@@ -1,0 +1,23 @@
+<launch>
+  <!-- <env name="ROSCONSOLE_CONFIG_FILE" value="$(find sim_stage)/config/log.config" /> -->
+  <arg name="world" default="carlike.world" />
+  <arg name="map" default="simple.yaml" />
+  <arg name="rviz" default="true" />
+
+  <param name="/use_sim_time" value="true"/>
+
+  <node pkg="map_server" type="map_server" name="map_server" args="$(find sim_stage)/maps/$(arg map)" output="screen"/>
+
+  <node pkg="stage_ros" type="stageros" name="stageros" args="$(find sim_stage)/world/$(arg world)" />
+
+  <node pkg="fake_localization" type="fake_localization" name="fake_localization" respawn="false" />
+
+  <node pkg="tf" type="static_transform_publisher" name="map_odom_broadcaster" args="0 0 0 0 0 0 /map /odom 100" />
+
+  <!-- <node pkg="sim_stage" type="stage_sim.py" name="stage_sim" output="screen"/> -->
+
+  <include file="$(find sim_stage)/launch/carlike/move_base.launch" />
+  
+	<node name="rviz" pkg="rviz" type="rviz" args="-d $(find sim_stage)/rviz/sim.rviz" if="$(arg rviz)"/>
+
+</launch>
