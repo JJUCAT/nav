@@ -1,0 +1,7 @@
+*~
+*.project
+*.cproject
+node_modules
+package.json
+package-lock.json
+
