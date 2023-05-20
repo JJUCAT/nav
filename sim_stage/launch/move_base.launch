@@ -6,5 +6,6 @@
     <rosparam file="$(find sim_stage)/config/local_costmap_params.yaml" command="load" />
     <rosparam file="$(find sim_stage)/config/global_costmap_params.yaml" command="load" />
     <rosparam file="$(find sim_stage)/config/local_planner_params.yaml" command="load" />
+    <rosparam file="$(find sim_stage)/config/global_planner_params.yaml" command="load" />
   </node>
 </launch>

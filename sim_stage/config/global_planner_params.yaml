@@ -1,0 +1,8 @@
+base_global_planner: global_planner/GlobalPlanner
+planner_frequency: 5.0
+
+GlobalPlanner:
+  lethal_cost: 253
+  neutral_cost: 50
+  cost_factor: 3.0
+
