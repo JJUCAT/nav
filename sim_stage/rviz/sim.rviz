@@ -3,9 +3,7 @@ Panels:
     Help Height: 138
     Name: Displays
     Property Tree Widget:
-      Expanded:
-        - /TF1/Tree1/map1
-        - /TF1/Tree1/map1/odom1
+      Expanded: ~
       Splitter Ratio: 0.5
     Tree Height: 1162
   - Class: rviz/Selection
@@ -139,7 +137,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 46.537353515625
+      Distance: 32.94540023803711
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
@@ -147,9 +145,9 @@ Visualization Manager:
         Value: false
       Field of View: 0.7853981852531433
       Focal Point:
-        X: 8.8937349319458
-        Y: 13.538039207458496
-        Z: -0.00783318467438221
+        X: 10.935636520385742
+        Y: 9.596330642700195
+        Z: -5.037943363189697
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
@@ -157,7 +155,7 @@ Visualization Manager:
       Near Clip Distance: 0.009999999776482582
       Pitch: 1.5697963237762451
       Target Frame: <Fixed Frame>
-      Yaw: 6.268589496612549
+      Yaw: 4.703585147857666
     Saved: ~
 Window Geometry:
   Displays:
