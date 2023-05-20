@@ -15,7 +15,7 @@ define laser ranger
 )
 
 # 定义机器，带定位功能
-define carlike_robot position
+define diff_robot position
 (
   # 
   pose [ 0.0 0.0 0.0 0.0 ]
@@ -23,7 +23,7 @@ define carlike_robot position
   # odom 定位，[x误差，y误差，航向协方差]
   odom_error [0.03 0.03 999999 999999 999999 0.02]
 
-  size [ 0.6 0.25 0.40 ]
+  size [ 0.6 0.5 0.40 ]
 
   # correct center of rotation:
   origin [ 0.0 0.0 0.0 0.0]
@@ -34,10 +34,10 @@ define carlike_robot position
   color "red"
 
   # 驱动模型 @diff:差速轮 @car:阿克曼 @omni:全向轮
-  drive "car"
+  drive "diff"
 
   # 前后轮距
-  wheelbase 1.07
+  wheelbase 0.4
   
   # 搭载模块，传感器
   laser(pose [ -0.1 0.0 -0.11 0.0 ])
