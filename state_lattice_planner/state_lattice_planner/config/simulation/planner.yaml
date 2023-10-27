@@ -1,0 +1,41 @@
+coverage_planner:
+     - name: ccpp
+       type: complete_coverage_planner/CompleteCoveragePlanner
+    
+
+nav_planner:
+     # - {name: topoint, type: navfn/NavfnROS}
+     - {name: topoint, type: global_planner/GlobalPlanner}
+    #  - {name: lattice, type: SBPLLatticePlanner}
+
+smooth_path_planner:
+     # - {name: topoint, type: navfn/NavfnROS}
+     - {name: gsl_smooth, type: path_smoother/PathGslSpline}
+
+ccpp:
+  map_resolution: 0.05              # [m], default = 0.05
+  coverage_resolution: 0.1          # [m], default = 0.1
+  robot_radius: 0.2                 # [m], default = 0.2
+  coverage_interval_distance: 0.5   # [m], coverage interval dis is robot_radius * 2 * 2
+  error_distance: 3                 # [pixel], error distance for turn circle ccpp
+  path_eps: 1.0                     # [pixel],for downsample path,the distance between points when generating a path
+  inflation_distance: 1.0           # [m] [default = robot_radius + 0.05]
+
+gsl_smooth:
+  step_points: 5                    # interval of picking up keypoints in rough path.
+  step_s: 0.02                      # [m], default = 0.02, interval of two points in smooth path.
+
+lattice:
+  environment_type: XYThetaLattice
+  planner_type: ADPlanner # ADPlanner, ARAPlanner
+  allocated_time: 5.0
+  initial_epsilon: 3
+  forward_search: false # for ADPlanner
+  # primitive_filename: 
+  force_scratch_limit: 500 # for ADPlanner
+  nominalvel_mpersecs: 0.5 # linear velocity
+  timetoturn45degsinplace_secs: 1.3 # (原地)旋转 45° 需要的时间
+  lethal_obstacle: 254 # 障碍物值
+  publish_footprint_path: true
+  visualizer_skip_poses: 5
+  allow_unknown: false

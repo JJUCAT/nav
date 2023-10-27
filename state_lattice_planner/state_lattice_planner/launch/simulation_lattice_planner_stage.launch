@@ -1,0 +1,40 @@
+<launch>
+  <param name="/use_sim_time" value="true"/>
+  <param name="/navit_planner_node/lattice/primitive_filename" value="$(find sbpl_lattice_planner)/matlab/mprim/pr2.mprim" />
+  <param name="/state_lattice_planner/LOOKUP_TABLE_FILE_NAME" value="$(find state_lattice_planner)/lookup_table/lookup_table.csv" />
+
+  <arg name="rviz" default="true" />
+  <!--  ****** Maps *****  -->
+  <node name="map_server" pkg="map_server" type="map_server" args="$(find state_lattice_planner)/stage/maps/googol_park.yaml" output="screen"/>
+
+  <node name="fake_localization" pkg="fake_localization" type="fake_localization" respawn="false" />
+
+  <!--  ************** Stage Simulator ***************  -->
+  <node pkg="stage_ros" type="stageros" name="stageros" args="$(find state_lattice_planner)/stage/googol_park.world"/>
+
+
+  <!--  ************** Navigation ***************  -->
+  <node pkg="navit_planner" type="navit_planner_node" name="navit_planner_node" output="screen" respawn="false">
+    <rosparam file="$(find state_lattice_planner)/config/simulation/planner.yaml" command="load" />
+    <rosparam file="$(find state_lattice_planner)/config/simulation/planner_costmap.yaml" command="load"/>
+  </node> 
+
+  <node pkg="navit_controller" type="navit_controller_node" name="navit_controller_node" output="screen" respawn="true">
+    <rosparam file="$(find state_lattice_planner)/config/simulation/controller.yaml" command="load"/>
+    <rosparam file="$(find state_lattice_planner)/config/simulation/controller_costmap.yaml" command="load"/>
+  </node>
+
+  <!--  ****** Recovery *****  -->
+  <node pkg="navit_recovery" type="navit_recovery_node" name="navit_recovery_node" output="screen">
+    <rosparam file="$(find navit_recovery)/config/simulation/test.yaml" command="load"/>
+  </node>
+  <!--  **************** Visualisation ****************  -->
+  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find state_lattice_planner)/rviz/navit.rviz" if="$(arg rviz)"/>
+
+  <!--  **************** client ****************  -->
+  <node pkg="navit_bt_navigator" type="simulation_lattice_node.py" name="simulation_lattice_node" output="screen" respawn="true"/>
+  <node pkg="state_lattice_planner" type="state_lattice_planner" name="state_lattice_planner" output="screen">
+    <rosparam file="$(find state_lattice_planner)/config/simulation/state_lattice_planner.yaml" command="load"/>
+  </node>
+
+</launch>

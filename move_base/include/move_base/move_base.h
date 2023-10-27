@@ -217,8 +217,8 @@ namespace move_base {
 
       //set up the planner's thread
       bool runPlanner_;
-      boost::recursive_mutex planner_mutex_;
-      boost::condition_variable_any planner_cond_;
+      boost::recursive_mutex planner_mutex_; // 递归式互斥量，线程内可能多次获取锁
+      boost::condition_variable_any planner_cond_; // 条件变量，多线程同步
       geometry_msgs::PoseStamped planner_goal_;
       boost::thread* planner_thread_;
 

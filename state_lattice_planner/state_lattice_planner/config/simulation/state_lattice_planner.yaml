@@ -1,0 +1,47 @@
+# plan & control
+HZ: 20 # lattice 规划控制频率
+ROBOT_FRAME: base_link
+N_P: 10 # 终点 x y 轴采样数
+N_H: 3 # 终点角度采样数
+MAX_ALPHA: 1.047 # 终点角度采样范围
+MAX_PSI: 0.533 # 终点角度范围
+N_S: 1000 # 可视化采样数量
+MAX_ACCELERATION: 1.0 # 加速度
+TARGET_VELOCITY: 1.0 # 目标速度，想要达到的匀速度
+# LOOKUP_TABLE_FILE_NAME: std::string(std::getenv("HOME")) + "/lookup_table.csv"
+MAX_ITERATION: 100  # 最大迭代数？
+OPTIMIZATION_TOLERANCE: 0.1 # 当代价低于该值，结束优化
+MAX_YAWRATE: 0.8 # 最大航向角速度
+MAX_D_YAWRATE: 2.0 # 航向角加速度
+MAX_WHEEL_ANGULAR_VELOCITY: 2.7 # 轮子转动的角速度=v/r
+WHEEL_RADIUS: 0.37 # 驱动轮半径
+TREAD: 0.5 # 
+IGNORABLE_OBSTACLE_RANGE: 1.0 # 无视障碍物范围
+VERBOSE: false  # 打印
+CONTROL_DELAY: 1 # 生成轨迹控制点后，因为有计算延迟，控制点的选择需要延后
+TURN_DIRECTION_THRESHOLD: 3 # 目标与当前位置相对角度大于该值就原地旋转
+ENABLE_SHARP_TRAJECTORY: false # 允许轨迹急转
+ENABLE_CONTROL_SPACE_SAMPLING: false # 允许控制空间采样
+
+# lookup table
+MIN_X: -5.0 # 终点 x 轴采样最大偏移 @1.0
+MAX_X: 5.0 # 终点 x 轴采样最小偏移 @5.0
+DELTA_X: 1.0 # x 轴采样步进 @1.0
+MAX_Y: 5.0 # 终点 y 轴采样最大，最小偏移 @2.0
+DELTA_Y: 1.0 # y 轴采样步进 @1.0
+MAX_YAW: 1.047 # 终点航向角最大，最小偏移
+DELTA_YAW: 1.047  # 航向角采样步进
+# LOOKUP_TABLE_FILE_NAME:  # lookup table 保存路径
+# TARGET_VELOCITY: 0.8 # 目标速度，想要达到的匀速度
+MIN_V: 0.1 # 最小速度
+MAX_V: 0.8 # 最大速度
+DELTA_V: 0.1 # 速度采样步进
+MAX_KAPPA: 1.0 # 最大曲率，uint: rad/m
+DELTA_KAPPA: 0.2 # 曲率步进，uint: rad/m
+# MAX_ACCELERATION: 1.0 # 最大加速度
+# MAX_YAWRATE: 0.8 # 最大航向角速度
+# MAX_D_YAWRATE: 2.0 # 航向角加速度
+# MAX_WHEEL_ANGULAR_VELOCITY: 11.6 # 
+# WHEEL_RADIUS: 0.37 # 驱动轮半径
+# TREAD: 0.5 # 
+
