@@ -1,7 +1,11 @@
 <launch>
-  <param name="/use_sim_time" value="true"/>
-  <param name="/state_lattice_planner/LOOKUP_TABLE_FILE_NAME" value="$(find state_lattice_planner)/lookup_table/lookup_table.csv" />
+  <!-- 参数 type，@run 跑规划控制，@table 生成表 -->
+  <arg name="type" default="run"/>
+  <!-- 参数 table 表的路径 -->
+  <arg name="table" default="lookup_table_bk.csv"/>
+  <arg name="table_path" default="/home/lmr/ws/navigation_ws/src/nav/state_lattice_planner/lookup_table/"/>
 
+  <param name="/use_sim_time" value="true"/>
   <arg name="rviz" default="true" />
   <!--  ****** Maps *****  -->
   <node name="map_server" pkg="map_server" type="map_server" args="$(find state_lattice_planner)/stage/maps/googol_park.yaml" output="screen"/>
@@ -11,22 +15,27 @@
   <!--  ************** Stage Simulator ***************  -->
   <node pkg="stage_ros" type="stageros" name="stageros" args="$(find state_lattice_planner)/stage/googol_park.world"/>
 
-
   <!--  ************** Navigation ***************  -->
   <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen" clear_params="true">
-    把 costmap_common_params 参数加载到相应的 ns 空间内
-    <rosparam file="$(find sim_stage)/config/local_costmap_params.yaml" command="load" />
-    <rosparam file="$(find sim_stage)/config/global_costmap_params.yaml" command="load" />
+    <rosparam file="$(find state_lattice_planner)/config/simulation/local_costmap_params.yaml" command="load" />
+    <rosparam file="$(find state_lattice_planner)/config/simulation/global_costmap_params.yaml" command="load" />
   </node>
-
 
   <!--  **************** Visualisation ****************  -->
   <node name="rviz" pkg="rviz" type="rviz" args="-d $(find state_lattice_planner)/rviz/navit.rviz" if="$(arg rviz)"/>
 
   <!--  **************** client ****************  -->
-  <node pkg="state_lattice_planner" type="simulation_lattice_node.py" name="simulation_lattice_node" output="screen" respawn="true"/>
-  <node pkg="state_lattice_planner" type="state_lattice_planner" name="state_lattice_planner" output="screen">
-    <rosparam file="$(find state_lattice_planner)/config/simulation/state_lattice_planner.yaml" command="load"/>
-  </node>
-
+  <group if="$(eval arg('type') == 'run')">
+    <node pkg="state_lattice_planner" type="simulation_lattice_node.py" name="simulation_lattice_node" output="screen" respawn="true"/>
+    <node pkg="state_lattice_planner" type="state_lattice_planner" name="state_lattice_planner" output="screen">
+      <param name="LOOKUP_TABLE_FILE_NAME" value="$(arg table_path)$(arg table)" />
+      <rosparam file="$(find state_lattice_planner)/config/simulation/state_lattice_planner.yaml" command="load"/>
+    </node>  
+  </group>
+  <group unless="$(eval arg('type') == 'run')">
+    <node pkg="state_lattice_planner" type="lookup_table_generator" name="lookup_table_generator" output="screen">
+      <param name="LOOKUP_TABLE_FILE_NAME" value="$(arg table_path)$(arg table)" />
+      <rosparam file="$(find state_lattice_planner)/config/simulation/state_lattice_planner.yaml" command="load"/>
+    </node>  
+  </group>
 </launch>
