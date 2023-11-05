@@ -62,6 +62,40 @@ public:
     private:
     };
 
+    class Critic
+    {
+    public:
+      Critic() = delete;
+      ~Critic() = default;
+
+      Critic(
+        const double dist_err, const double yaw_err, const double angular_err,
+        const double dist_scale, const double yaw_scale, const double angular_scale) :
+        dist_err_(dist_err), yaw_err_(yaw_err), angular_err_(angular_err),
+        dist_scale_(dist_scale), yaw_scale_(yaw_scale), angular_scale_(angular_scale) {}
+
+      bool pickup_trajectory(
+        const std::vector<MotionModelDiffDrive::Trajectory>&,
+        const Eigen::Vector3d&, MotionModelDiffDrive::Trajectory&);
+
+    private:
+      double evaluate_dist_err(
+        const MotionModelDiffDrive::Trajectory& trajectory, const Eigen::Vector3d& goal); 
+      double evaluate_yaw_err(
+        const MotionModelDiffDrive::Trajectory& trajectory, const Eigen::Vector3d& goal);
+      double evaluate_angular_err(
+        const MotionModelDiffDrive::Trajectory& trajectory);
+
+      double dist_err_;
+      double yaw_err_;
+      double angular_err_;
+
+      double dist_scale_;
+      double yaw_scale_;
+      double angular_scale_;
+    }; // Critic
+
+
     /**
      * @brief Constructor
      */
@@ -100,7 +134,7 @@ public:
      * @brief Load lookup table from csv
      * @param[in] LOOKUP_TABLE_FILE_NAME file path of the lookup table
      */
-    void load_lookup_table(const std::string&);
+    void load_lookup_table(const std::string&, std::vector<Eigen::Vector3d>&);
     /**
      * @brief Generate biased polar states
      * @param[in] n_s Parameter for sampling
@@ -114,7 +148,6 @@ public:
      * @param[in] sample_angle Values between [0, 1] representing angles
      * @param[out] states Terminal states
      */
-    void sample_states(const std::vector<double>&, std::vector<Eigen::Vector3d>&);
     void sample_states(const std::vector<double>&, const SamplingParams&, std::vector<Eigen::Vector3d>&);
     /**
      * @brief Generate trajectories to specified terminal states
@@ -150,11 +183,22 @@ public:
      */
     double get_target_velocity(const Eigen::Vector3d&);
     /**
+     * @brief  生成车头的轨迹点
+     * @param  trajectory 原轨迹点
+     * @param  head 后轮中心到车头的距离
+     * @param  head_trajectory 车头轨迹
+     */
+    void generate_head_trajectory(
+      const std::vector<Eigen::Vector3d>& trajectory,
+      const double head,
+      std::vector<Eigen::Vector3d>& head_trajectory);
+    /**
      * @brief Generate bresenhams line from given trajectory
      * @param[in] trajectory Original trajectory
      * @param[out] Bresenhams line trajectory
      */
-    void generate_bresemhams_line(const std::vector<Eigen::Vector3d>&, const double&, std::vector<Eigen::Vector3d>&);
+    void generate_bresemhams_line(const std::vector<Eigen::Vector3d>&,
+      const double&, std::vector<Eigen::Vector3d>&);
     /**
      * @brief Check collision in the obstacle map
      * @param[in] map Obstacle map
@@ -162,7 +206,8 @@ public:
      * @retval true The trajectory collides with an obstacle
      * @retval false The trajectory doesn't collides with an obstacle
      */
-    bool check_collision(const state_lattice_planner::ObstacleMap<int>&, const std::vector<Eigen::Vector3d>&);
+    bool check_collision(const state_lattice_planner::ObstacleMap<int>&,
+      const std::vector<Eigen::Vector3d>&, const int collision_cost = 0);
     /**
      * @brief Check collision in the obstacle map. Ignoring obstacles out of range
      * @param[in] map Obstacle map
@@ -171,7 +216,8 @@ public:
      * @retval true The trajectory collides with an obstacle
      * @retval false The trajectory doesn't collides with an obstacle
      */
-    bool check_collision(const state_lattice_planner::ObstacleMap<int>&, const std::vector<Eigen::Vector3d>&, double);
+    bool check_collision(const state_lattice_planner::ObstacleMap<int>&,
+      const std::vector<Eigen::Vector3d>&, double);
 
 protected:
     double HZ;

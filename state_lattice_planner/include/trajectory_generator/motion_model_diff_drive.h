@@ -71,7 +71,7 @@ public:
         double vt;
         double vf;
         double af;
-        double time;
+        double time; // 
     private:
     };
 

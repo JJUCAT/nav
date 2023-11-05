@@ -7,7 +7,7 @@ namespace LookupTableUtils
 
     }
 
-    bool load_lookup_table(const std::string& lookup_table_file_name, LookupTable& lookup_table)
+    bool load_lookup_table(const std::string& lookup_table_file_name, LookupTable& lookup_table, std::vector<Eigen::Vector3d>& xyyaw_table)
     {
         lookup_table.clear();
         std::cout << "loading lookup table from " << lookup_table_file_name << std::endl;
@@ -38,6 +38,7 @@ namespace LookupTableUtils
                 double y = *(++it);
                 double yaw = *(++it);
                 param.state << x, y, yaw;
+                xyyaw_table.push_back(param.state);
                 param.control.omega.km = *(++it);
                 param.control.omega.kf = *(++it);
                 param.control.omega.sf = *(++it);
@@ -52,11 +53,14 @@ namespace LookupTableUtils
         return true;
     }
 
-    void get_optimized_param_from_lookup_table(const LookupTable& lookup_table, const Eigen::Vector3d goal, const double v0, const double k0, MotionModelDiffDrive::ControlParams& param)
+    void get_optimized_param_from_lookup_table(
+      const LookupTable& lookup_table, const Eigen::Vector3d goal,
+      const double v0, const double k0, MotionModelDiffDrive::ControlParams& param)
     {
         if(lookup_table.size() > 0){
+            // 查表找与当前速度 v0 接近的速度
             double min_v_diff = 1e3;
-            double v = 0;
+            double v = 0;            
             for(const auto& v_data : lookup_table){
                 double _v = v_data.first;
                 double diff = fabs(_v - v0);
@@ -65,6 +69,7 @@ namespace LookupTableUtils
                     v = _v;
                 }
             }
+            // 查表找与当前角速度 k0 接近的角速度
             double min_k_diff = 1e3;
             double k = 0;
             for(const auto& k_data : lookup_table.at(v)){
@@ -75,6 +80,7 @@ namespace LookupTableUtils
                     k = _k;
                 }
             }
+            // 查表找与目标点 goal[x, y, yaw] 接近的坐标
             double min_cost = 1e3;
             StateWithControlParams _param;
             for(const auto& data : lookup_table.at(v).at(k)){

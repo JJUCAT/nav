@@ -56,7 +56,8 @@ TrajectoryViewer::TrajectoryViewer(void)
 
     local_goal_updated = false;
 
-    LookupTableUtils::load_lookup_table(LOOKUP_TABLE_FILE_NAME, lookup_table);
+    std::vector<Eigen::Vector3d> tmp;
+    LookupTableUtils::load_lookup_table(LOOKUP_TABLE_FILE_NAME, lookup_table, tmp);
 }
 
 TrajectoryViewer::SamplingParams::SamplingParams(void)
@@ -221,7 +222,10 @@ void TrajectoryViewer::generate_biased_polar_states(const int n_s, const Eigen::
     sample_states(biased_angles, _params, states);
 }
 
-bool TrajectoryViewer::generate_trajectories(const std::vector<Eigen::Vector3d>& boundary_states, const double velocity, const double angular_velocity, const double target_velocity, std::vector<MotionModelDiffDrive::Trajectory>& trajectories)
+bool TrajectoryViewer::generate_trajectories(
+  const std::vector<Eigen::Vector3d>& boundary_states,
+  const double velocity, const double angular_velocity, const double target_velocity,
+  std::vector<MotionModelDiffDrive::Trajectory>& trajectories)
 {
     std::cout << "generate trajectories to boundary states" << std::endl;
     int count = 0;
@@ -233,21 +237,26 @@ bool TrajectoryViewer::generate_trajectories(const std::vector<Eigen::Vector3d>&
         // double start = ros::Time::now().toSec();
         TrajectoryGeneratorDiffDrive tg;
         tg.set_verbose(VERBOSE);
-        tg.set_motion_param(MAX_YAWRATE, MAX_D_YAWRATE, MAX_ACCELERATION, MAX_WHEEL_ANGULAR_VELOCITY, WHEEL_RADIUS, TREAD);
+        tg.set_motion_param(
+          MAX_YAWRATE, MAX_D_YAWRATE, MAX_ACCELERATION, MAX_WHEEL_ANGULAR_VELOCITY, WHEEL_RADIUS, TREAD);
         MotionModelDiffDrive::ControlParams output;
         double k0 = angular_velocity;
 
         MotionModelDiffDrive::ControlParams param;
-        LookupTableUtils::get_optimized_param_from_lookup_table(lookup_table, boundary_state, velocity, k0, param);
-        // std::cout << "v0: " << velocity << ", " << "k0: " << k0 << ", " << "km: " << param.omega.km << ", " << "kf: " << param.omega.kf << ", " << "sf: " << param.omega.sf << std::endl;
+        LookupTableUtils::get_optimized_param_from_lookup_table(
+          lookup_table, boundary_state, velocity, k0, param);
+        // std::cout << "v0: " << velocity << ", " << "k0: " << k0 << ", " << "km: " <<
+        //   param.omega.km << ", " << "kf: " << param.omega.kf << ", " << "sf: " << param.omega.sf << std::endl;
         //std::cout << "lookup table time " << count << ": " << ros::Time::now().toSec() - start << "[s]" << std::endl;
 
-        MotionModelDiffDrive::ControlParams init(MotionModelDiffDrive::VelocityParams(velocity, MAX_ACCELERATION, target_velocity, target_velocity, MAX_ACCELERATION)
-                                               , MotionModelDiffDrive::AngularVelocityParams(k0, param.omega.km, param.omega.kf, param.omega.sf));
+        MotionModelDiffDrive::ControlParams init(
+          MotionModelDiffDrive::VelocityParams(velocity, MAX_ACCELERATION, target_velocity, target_velocity, MAX_ACCELERATION),
+          MotionModelDiffDrive::AngularVelocityParams(k0, param.omega.km, param.omega.kf, param.omega.sf));
 
         MotionModelDiffDrive::Trajectory trajectory;
         // std::cout << boundary_state.transpose() << std::endl;
-        double cost = tg.generate_optimized_trajectory(boundary_state, init, 1.0 / HZ, OPTIMIZATION_TOLERANCE, MAX_ITERATION, output, trajectory);
+        double cost = tg.generate_optimized_trajectory(
+          boundary_state, init, 1.0 / HZ, OPTIMIZATION_TOLERANCE, MAX_ITERATION, output, trajectory);
         // std::cout << trajectory.trajectory.back().transpose() << std::endl;
         if(cost > 0){
             trajectories_[i] = trajectory;

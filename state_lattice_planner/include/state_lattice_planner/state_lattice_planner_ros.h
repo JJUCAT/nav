@@ -2,8 +2,10 @@
 #define __STATE_LATTICE_PLANNER_ROS_H
 
 #include <ros/ros.h>
+#include <nav_msgs/Path.h>
 #include <geometry_msgs/PoseStamped.h>
 #include <geometry_msgs/Twist.h>
+#include <geometry_msgs/PoseArray.h>
 #include <nav_msgs/OccupancyGrid.h>
 #include <nav_msgs/Odometry.h>
 #include <visualization_msgs/Marker.h>
@@ -27,8 +29,18 @@ public:
     void get_obstacle_map(const nav_msgs::OccupancyGrid&, state_lattice_planner::ObstacleMap<TYPE>&);
 
 protected:
-    void visualize_trajectories(const std::vector<MotionModelDiffDrive::Trajectory>&, const double, const double, const double, const int, const ros::Publisher&);
-    void visualize_trajectory(const MotionModelDiffDrive::Trajectory&, const double, const double, const double, const ros::Publisher&);
+    void visualize_trajectories(
+      const std::vector<MotionModelDiffDrive::Trajectory>&,
+      const double, const double, const double, const int, const ros::Publisher&);
+    void visualize_trajectory(const MotionModelDiffDrive::Trajectory&,
+      const double, const double, const double, const ros::Publisher&);
+    geometry_msgs::Twist diff_cmd2ackermann_cmd(const geometry_msgs::Twist& cmd_vel);
+    void init_xyyaw_table();
+    void viz_goal_sampling(const std::vector<Eigen::Vector3d>& states);
+    void new_goal_sampling(const Eigen::Vector3d goal, const float ratio, std::vector<Eigen::Vector3d>& states);
+    void parallel_goal_sampling(const Eigen::Vector3d goal, const float ratio, std::vector<Eigen::Vector3d>& states);
+    void PubBestTrajectory(const std::vector<Eigen::Vector3d>& trajectory, const std::string target_frame_id);
+    void update_pose_in_map(const std::string map_frame_id);
 
     double HZ;
     std::string ROBOT_FRAME;
@@ -53,10 +65,32 @@ protected:
     double TURN_DIRECTION_THRESHOLD;
     bool ENABLE_SHARP_TRAJECTORY;
     bool ENABLE_CONTROL_SPACE_SAMPLING;
+    bool DRIVE;
+    bool ACKERMANN;
+    double WHEEL_BASE;
+    bool NEW_GOAL_SAMPLING;
+    double NGS_R;
+    int NGS_NA;
+    int NGS_NR;
+    double NGS_GY;
+    int NGS_NY;
+    double HEAD;
+    int COLLISION_COST; // 碰撞检测值，[-1,100]
+    // 轨迹评价
+    double DIST_ERR;
+    double YAW_ERR;
+    double ANGULAR_ERR;
+    double DIST_SCALE;
+    double YAW_SCALE;
+    double ANGULAR_SCALE;
 
     ros::NodeHandle nh;
     ros::NodeHandle local_nh;
 
+    ros::Publisher best_trajectory_pub;
+    ros::Publisher xyyaw_table_pub;
+    ros::Publisher goal_pub;
+    ros::Publisher goal_sampling_pub;
     ros::Publisher velocity_pub;
     ros::Publisher candidate_trajectories_pub;
     ros::Publisher candidate_trajectories_no_collision_pub;
@@ -74,6 +108,11 @@ protected:
     bool odom_updated;
 
     StateLatticePlanner planner;
+    sensor_msgs::PointCloud pc_table_;
+    std::vector<Eigen::Vector3d> xyyaw_table_;
+    geometry_msgs::PoseStamped robot_pose_in_map_;
+    Eigen::Vector3d robot_in_map_;
+    std::shared_ptr<StateLatticePlanner::Critic> critic_;
 };
 
 #endif //__STATE_LATTICE_PLANNER_ROS_H

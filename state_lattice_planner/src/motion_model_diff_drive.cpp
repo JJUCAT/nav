@@ -48,7 +48,13 @@ MotionModelDiffDrive::AngularVelocityParams::AngularVelocityParams(void)
         c = Eigen::Vector4d::Zero();
     }
 }
-
+/**
+  * @brief Constructor
+  * @param[in] _k0 Initial angular velocity [rad/s] 初始点角速度
+  * @param[in] _km Intermediate angular velocity [rad/s] 插值点角速度
+  * @param[in] _kf Terminal angular velocity [rad/s] 终点角速度
+  * @param[in] _sf Length of trajectory [m] 曲线的长度
+  */
 MotionModelDiffDrive::AngularVelocityParams::AngularVelocityParams(double _k0, double _km, double _kf, double _sf)
 {
     k0 = _k0;
@@ -87,6 +93,14 @@ void MotionModelDiffDrive::set_param(const double max_yawrate, const double max_
     TREAD = TREAD;
 }
 
+/**
+ * @brief 由当前状态计算下个控制时间点的状态
+ * @param  s                当前状态
+ * @param  v                当前线速度
+ * @param  omega            当前角速度
+ * @param  dt               控制时间间隔
+ * @param  output_s         下一个控制点的状态
+ */
 void MotionModelDiffDrive::update(const State& s, const double v, const double omega, const double dt, State& output_s)
 {
     output_s.v = v;
@@ -113,21 +127,21 @@ double MotionModelDiffDrive::calculate_cubic_function(const double x, const Eige
 
 void MotionModelDiffDrive::response_to_control_inputs(const State& state, const double dt, State& output)
 {
-    double _dt = 1.0 / dt;
+    double _dt = 1.0 / dt; // hz
     double k = state.omega;
     double _k = output.omega;
     double dk = (_k - k) * _dt;
-    dk = std::max(std::min(dk, MAX_D_YAWRATE), -MAX_D_YAWRATE);
+    dk = std::max(std::min(dk, MAX_D_YAWRATE), -MAX_D_YAWRATE); // 角加速度
 
-    _k = k + dk * dt;
+    _k = k + dk * dt; // 角速度
     output.omega = std::max(std::min(_k, MAX_YAWRATE), -MAX_YAWRATE);
 
-    // adjust output.v
+    // adjust output.v 计算线速度
     control_speed(output, output);
 
     double v = state.v;
     double _v = output.v;
-    double a = (_v - v) * _dt;
+    double a = (_v - v) * _dt; // 加速度
     a = std::max(std::min(a, MAX_ACCELERATION), -MAX_ACCELERATION);
     output.v = v + a * dt;
 
@@ -142,9 +156,13 @@ void MotionModelDiffDrive::control_speed(const State& state, State& _state)
 {
     // speed control logic
     _state = state;
-    _state.v = WHEEL_RADIUS * std::min(
-      fabs(_state.v) / WHEEL_RADIUS, MAX_WHEEL_ANGULAR_VELOCITY - 0.5 * fabs(_state.omega) * TREAD / WHEEL_RADIUS) *
-      (_state.v >= 0.0 ? 1 : -1);
+    // v = r * w
+    // 不知道 TREAD 是什么，就不用它了
+    // _state.v = WHEEL_RADIUS * std::min(
+    //   fabs(_state.v) / WHEEL_RADIUS, 
+    //   MAX_WHEEL_ANGULAR_VELOCITY - 0.5 * fabs(_state.omega) * TREAD / WHEEL_RADIUS) *
+    //   (_state.v >= 0.0 ? 1 : -1);
+    _state.v = WHEEL_RADIUS * fabs(_state.v) / WHEEL_RADIUS * (_state.v >= 0.0 ? 1 : -1);
 
     // double yawrate = _state.omega * _state.v;
     // if(fabs(yawrate) > MAX_YAWRATE){
@@ -159,25 +177,31 @@ void MotionModelDiffDrive::generate_trajectory(const double dt, const ControlPar
     AngularVelocityParams omega = control_param.omega;
     VelocityParams vel = control_param.vel;
 
+    // lookup table 中的 sf 参数已经估计过大概的曲线长度
+    // 根据当前的速度估计走完曲线需要多长时间
     vel.time = estimate_driving_time(control_param);
     // std::cout << "driving time: " << vel.time << "[s]" << std::endl;
     auto time = std::chrono::system_clock::now();
     double elapsed_time = std::chrono::duration_cast<std::chrono::seconds>(time - start).count();
     // std::cout << "estimate time: " << elapsed_time << "[s]" << std::endl;
 
-    make_velocity_profile(dt, vel);
+    // 获取各个时间控制点的线速度，以及该位置累计的距离
+    // 提高速度达到目标速度（最大速度），获取各个控制点的速度和累计距离
+    make_velocity_profile(dt, vel); 
     time = std::chrono::system_clock::now();
     elapsed_time = std::chrono::duration_cast<std::chrono::seconds>(time - start).count();
     // std::cout << "v prof: " << elapsed_time << "[s]" << std::endl;
     // std::cout << vel.v0 << ", " << vel.vt << ", " << vel.vf << ", " << vel.time << ", " << omega.sf << ", " << std::endl;
-
-    omega.calculate_spline(ratio);
-    const int N = s_profile.size();
+    // 角速度与曲线长度的相关函数
+    omega.calculate_spline(ratio); // ratio = 0.5
+    const int N = s_profile.size(); // 生成控制点的速度，和累计的距离
     // std::cout << "n: " << N << std::endl;
     if(N == 0){
         return;
     }
-    double sf_2 = omega.sf * ratio;
+    // omega.sf 是 control_param 状态表中路径曲线长度
+    // sf_2 是准备插值的点在总曲线的长度位置
+    double sf_2 = omega.sf * ratio; 
 
     State state(0, 0, 0, vel.v0, omega.k0);
     State state_(0, 0, 0, vel.v0, omega.k0);
@@ -191,21 +215,22 @@ void MotionModelDiffDrive::generate_trajectory(const double dt, const ControlPar
     // trajectory.angular_velocities[0] = state.v * state.omega;
     trajectory.angular_velocities[0] = state.omega;
 
-    for(int i=1;i<N;i++){
-        double s = s_profile[i];
-        double k = 0;
-        if(s < sf_2){
-            k = calculate_cubic_function(s, omega.coefficients[0]);
-        }else{
-            k = calculate_cubic_function(s, omega.coefficients[1]);
-        }
-        update(state, v_profile[i], k, dt, state_);
-        state = state_;
-        pose << state.x, state.y, state.yaw;
-        trajectory.trajectory[i] = pose;
-        trajectory.velocities[i] = state.v;
-        // trajectory.angular_velocities[i] = state.v * state.omega;
-        trajectory.angular_velocities[i] = state.omega;
+    // x 轴是曲线长度，y 轴是角速度，coefficients 是 ax^3 + bx^2 + cx + d 系数
+    for(int i=1;i<N;i++) {
+      double s = s_profile[i];
+      double k = 0;
+      if(s < sf_2){
+        k = calculate_cubic_function(s, omega.coefficients[0]); // 插值角速度前的系数
+      }else{
+        k = calculate_cubic_function(s, omega.coefficients[1]); // 插值角速度后的系数
+      }
+      update(state, v_profile[i], k, dt, state_);
+      state = state_;
+      pose << state.x, state.y, state.yaw;
+      trajectory.trajectory[i] = pose;
+      trajectory.velocities[i] = state.v;
+      // trajectory.angular_velocities[i] = state.v * state.omega;
+      trajectory.angular_velocities[i] = state.omega;
     }
     time = std::chrono::system_clock::now();
     elapsed_time = std::chrono::duration_cast<std::chrono::seconds>(time - start).count();
@@ -238,15 +263,22 @@ void MotionModelDiffDrive::generate_last_state(const double dt, const double tra
         }
         update(state, v_profile[i], k, dt, state);
     }
-    output << state.x, state.y, state.yaw;
+    output << state.x, state.y, state.yaw; // 终点 x y yaw 状态
 }
 
+/**
+ * @brief 求解曲线参数  (a, b, c, d) <- ax^3+bx^2+cx+d
+ *       std::vector<Eigen::Vector4d> coefficients;
+ * @param ratio 角速度插值的位置，x 轴是曲线长度，y 轴是角速度
+ */
 void MotionModelDiffDrive::AngularVelocityParams::calculate_spline(double ratio)
 {
     // std::cout << "spline" << std::endl;
     // 3d spline interpolation
+    // 轨迹点累计的距离，0 起点累计 0 距离， sf * ratio 插值位置的距离，sf 轨迹总距离
     Eigen::Vector3d x(0, sf * ratio, sf);
-    Eigen::Vector3d y(k0, km, kf);
+    // 轨迹点的角速度，k0 起点角速度，km 插值角速度，kf 终点角速度
+    Eigen::Vector3d y(k0, km, kf); 
     Eigen::Matrix<double, 8, 8> s;
     s << x(0) * x(0) * x(0), x(0) * x(0), x(0), 1, 0, 0, 0, 0,
          x(1) * x(1) * x(1), x(1) * x(1), x(1), 1, 0, 0, 0, 0,
@@ -259,8 +291,8 @@ void MotionModelDiffDrive::AngularVelocityParams::calculate_spline(double ratio)
     Eigen::VectorXd c = Eigen::VectorXd::Zero(8);
     c << y(0), y(1), y(1), y(2), 0, 0, 0, 0;
     Eigen::VectorXd a = s.inverse() * c;
-    coefficients[0] = a.segment(0, 4);
-    coefficients[1] = a.segment(4, 4);
+    coefficients[0] = a.segment(0, 4); // k0~km 曲线的 a,b,c,d 系数
+    coefficients[1] = a.segment(4, 4); // km~kf 曲线的 a,b,c,d 系数
 }
 
 void MotionModelDiffDrive::make_velocity_profile(const double dt, const VelocityParams& v_param)
