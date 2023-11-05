@@ -84,7 +84,7 @@ StateLatticePlannerROS::StateLatticePlannerROS(void)
     selected_trajectory_pub = local_nh.advertise<visualization_msgs::Marker>("selected_trajectory", 1);
 
     local_goal_sub = nh.subscribe("/sim_goal", 1, &StateLatticePlannerROS::local_goal_callback, this);
-    local_map_sub = nh.subscribe("/navit_controller_node/controller_costmap/costmap", 1, &StateLatticePlannerROS::local_map_callback, this);
+    local_map_sub = nh.subscribe("/move_base/local_costmap/costmap", 1, &StateLatticePlannerROS::local_map_callback, this);
     odom_sub = nh.subscribe("/odom", 1, &StateLatticePlannerROS::odom_callback, this);
     target_velocity_sub = nh.subscribe("/target_velocity", 1, &StateLatticePlannerROS::target_velocity_callback, this);
 
