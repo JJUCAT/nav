@@ -13,7 +13,7 @@ local_costmap:
   inscribed_radius: 0.2
   circumscribed_radius: 0.35
   clearing_radius: 0.2
-
+  footprint: [[1.7, 0.85], [1.169, 0.85], [1.169, 0.567], [-0.54, 0.567], [-0.54, -0.567], [1.169, -0.567], [1.169, -0.85], [1.7, -0.85]]
 
   plugins:
     # - {name: static_layer, type: "costmap_2d::StaticLayer"}
