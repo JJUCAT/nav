@@ -101,6 +101,7 @@ void transformFootprint(double x, double y, double theta, const std::vector<geom
 
 /**
  * @brief Adds the specified amount of padding to the footprint (in place)
+ * 就是膨胀 footprint
  */
 void padFootprint(std::vector<geometry_msgs::Point>& footprint, double padding);
 

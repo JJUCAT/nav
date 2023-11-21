@@ -96,9 +96,11 @@ void LayeredCostmap::updateMap(double robot_x, double robot_y, double robot_yaw)
 {
   // Lock for the remainder of this function, some plugins (e.g. VoxelLayer)
   // implement thread unsafe updateBounds() functions.
+  // 外部通过指针使用 costmap 的时候要记得上锁，最好是上锁拷贝一份地图
   boost::unique_lock<Costmap2D::mutex_t> lock(*(costmap_.getMutex()));
 
   // if we're using a rolling buffer costmap... we need to update the origin using the robot's position
+  // 机器移动局部地图跟着机器移动，这里拷贝了前后地图的重复部分，提高了点效率
   if (rolling_window_)
   {
     double new_origin_x = robot_x - costmap_.getSizeInMetersX() / 2;
@@ -112,6 +114,7 @@ void LayeredCostmap::updateMap(double robot_x, double robot_y, double robot_yaw)
   minx_ = miny_ = 1e30;
   maxx_ = maxy_ = -1e30;
 
+  // 检查各个插件更新的最大边界范围，世界坐标，即地图的 Global_Frame 坐标系
   for (vector<boost::shared_ptr<Layer> >::iterator plugin = plugins_.begin(); plugin != plugins_.end();
        ++plugin)
   {
@@ -132,6 +135,7 @@ void LayeredCostmap::updateMap(double robot_x, double robot_y, double robot_yaw)
     }
   }
 
+  // 边界的世界坐标转地图数组坐标
   int x0, xn, y0, yn;
   costmap_.worldToMapEnforceBounds(minx_, miny_, x0, y0);
   costmap_.worldToMapEnforceBounds(maxx_, maxy_, xn, yn);
@@ -146,7 +150,8 @@ void LayeredCostmap::updateMap(double robot_x, double robot_y, double robot_yaw)
   if (xn < x0 || yn < y0)
     return;
 
-  costmap_.resetMap(x0, y0, xn, yn);
+  costmap_.resetMap(x0, y0, xn, yn); // 这里会重置整个更新边界内的地图内容 ！
+  // 各个插件更新边界内的地图代价值
   for (vector<boost::shared_ptr<Layer> >::iterator plugin = plugins_.begin(); plugin != plugins_.end();
        ++plugin)
   {

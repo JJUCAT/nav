@@ -164,6 +164,7 @@ Costmap2DROS::Costmap2DROS(const std::string& name, tf2_ros::Buffer& tf) :
   initialized_ = true;
   stopped_ = false;
 
+  // 动态服务器内开了更新地图的线程？？？
   dsrv_ = new dynamic_reconfigure::Server<Costmap2DConfig>(ros::NodeHandle("~/" + name));
   dynamic_reconfigure::Server<Costmap2DConfig>::CallbackType cb = [this](auto& config, auto level){ reconfigureCB(config, level); };
   dsrv_->setCallback(cb);

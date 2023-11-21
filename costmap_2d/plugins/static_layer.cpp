@@ -117,6 +117,7 @@ void StaticLayer::onInitialize()
     delete dsrv_;
   }
 
+  // 动态服务器更新参数
   dsrv_ = new dynamic_reconfigure::Server<costmap_2d::GenericPluginConfig>(nh);
   dynamic_reconfigure::Server<costmap_2d::GenericPluginConfig>::CallbackType cb =
       [this](auto& config, auto level){ reconfigureCB(config, level); };
@@ -220,7 +221,7 @@ void StaticLayer::incomingMap(const nav_msgs::OccupancyGridConstPtr& new_map)
   if (first_map_only_)
   {
     ROS_INFO("Shutting down the map subscriber. first_map_only flag is on");
-    map_sub_.shutdown();
+    map_sub_.shutdown(); // 关闭订阅
   }
 }
 
