@@ -50,6 +50,7 @@ namespace costmap_2d
 /**
  * @class CellData
  * @brief Storage for cell information used during obstacle inflation
+ * 记录栅格的地图数组下标，栅格地图坐标，以及其最近障碍物的栅格地图坐标
  */
 class CellData
 {
@@ -101,6 +102,7 @@ public:
   /** @brief  Given a distance, compute a cost.
    * @param  distance The distance from an obstacle in cells
    * @return A cost value for the distance */
+  // 根据到最近障碍物距离计算膨胀值
   virtual inline unsigned char computeCost(double distance) const
   {
     unsigned char cost = 0;
@@ -130,10 +132,10 @@ protected:
   boost::recursive_mutex* inflation_access_;
 
   double resolution_;
-  double inflation_radius_;
-  double inscribed_radius_;
-  double weight_;
-  bool inflate_unknown_;
+  double inflation_radius_; // 膨胀半径
+  double inscribed_radius_; // 机器内切半径
+  double weight_; // 膨胀系数，具体看公式
+  bool inflate_unknown_; // 未知区域是否要膨胀值，膨胀值会覆盖掉未知区域
 
 private:
   /**
@@ -166,10 +168,11 @@ private:
     return cached_costs_[dx][dy];
   }
 
-  void computeCaches();
+  void computeCaches(); //计算距离缓存表和膨胀值缓存表
   void deleteKernels();
   void inflate_area(int min_i, int min_j, int max_i, int max_j, unsigned char* master_grid);
-
+  
+  // 欧氏距离转地图栅格数
   unsigned int cellDistance(double world_dist)
   {
     return layered_costmap_->getCostmap()->cellDistance(world_dist);
@@ -178,15 +181,28 @@ private:
   inline void enqueue(unsigned int index, unsigned int mx, unsigned int my,
                       unsigned int src_x, unsigned int src_y);
 
-  unsigned int cell_inflation_radius_;
-  unsigned int cached_cell_inflation_radius_;
+  unsigned int cell_inflation_radius_; // 膨胀半径，单位是栅格
+  unsigned int cached_cell_inflation_radius_; // 之前的膨胀半径，单位是栅格
+  // std::map 不允许有重复的键！
+  // 存储需要膨胀的栅格信息，按到障碍物的距离进行分组
   std::map<double, std::vector<CellData> > inflation_cells_;
 
-  bool* seen_;
+  bool* seen_; // 对应栅格地图内存数组，存储该栅格是否被检查过
   int seen_size_;
 
-  unsigned char** cached_costs_;
-  double** cached_distances_;
+  /**
+   * 缓存表格式，以栅格方式存储各个栅格到原点的距离和膨胀值
+   * 4
+   * 3
+   * 2
+   * 1
+   * 0  1  2  3  4
+   * 由于计算地图上两个坐标之间的距离是相对的，
+   * 所以任意坐标之间的距离都可以作差取绝对值转换到缓存表中
+   * e.g. [2,2] 和 [-3,-3] 作差取绝对值得到 [5,5] 直接查表得到对应的距离和膨胀值
+   */
+  unsigned char** cached_costs_; // 膨胀值缓存表
+  double** cached_distances_; // 距离缓存表
   double last_min_x_, last_min_y_, last_max_x_, last_max_y_;
 
   dynamic_reconfigure::Server<costmap_2d::InflationPluginConfig> *dsrv_;

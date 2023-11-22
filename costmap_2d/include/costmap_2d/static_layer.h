@@ -59,9 +59,10 @@ public:
   virtual void activate();
   virtual void deactivate();
   virtual void reset();
-
+  // 获取地图更新的边界左下角坐标以及边界大小
   virtual void updateBounds(double robot_x, double robot_y, double robot_yaw, double* min_x, double* min_y,
                             double* max_x, double* max_y);
+  // 更新区域内地图，min_i min_j 是更新区域的左下角坐标，max_i max_j 是右上角坐标
   virtual void updateCosts(costmap_2d::Costmap2D& master_grid, int min_i, int min_j, int max_i, int max_j);
 
   virtual void matchSize();
@@ -73,8 +74,11 @@ private:
    * map along with its size will determine what parts of the costmap's
    * static map are overwritten.
    */
+  // 更新的是一整张地图
   void incomingMap(const nav_msgs::OccupancyGridConstPtr& new_map);
+  // 仅更新局部区域
   void incomingUpdate(const map_msgs::OccupancyGridUpdateConstPtr& update);
+  // 回调，更新地图参数
   void reconfigureCB(costmap_2d::GenericPluginConfig &config, uint32_t level);
 
   unsigned char interpretValue(unsigned char value);
@@ -84,7 +88,7 @@ private:
   bool subscribe_to_updates_;
   bool map_received_;
   bool has_updated_data_;
-  unsigned int x_, y_, width_, height_;
+  unsigned int x_, y_, width_, height_; // 更新区域的左下角坐标以及区域大小
   bool track_unknown_space_;
   bool use_maximum_;
   bool first_map_only_;      ///< @brief Store the first static map and reuse it on reinitializing

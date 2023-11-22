@@ -154,6 +154,7 @@ void InflationLayer::updateBounds(double robot_x, double robot_y, double robot_y
     last_min_y_ = *min_y;
     last_max_x_ = *max_x;
     last_max_y_ = *max_y;
+    // 更新边界要比实际多一个膨胀半径，因为在边界外且在膨胀半径内的障碍物更新也会影响到更新边界内的膨胀值！
     *min_x = std::min(tmp_min_x, *min_x) - inflation_radius_;
     *min_y = std::min(tmp_min_y, *min_y) - inflation_radius_;
     *max_x = std::max(tmp_max_x, *max_x) + inflation_radius_;
@@ -203,6 +204,7 @@ void InflationLayer::updateCosts(costmap_2d::Costmap2D& master_grid, int min_i, 
   // box min_i...max_j, by the amount cell_inflation_radius_.  Cells
   // up to that distance outside the box can still influence the costs
   // stored in cells inside the box.
+  // 更新边界要比实际多一个膨胀半径，因为在边界外且在膨胀半径内的障碍物更新也会影响到更新边界内的膨胀值！
   min_i -= cell_inflation_radius_;
   min_j -= cell_inflation_radius_;
   max_i += cell_inflation_radius_;
@@ -215,7 +217,7 @@ void InflationLayer::updateCosts(costmap_2d::Costmap2D& master_grid, int min_i, 
 
   // Inflation list; we append cells to visit in a list associated with its distance to the nearest obstacle
   // We use a map<distance, list> to emulate the priority queue used before, with a notable performance boost
-
+  // 按“到障碍物距离”进行分组，从到障碍物距离为 0 的栅格开始存储
   // Start with lethal obstacles: by definition distance is 0.0
   std::vector<CellData>& obs_bin = inflation_cells_[0.0];
   for (int j = min_j; j < max_j; j++)
@@ -234,8 +236,15 @@ void InflationLayer::updateCosts(costmap_2d::Costmap2D& master_grid, int min_i, 
   // Process cells by increasing distance; new cells are appended to the corresponding distance bin, so they
   // can overtake previously inserted but farther away cells
   std::map<double, std::vector<CellData> >::iterator bin;
+  // 利用了 std::map 会默认按键的大小，从小到大排序，正好符合膨胀由障碍物从近到远的扩散！！
+  // 当内部 for 循环补充了扩散后的栅格，会自动添加到 inflation_cells_ 当前指针后面
   for (bin = inflation_cells_.begin(); bin != inflation_cells_.end(); ++bin)
   {
+    // 膨胀栅格信息表最开始记录的是障碍物栅格自身的信息
+    // 迭代开始会从每个障碍物栅格开始扩散，扩散的栅格始终记录着最开始的那个障碍物坐标，称为起始障碍物栅格
+    // 然后计算扩散的栅格同起始障碍物栅格的距离和对应的膨胀值
+    // 之后由扩散后的栅格再次扩散，并计算其与起始障碍物栅格距离
+    // 当扩散超出膨胀半径范围，扩散停止，inflation_cells_ 的 [distance] 键不再有补充，循环结束
     for (int i = 0; i < bin->second.size(); ++i)
     {
       // process all cells at distance dist_bin.first
@@ -251,9 +260,9 @@ void InflationLayer::updateCosts(costmap_2d::Costmap2D& master_grid, int min_i, 
 
       seen_[index] = true;
 
-      unsigned int mx = cell.x_;
+      unsigned int mx = cell.x_; // 当前栅格坐标
       unsigned int my = cell.y_;
-      unsigned int sx = cell.src_x_;
+      unsigned int sx = cell.src_x_; // 障碍物坐标
       unsigned int sy = cell.src_y_;
 
       // assign the cost associated with the distance from an obstacle to the cell
@@ -265,6 +274,7 @@ void InflationLayer::updateCosts(costmap_2d::Costmap2D& master_grid, int min_i, 
         master_array[index] = std::max(old_cost, cost);
 
       // attempt to put the neighbors of the current cell onto the inflation list
+      // 把膨胀栅格的左，右，上，下栅格添加到膨胀栅格信息列表
       if (mx > 0)
         enqueue(index - 1, mx - 1, my, sx, sy);
       if (my > 0)
@@ -294,13 +304,16 @@ inline void InflationLayer::enqueue(unsigned int index, unsigned int mx, unsigne
   if (!seen_[index])
   {
     // we compute our distance table one cell further than the inflation radius dictates so we can make the check below
+    // 当前栅格与障碍物距离
     double distance = distanceLookup(mx, my, src_x, src_y);
 
     // we only want to put the cell in the list if it is within the inflation radius of the obstacle point
+    // 当前栅格与障碍物距离超出了膨胀半径则不用记录
     if (distance > cell_inflation_radius_)
       return;
 
     // push the cell data onto the inflation list and mark
+    // 记录到膨胀栅格信息表
     inflation_cells_[distance].push_back(CellData(index, mx, my, src_x, src_y));
   }
 }
@@ -317,7 +330,7 @@ void InflationLayer::computeCaches()
 
     cached_costs_ = new unsigned char*[cell_inflation_radius_ + 2];
     cached_distances_ = new double*[cell_inflation_radius_ + 2];
-
+    // 更新距离缓存表
     for (unsigned int i = 0; i <= cell_inflation_radius_ + 1; ++i)
     {
       cached_costs_[i] = new unsigned char[cell_inflation_radius_ + 2];
@@ -330,7 +343,7 @@ void InflationLayer::computeCaches()
 
     cached_cell_inflation_radius_ = cell_inflation_radius_;
   }
-
+  // 更新膨胀值缓存表
   for (unsigned int i = 0; i <= cell_inflation_radius_ + 1; ++i)
   {
     for (unsigned int j = 0; j <= cell_inflation_radius_ + 1; ++j)

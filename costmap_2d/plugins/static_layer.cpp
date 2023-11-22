@@ -211,6 +211,7 @@ void StaticLayer::incomingMap(const nav_msgs::OccupancyGridConstPtr& new_map)
   map_frame_ = new_map->header.frame_id;
 
   // we have a new map, update full size of map
+  // 默认静态地图的更新区域是全图
   x_ = y_ = 0;
   width_ = size_x_;
   height_ = size_y_;
@@ -276,7 +277,7 @@ void StaticLayer::updateBounds(double robot_x, double robot_y, double robot_yaw,
     if (!map_received_ || !(has_updated_data_ || has_extra_bounds_))
       return;
   }
-
+  // 是否使用拓展区域
   useExtraBounds(min_x, min_y, max_x, max_y);
 
   double wx, wy;
@@ -314,6 +315,7 @@ void StaticLayer::updateCosts(costmap_2d::Costmap2D& master_grid, int min_i, int
     geometry_msgs::TransformStamped transform;
     try
     {
+      // 获取坐标转换关系，map_frame_ 目标坐标系，global_frame_ 源坐标系
       transform = tf_->lookupTransform(map_frame_, global_frame_, ros::Time(0));
     }
     catch (tf2::TransformException ex)
