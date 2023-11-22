@@ -118,7 +118,7 @@ protected:
   /**
    * Updates the bounding box specified in the parameters to include
    * the location (x,y)
-   *
+   * 把 min_x min_y max_x max_y 调整到包含 x y 
    * @param x x-coordinate to include
    * @param y y-coordinate to include
    * @param min_x bounding box

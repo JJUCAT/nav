@@ -100,12 +100,14 @@ public:
 
   /**
    * @brief  Pushes copies of all current observations onto the end of the vector passed in
+   *         把最近的观测数据全部添加到 observations 后方
    * @param  observations The vector to be filled
    */
   void getObservations(std::vector<Observation>& observations);
 
   /**
    * @brief  Check if the observation buffer is being update at its expected rate
+   *         数据时间在期望更新频率内就认为数据是最新的数据
    * @return True if it is being updated at the expected rate, false otherwise
    */
   bool isCurrent() const;
@@ -134,6 +136,7 @@ public:
 private:
   /**
    * @brief  Removes any stale observations from the buffer list
+   *         过滤掉过期的观测数据
    */
   void purgeStaleObservations();
 
@@ -143,6 +146,7 @@ private:
   ros::Time last_updated_;
   std::string global_frame_;
   std::string sensor_frame_;
+  // 缓存的观测数据，数据已经转到 global frame 坐标下了，数据是在头部添加
   std::list<Observation> observation_list_;
   std::string topic_name_;
   double min_obstacle_height_, max_obstacle_height_;

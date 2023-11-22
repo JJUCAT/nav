@@ -64,7 +64,9 @@ public:
    * @param origin The origin point of the observation
    * @param cloud The point cloud of the observation
    * @param obstacle_range The range out to which an observation should be able to insert obstacles
+   *        超过这个范围的观测数据会被标记为障碍物，换言之这是用来过滤太近的噪点
    * @param raytrace_range The range out to which an observation should be able to clear via raytracing
+   *        超过这个范围的观测数据会被清除掉，换言之这是用来过滤太远的噪点
    */
   Observation(geometry_msgs::Point& origin, const sensor_msgs::PointCloud2 &cloud,
               double obstacle_range, double raytrace_range) :
@@ -93,7 +95,7 @@ public:
   {
   }
 
-  geometry_msgs::Point origin_;
+  geometry_msgs::Point origin_; // 观测数据的传感器 frame 在 global frame 中的坐标
   sensor_msgs::PointCloud2* cloud_;
   double obstacle_range_, raytrace_range_;
 };

@@ -349,6 +349,7 @@ protected:
 
   /**
    * @brief  Raytrace a line and apply some action at each step
+   *         对 p0 到 p1 连线经过的栅格做 at 处理，就是设置栅格代价
    * @param  at The action to take... a functor
    * @param  x0 The starting x coordinate
    * @param  y0 The starting y coordinate

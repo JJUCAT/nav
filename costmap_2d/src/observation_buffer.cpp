@@ -73,6 +73,7 @@ bool ObservationBuffer::setGlobalFrame(const std::string new_global_frame)
     return false;
   }
 
+  // 缓存的观测数据需要转到新 global frame 下
   list<Observation>::iterator obs_it;
   for (obs_it = observation_list_.begin(); obs_it != observation_list_.end(); ++obs_it)
   {
@@ -86,10 +87,12 @@ bool ObservationBuffer::setGlobalFrame(const std::string new_global_frame)
       origin.point = obs.origin_;
 
       // we need to transform the origin of the observation to the new global frame
+      // 观测的传感器 frame 转到 global frame 下
       tf2_buffer_.transform(origin, origin, new_global_frame);
       obs.origin_ = origin.point;
 
       // we also need to transform the cloud of the observation to the new global frame
+      // 观测的所有点云数据转到 global frame 下
       tf2_buffer_.transform(*(obs.cloud_), *(obs.cloud_), new_global_frame);
     }
     catch (TransformException& ex)
@@ -110,6 +113,7 @@ void ObservationBuffer::bufferCloud(const sensor_msgs::PointCloud2& cloud)
   geometry_msgs::PointStamped global_origin;
 
   // create a new observation on the list to be populated
+  // 添加到缓存观测 observation_list_ 中的头部
   observation_list_.push_front(Observation());
 
   // check whether the origin frame has been set explicitly or whether we should get it from the cloud
@@ -124,8 +128,8 @@ void ObservationBuffer::bufferCloud(const sensor_msgs::PointCloud2& cloud)
     local_origin.point.x = 0;
     local_origin.point.y = 0;
     local_origin.point.z = 0;
-    tf2_buffer_.transform(local_origin, global_origin, global_frame_);
-    tf2::convert(global_origin.point, observation_list_.front().origin_);
+    tf2_buffer_.transform(local_origin, global_origin, global_frame_); // 观测数据的传感器 frame 转到 global frame 下
+    tf2::convert(global_origin.point, observation_list_.front().origin_); // 数据类型转换
 
     // make sure to pass on the raytrace/obstacle range of the observation buffer to the observations
     observation_list_.front().raytrace_range_ = raytrace_range_;
@@ -134,7 +138,7 @@ void ObservationBuffer::bufferCloud(const sensor_msgs::PointCloud2& cloud)
     sensor_msgs::PointCloud2 global_frame_cloud;
 
     // transform the point cloud
-    tf2_buffer_.transform(cloud, global_frame_cloud, global_frame_);
+    tf2_buffer_.transform(cloud, global_frame_cloud, global_frame_); // 观测数据转到 global frame 下
     global_frame_cloud.header.stamp = cloud.header.stamp;
 
     // now we need to remove observations from the cloud that are below or above our height thresholds
@@ -148,11 +152,12 @@ void ObservationBuffer::bufferCloud(const sensor_msgs::PointCloud2& cloud)
     observation_cloud.is_dense = global_frame_cloud.is_dense;
 
     unsigned int cloud_size = global_frame_cloud.height*global_frame_cloud.width;
-    sensor_msgs::PointCloud2Modifier modifier(observation_cloud);
+    sensor_msgs::PointCloud2Modifier modifier(observation_cloud); // PointCloud2 点云修改器，原点云数据格式不好改
     modifier.resize(cloud_size);
     unsigned int point_count = 0;
 
     // copy over the points that are within our height bounds
+    // 过滤点云 z 轴数据
     sensor_msgs::PointCloud2Iterator<float> iter_z(global_frame_cloud, "z");
     std::vector<unsigned char>::const_iterator iter_global = global_frame_cloud.data.begin(), iter_global_end = global_frame_cloud.data.end();
     std::vector<unsigned char>::iterator iter_obs = observation_cloud.data.begin();

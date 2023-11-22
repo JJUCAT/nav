@@ -79,10 +79,10 @@ void ObstacleLayer::onInitialize()
   ROS_INFO("    Subscribed to Topics: %s", topics_string.c_str());
 
   // now we need to split the topics based on whitespace which we can use a stringstream for
-  std::stringstream ss(topics_string);
+  std::stringstream ss(topics_string); // 传感器列表
 
   std::string source;
-  while (ss >> source)
+  while (ss >> source) // 加载传感器对应的参数信息，例如话题名，数据类型等，然后订阅相关话题
   {
     ros::NodeHandle source_node(nh, source);
 
@@ -150,9 +150,10 @@ void ObstacleLayer::onInitialize()
     // create a callback for the topic
     if (data_type == "LaserScan")
     {
+      // message_filters 话题软同步，过滤过时的数据
       boost::shared_ptr < message_filters::Subscriber<sensor_msgs::LaserScan>
           > sub(new message_filters::Subscriber<sensor_msgs::LaserScan>(g_nh, topic, 50));
-
+      // tf2_ros::MessageFilter 保证了传感器与 global frame 坐标系的 tf 有效时候才会转换数据到 global frame
       boost::shared_ptr<tf2_ros::MessageFilter<sensor_msgs::LaserScan> > filter(
         new tf2_ros::MessageFilter<sensor_msgs::LaserScan>(*sub, *tf_, global_frame_, 50, g_nh));
 
@@ -215,7 +216,7 @@ void ObstacleLayer::onInitialize()
   }
 
   dsrv_ = NULL;
-  setupDynamicReconfigure(nh);
+  setupDynamicReconfigure(nh); // 动态参数服务器
 }
 
 void ObstacleLayer::setupDynamicReconfigure(ros::NodeHandle& nh)
@@ -264,6 +265,7 @@ void ObstacleLayer::laserScanCallback(const sensor_msgs::LaserScanConstPtr& mess
   }
 
   // buffer the point cloud
+  // 插入点云数据
   buffer->lock();
   buffer->bufferCloud(cloud);
   buffer->unlock();
@@ -273,6 +275,7 @@ void ObstacleLayer::laserScanValidInfCallback(const sensor_msgs::LaserScanConstP
                                               const boost::shared_ptr<ObservationBuffer>& buffer)
 {
   // Filter positive infinities ("Inf"s) to max_range.
+  // 把无限远的激光转到最大距离
   float epsilon = 0.0001;  // a tenth of a millimeter
   sensor_msgs::LaserScan message = *raw_message;
   for (size_t i = 0; i < message.ranges.size(); i++)
@@ -348,15 +351,16 @@ void ObstacleLayer::updateBounds(double robot_x, double robot_y, double robot_ya
   std::vector<Observation> observations, clearing_observations;
 
   // get the marking observations
-  current = current && getMarkingObservations(observations);
+  current = current && getMarkingObservations(observations); // 判断数据是否是最近的数据
 
   // get the clearing observations
-  current = current && getClearingObservations(clearing_observations);
+  current = current && getClearingObservations(clearing_observations); // 判断数据是否是最近的数据
 
   // update the global current status
   current_ = current;
 
   // raytrace freespace
+  // 更新自由区
   for (unsigned int i = 0; i < clearing_observations.size(); ++i)
   {
     raytraceFreespace(clearing_observations[i], min_x, min_y, max_x, max_y);
@@ -391,7 +395,7 @@ void ObstacleLayer::updateBounds(double robot_x, double robot_y, double robot_ya
           + (pz - obs.origin_.z) * (pz - obs.origin_.z);
 
       // if the point is far enough away... we won't consider it
-      if (sq_dist >= sq_obstacle_range)
+      if (sq_dist >= sq_obstacle_range) // ？？？可以这么判断
       {
         ROS_DEBUG("The point is too far away");
         continue;
@@ -410,7 +414,7 @@ void ObstacleLayer::updateBounds(double robot_x, double robot_y, double robot_ya
       touch(px, py, min_x, min_y, max_x, max_y);
     }
   }
-
+  // 清除 footprint 内的障碍物
   updateFootprint(robot_x, robot_y, robot_yaw, min_x, min_y, max_x, max_y);
 }
 
@@ -470,6 +474,7 @@ bool ObstacleLayer::getMarkingObservations(std::vector<Observation>& marking_obs
   {
     marking_buffers_[i]->lock();
     marking_buffers_[i]->getObservations(marking_observations);
+    // 一旦有一次 isCurrent 返回 false，后面就一直是 false 了
     current = marking_buffers_[i]->isCurrent() && current;
     marking_buffers_[i]->unlock();
   }
@@ -516,7 +521,7 @@ void ObstacleLayer::raytraceFreespace(const Observation& clearing_observation, d
   double map_end_x = origin_x + size_x_ * resolution_;
   double map_end_y = origin_y + size_y_ * resolution_;
 
-
+  // 调整更新的边界范围
   touch(ox, oy, min_x, min_y, max_x, max_y);
 
   // for each point in the cloud, we want to trace a line from the origin and clear obstacles along it
@@ -534,6 +539,7 @@ void ObstacleLayer::raytraceFreespace(const Observation& clearing_observation, d
     double b = wy - oy;
 
     // the minimum value to raytrace from is the origin
+    // 超出地图外的观测数据，就把观测改到地图边缘
     if (wx < origin_x)
     {
       double t = (origin_x - ox) / a;
@@ -548,6 +554,7 @@ void ObstacleLayer::raytraceFreespace(const Observation& clearing_observation, d
     }
 
     // the maximum value to raytrace to is the end of the map
+    // 超出地图外的观测数据，就把观测改到地图边缘
     if (wx > map_end_x)
     {
       double t = (map_end_x - ox) / a;
@@ -567,12 +574,12 @@ void ObstacleLayer::raytraceFreespace(const Observation& clearing_observation, d
     // check for legality just in case
     if (!worldToMap(wx, wy, x1, y1))
       continue;
-
+    // 清除障碍物范围，单位是栅格
     unsigned int cell_raytrace_range = cellDistance(clearing_observation.raytrace_range_);
-    MarkCell marker(costmap_, FREE_SPACE);
+    MarkCell marker(costmap_, FREE_SPACE); // 自由区标记
     // and finally... we can execute our trace to clear obstacles along that line
-    raytraceLine(marker, x0, y0, x1, y1, cell_raytrace_range);
-
+    raytraceLine(marker, x0, y0, x1, y1, cell_raytrace_range); // 将传感器到观测之间的连线设置为自由区
+    // 调整更新的边界范围
     updateRaytraceBounds(ox, oy, wx, wy, clearing_observation.raytrace_range_, min_x, min_y, max_x, max_y);
   }
 }
