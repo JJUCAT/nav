@@ -360,7 +360,7 @@ void ObstacleLayer::updateBounds(double robot_x, double robot_y, double robot_ya
   current_ = current;
 
   // raytrace freespace
-  // 更新自由区
+  // 清除障碍物的范围是平面
   for (unsigned int i = 0; i < clearing_observations.size(); ++i)
   {
     raytraceFreespace(clearing_observations[i], min_x, min_y, max_x, max_y);
@@ -395,7 +395,7 @@ void ObstacleLayer::updateBounds(double robot_x, double robot_y, double robot_ya
           + (pz - obs.origin_.z) * (pz - obs.origin_.z);
 
       // if the point is far enough away... we won't consider it
-      if (sq_dist >= sq_obstacle_range) // ？？？可以这么判断
+      if (sq_dist >= sq_obstacle_range) // 障碍物判断的范围是个球面
       {
         ROS_DEBUG("The point is too far away");
         continue;
