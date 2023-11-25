@@ -25,9 +25,10 @@ if (OPENMP_FOUND)
   set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
 endif()
 
+# 给外部引用
 catkin_package(
    INCLUDE_DIRS include
-   LIBRARIES state_lattice_planner_lib lookup_table_generator_lib trajectory_generator_diff_drive motion_model_diff_drive
+   LIBRARIES state_lattice_planner_lib lookup_table_generator_lib trajectory_generator_diff_drive motion_model_diff_drive local_planner
 #  CATKIN_DEPENDS geometry_msgs roscpp rospy std_msgs
 #  DEPENDS system_lib
 )
@@ -52,11 +53,21 @@ add_library(state_lattice_planner_lib
   src/state_lattice_planner.cpp
   src/lookup_table_utils.cpp
 )
+add_library(local_planner
+  src/local_planner.cpp
+  src/motion_model_diff_drive.cpp
+  src/trajectory_generator_diff_drive.cpp
+  src/lookup_table_generator.cpp
+  src/lookup_table_utils.cpp
+  src/state_lattice_planner.cpp
+  src/fast_triangular_fun.cpp
+)
 
 add_dependencies(lookup_table_generator_lib ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 add_dependencies(state_lattice_planner_lib ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 add_dependencies(motion_model_diff_drive ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 add_dependencies(trajectory_generator_diff_drive ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+add_dependencies(local_planner ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 add_executable(state_lattice_planner src/state_lattice_planner_node.cpp src/state_lattice_planner_ros.cpp)
 add_executable(lookup_table_generator src/lookup_table_generator_node.cpp)
@@ -83,8 +94,19 @@ target_link_libraries(trajectory_viewer
   trajectory_generator_diff_drive
   motion_model_diff_drive
 )
+target_link_libraries(local_planner
+  ${catkin_LIBRARIES}
+)
 
 if(CATKIN_ENABLE_TESTING)
     find_package(rostest REQUIRED)
     add_subdirectory(test)
 endif()
+
+
+install(TARGETS
+  local_planner
+  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  RUNTIME DESTINATION ${CATKIN_GLOBAL_BIN_DESTINATION}
+)

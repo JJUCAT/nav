@@ -134,7 +134,7 @@ void StateLatticePlannerROS::target_velocity_callback(const geometry_msgs::Twist
 void StateLatticePlannerROS::process(void)
 {
   ros::Rate loop_rate(HZ);
-
+  xyyaw_table_pub.publish(pc_table_);
   while(ros::ok()){
     bool goal_transformed = false;
     geometry_msgs::PoseStamped local_goal_base_link;
@@ -251,7 +251,7 @@ void StateLatticePlannerROS::process(void)
           cmd_vel.angular.z = trajectory.angular_velocities[delayed_control_index];
           if (ACKERMANN) cmd_vel = diff_cmd2ackermann_cmd(cmd_vel);
           if (DRIVE) velocity_pub.publish(cmd_vel);
-          std::cout << "published velocity: \n" << cmd_vel << std::endl;
+          // std::cout << "published velocity: \n" << cmd_vel << std::endl;
           local_map_updated = false;
           odom_updated = false;
         } else { // 原有轨迹有碰撞都不能用了，机器暂停
@@ -443,6 +443,7 @@ void StateLatticePlannerROS::parallel_goal_sampling(
 {
   double d = goal.segment(0,2).norm();
   double radius = std::min(std::max(d * ratio, NGS_R), 2 * NGS_R);
+  // double radius = std::min(d * ratio, NGS_R);
   std::vector<double> R(NGS_NR);
   double sum = 0;
   for (int i = 1; i <= NGS_NR; i ++)
@@ -477,6 +478,7 @@ void StateLatticePlannerROS::parallel_goal_sampling(
 void StateLatticePlannerROS::PubBestTrajectory(
   const std::vector<Eigen::Vector3d>& trajectory, const std::string target_frame_id)
 {
+  // std::cout << "robot frame:" << ROBOT_FRAME << ", target frame:" << target_frame_id << std::endl;
   geometry_msgs::PoseStamped target_link;
   geometry_msgs::PoseStamped base_link;
   base_link.header.frame_id = ROBOT_FRAME;

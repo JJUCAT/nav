@@ -7,13 +7,16 @@ namespace LookupTableUtils
 
     }
 
-    bool load_lookup_table(const std::string& lookup_table_file_name, LookupTable& lookup_table, std::vector<Eigen::Vector3d>& xyyaw_table)
+    bool load_lookup_table(
+      const std::string& lookup_table_file_name,
+      LookupTable& lookup_table, std::vector<Eigen::Vector3d>& xyyaw_table)
     {
         lookup_table.clear();
         std::cout << "loading lookup table from " << lookup_table_file_name << std::endl;
         std::ifstream ifs(lookup_table_file_name);
         if(ifs){
             bool first_line_flag = true;
+            Eigen::Vector3d err(0.05, 0.05, 0.05);
             while(!ifs.eof()){
                 std::string data;
                 std::getline(ifs, data);
@@ -38,7 +41,10 @@ namespace LookupTableUtils
                 double y = *(++it);
                 double yaw = *(++it);
                 param.state << x, y, yaw;
-                xyyaw_table.push_back(param.state);
+                if (xyyaw_table.empty())
+                  xyyaw_table.push_back(param.state);
+                else if (fabs(xyyaw_table.back()(0)-x) < 0.05 || fabs(xyyaw_table.back()(1)-y) < 0.05)
+                  xyyaw_table.push_back(param.state);
                 param.control.omega.km = *(++it);
                 param.control.omega.kf = *(++it);
                 param.control.omega.sf = *(++it);
@@ -50,6 +56,7 @@ namespace LookupTableUtils
             // exit(-1);
             return false;
         }
+        std::cout << "x y yaw table size:" << xyyaw_table.size() << std::endl;
         return true;
     }
 

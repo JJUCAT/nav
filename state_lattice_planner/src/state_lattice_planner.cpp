@@ -115,7 +115,7 @@ double StateLatticePlanner::Critic::evaluate_angular_err(
     angular_sum += fabs(trajectory.angular_velocities.at(i));
   }
   double angular_cost = angular_sum / angular_max * angular_scale_;
-  std::cout << "angular cost:" << angular_cost << std::endl;
+  // std::cout << "angular cost:" << angular_cost << std::endl;
   return angular_cost;
 }
 

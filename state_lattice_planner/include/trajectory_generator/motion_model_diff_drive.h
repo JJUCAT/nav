@@ -100,6 +100,12 @@ public:
          */
         void calculate_spline(double ratio=0.5);
 
+        /**
+         * @brief Calculate 3D spline parameters from k0, km, kf, sf. #coefficients_abc will be to the parameters
+         * @param[in] ratio Ratio of sf (default: 0.5)
+         */
+        void calculate_spline_abc(double ratio=0.5);
+
         double k0;
         double km;
         double kf;
@@ -108,6 +114,11 @@ public:
          * @brief (a, b, c, d) <- ax^3+bx^2+cx+d
          */
         std::vector<Eigen::Vector4d> coefficients;
+
+        /**
+         * @brief (a, b, c) <- ax^2+bx+c
+         */
+        std::vector<Eigen::Vector3d> coefficients_abc;
     private:
     };
 
@@ -177,7 +188,8 @@ public:
      * @param[in] k0, km, kf Angular velocity in the trajectory
      * @param[out] output The last state of generated trajectory
      */
-    void generate_last_state(const double, const double, const VelocityParams&, const double, const double, const double, Eigen::Vector3d&);
+    void generate_last_state(const double, const double, const VelocityParams&,
+      const double, const double, const double, Eigen::Vector3d&);
     /**
      * @brief Make veloicity profile from given velocity parameter
      * @param[in] dt Time interval between each pose in the trajectory [s]

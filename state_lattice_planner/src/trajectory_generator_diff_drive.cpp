@@ -71,6 +71,8 @@ double TrajectoryGeneratorDiffDrive::generate_optimized_trajectory(
         trajectory.angular_velocities.clear();
         // 由初始化状态 output 和控制间隔 dt ,状态表中的 sf 预估曲线长度来实时生成轨迹
         model.generate_trajectory(dt, output, trajectory);
+        // std::cout << "goal[" << goal(0) << "," << goal(1) << "], end[" <<
+        //   trajectory.trajectory.back()(0) << "," << trajectory.trajectory.back()(1) << "]" << std::endl;
         /*
         std::cout << "size: " << trajectory.trajectory.size() << std::endl;
         if(trajectory.trajectory.size() <= 1){
@@ -78,9 +80,7 @@ double TrajectoryGeneratorDiffDrive::generate_optimized_trajectory(
             return -1;
         }
         */
-        // h 是曲线参数步进，h 是自变量，output 是曲线参数初始状态
-        // 曲线参数的改变会改变整条曲线状态，曲线上的点状态就是应变量
-        // jacobian 是两个 h 之间的曲线上点状态的变化梯度
+        // h 是 km 插值点角速度, kf 终点角速度, sf 曲线长度，3 个状态的误差容许范围
         get_jacobian(dt, output, h, jacobian);
         // std::cout << "j: \n" << jacobian << std::endl;
         // std::cout << "j^-1: \n" << jacobian.inverse() << std::endl;
@@ -102,7 +102,7 @@ double TrajectoryGeneratorDiffDrive::generate_optimized_trajectory(
         // std::cout << "cost: " << cost.norm() << std::endl;
         // std::cout << "dp" << dp.transpose() << std::endl;
         // std::cout << "calculate scale factor" << std::endl;
-        // 调整曲线参数变化量 dp，计算新曲线
+        // 调整 output 状态，用新状态再计算一次轨迹
         calculate_scale_factor(dt, tolerance, goal, cost, output, trajectory, dp);
 
         // std::cout << "last state: \n" << trajectory.trajectory.back() << std::endl;
@@ -205,10 +205,41 @@ void TrajectoryGeneratorDiffDrive::calculate_scale_factor(
   Eigen::Vector3d& cost, MotionModelDiffDrive::ControlParams& output,
   MotionModelDiffDrive::Trajectory& trajectory, Eigen::Vector3d& dp)
 {
-  for(double beta=0.25;beta<=1.5;beta+=0.25) { // 曲线参数变化量 dp 的缩放
-    // std::cout << "beta: " << beta << std::endl;
-    if(beta == 1.0f){ //不用原来的 dp，为什么不用原 dp
-      continue;
+    for(double beta=0.25;beta<=1.5;beta+=0.25){
+        // std::cout << "beta: " << beta << std::endl;
+        if(beta == 1.0f){
+            continue;
+        }
+        Eigen::Vector3d dp_ = beta * dp;
+        MotionModelDiffDrive::Trajectory trajectory_;
+        MotionModelDiffDrive::ControlParams output_ = output;
+        output_.omega.km += dp_(0);
+        output_.omega.kf += dp_(1);
+        output_.omega.sf += dp_(2);
+        // std::cout << "dp_: " << dp_.transpose() << std::endl;
+        // output_.omega.km = std::min(std::max(output_.omega.km, -MAX_YAWRATE), MAX_YAWRATE);
+        // output_.omega.kf = std::min(std::max(output_.omega.kf, -MAX_YAWRATE), MAX_YAWRATE);
+        // std::cout << "output: " << output_.omega.km << ", " << output_.omega.kf << ", " << output_.omega.sf << std::endl;
+        model.generate_trajectory(dt, output_, trajectory_); 
+        // std::cout << "size: " << trajectory_.trajectory.size() << std::endl;
+        if(trajectory_.trajectory.size() <= 1){
+            // std::cout << "failed to generate trajecotry!!!" << std::endl;
+            continue;
+        }
+        Eigen::Vector3d cost_ = goal - trajectory_.trajectory.back();
+        // std::cout << cost_.norm() << " vs " << cost.norm() << std::endl;
+        if(cost_.norm() < cost.norm()){
+            cost = cost_;
+            output = output_;
+            trajectory = trajectory_;
+            dp = dp_;
+            // std::cout << "updated!!!" << std::endl;
+        }else{
+            // std::cout << "not updated!!!" << std::endl;
+        }
+        if(cost.norm() < tolerance){
+            return;
+        }
     }
     Eigen::Vector3d dp_ = beta * dp; // 缩放曲线参数变化量
     MotionModelDiffDrive::Trajectory trajectory_;
