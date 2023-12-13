@@ -47,6 +47,9 @@
 
 namespace base_local_planner {
 
+/**
+ * @brief 获取 footprint 在地图中的机器外形轮廓栅格或者是轮廓填充后的所有栅格
+ */
 class FootprintHelper {
 public:
   FootprintHelper();

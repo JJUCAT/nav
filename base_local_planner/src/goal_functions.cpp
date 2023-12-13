@@ -110,6 +110,7 @@ namespace base_local_planner {
     const geometry_msgs::PoseStamped& plan_pose = global_plan[0];
     try {
       // get plan_to_global_transform from plan frame to global_frame
+      // 这里的 lookupTransform 是假设固定帧的 tf 转换
       geometry_msgs::TransformStamped plan_to_global_transform = tf.lookupTransform(global_frame, ros::Time(),
           plan_pose.header.frame_id, plan_pose.header.stamp, plan_pose.header.frame_id, ros::Duration(0.5));
 

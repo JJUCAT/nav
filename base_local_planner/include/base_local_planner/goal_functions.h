@@ -52,6 +52,9 @@
 #include <costmap_2d/costmap_2d.h>
 
 namespace base_local_planner {
+  /**
+   * @brief 提供跟局部规划器目标选择相关的工具，涉及全局路径的实时转换，全局路径裁剪，全局路径上的目标是否到达等
+   */
 
   /**
    * @brief  return squared distance to check if the goal position has been achieved
@@ -106,6 +109,7 @@ namespace base_local_planner {
 
   /**
    * @brief  Returns last pose in plan
+   *         通过 tf 更新 global plan 最后一个点坐标并返回
    * @param tf A reference to a transform listener
    * @param global_plan The plan being followed
    * @param global_frame The global frame of the local planner
@@ -119,6 +123,7 @@ namespace base_local_planner {
 
   /**
    * @brief  Check if the goal pose has been achieved
+   *        除了检查 x y yaw 位姿是否在范围内，还要检查 odom 的控制是否已经停止
    * @param tf A reference to a transform listener
    * @param global_plan The plan being followed
    * @param costmap_ros A reference to the costmap object being used by the planner

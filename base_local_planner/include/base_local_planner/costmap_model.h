@@ -46,6 +46,7 @@ namespace base_local_planner {
    * @class CostmapModel
    * @brief A class that implements the WorldModel interface to provide grid
    * based collision checks for the trajectory controller using the costmap.
+   * 获取 footprint 在地图中的代价
    */
   class CostmapModel : public WorldModel {
     public:
