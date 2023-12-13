@@ -84,6 +84,7 @@ namespace base_local_planner {
 
   /**
    * @brief  Trim off parts of the global plan that are far enough behind the robot
+   *         把全局路径和转换到局部地图内的路径剪切到离机器 1m 近的位置
    * @param global_pose The pose of the robot in the global frame
    * @param plan The plan to be pruned
    * @param global_plan The plan to be pruned in the frame of the planner

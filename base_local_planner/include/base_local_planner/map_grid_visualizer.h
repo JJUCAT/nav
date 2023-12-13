@@ -39,6 +39,9 @@
 #include <costmap_2d/costmap_2d.h>
 
 namespace base_local_planner {
+    /**
+     * @brief 代价栅格地图的可视化工具，这里的代价到路径，到终点的代价，用 pointcloud2 类型来可视化代价地图
+     */
     class MapGridVisualizer {
         public:
             /**

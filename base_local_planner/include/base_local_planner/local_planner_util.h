@@ -52,6 +52,7 @@ namespace base_local_planner {
 
 /**
  * @class LocalPlannerUtil
+ * 提供了局部规划器的一些基础接口，例如全局路径转到局部下，更新局部规划器的控制参数等
  * @brief Helper class implementing infrastructure code many local planner implementations may need.
  */
 class LocalPlannerUtil {

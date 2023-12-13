@@ -48,6 +48,7 @@ namespace base_local_planner{
   /**
    * @class MapGrid
    * @brief A grid of MapCell cells that is used to propagate path and goal distances for the trajectory controller.
+   * 记录机器到路径和到终点的代价的栅格地图，提供给局部规划器使用
    */
   class MapGrid{
     public:
@@ -132,6 +133,8 @@ namespace base_local_planner{
 
       /**
        * return a value that indicates cell is in obstacle
+       * 该代价地图记录的是到路径，到终点的距离代价，遇到障碍物会把障碍物所在的栅格代价设置为地图上最远距离的代价
+       * 这里把致命障碍物，内嵌区域，未知区域都设置为最大代价
        */
       inline double obstacleCosts() {
         return map_.size();
@@ -188,7 +191,7 @@ namespace base_local_planner{
 
       double goal_x_, goal_y_; /**< @brief The goal distance was last computed from */
 
-      unsigned int size_x_, size_y_; ///< @brief The dimensions of the grid
+      unsigned int size_x_, size_y_; ///< @brief The dimensions of the grid // 栅格地图的尺寸，单位是栅格
 
     private:
 

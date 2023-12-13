@@ -45,7 +45,7 @@ namespace base_local_planner {
   void MapGridVisualizer::initialize(const std::string& name, std::string frame_id, boost::function<bool (int cx, int cy, float &path_cost, float &goal_cost, float &occ_cost, float &total_cost)> cost_function) {
     name_ = name;
     frame_id_ = frame_id;
-    cost_function_ = cost_function;
+    cost_function_ = cost_function; // 外部自定义地图代价的计算方法
 
     ns_nh_ = ros::NodeHandle("~/" + name_);
     pub_ = ns_nh_.advertise<sensor_msgs::PointCloud2>("cost_cloud", 1);
@@ -57,6 +57,10 @@ namespace base_local_planner {
     cost_cloud.header.stamp = ros::Time::now();
 
     sensor_msgs::PointCloud2Modifier cloud_mod(cost_cloud);
+    // 设置 pointcloud2 点云数据字段
+    // 7 个字段，字段[0]为"x"，元素 1 个，数据类型为 sensor_msgs::PointField::FLOAT32
+    // 字段[1]为"y"，元素 1 个，数据类型为 sensor_msgs::PointField::FLOAT32
+    // ...
     cloud_mod.setPointCloud2Fields(7, "x", 1, sensor_msgs::PointField::FLOAT32,
                                       "y", 1, sensor_msgs::PointField::FLOAT32,
                                       "z", 1, sensor_msgs::PointField::FLOAT32,

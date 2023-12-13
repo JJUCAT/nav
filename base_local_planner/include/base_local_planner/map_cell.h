@@ -40,6 +40,7 @@ namespace base_local_planner {
   /**
    * @class MapCell
    * @brief Stores path distance and goal distance information used for scoring trajectories
+   * 记录到路径距离代价和到终点距离代价的地图栅格
    */
   class MapCell{
     public:

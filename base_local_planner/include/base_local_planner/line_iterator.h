@@ -33,7 +33,9 @@
 
 namespace base_local_planner
 {
-
+/**
+ * @brief 在栅格上画线
+ */
 /** An iterator implementing Bresenham Ray-Tracing. */
 class LineIterator
 {

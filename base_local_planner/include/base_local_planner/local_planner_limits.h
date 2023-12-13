@@ -40,6 +40,9 @@
 
 namespace base_local_planner
 {
+/**
+ * @brief 控制上的一些参数
+ */
 class LocalPlannerLimits
 {
 public:
