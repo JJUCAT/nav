@@ -150,6 +150,7 @@ bool Controller::step(const std::vector<geometry_msgs::PoseStamped>& initial_pla
 
     // now check goal
     if (_force_reinit_num_steps > 0 && _ocp_seq % _force_reinit_num_steps == 0) _grid->clear();
+    // 已经到达 grid 了
     if (!_grid->isEmpty() && ((goal.position() - _last_goal.position()).norm() > _force_reinit_new_goal_dist ||
                               std::abs(normalize_theta(goal.theta() - _last_goal.theta())) > _force_reinit_new_goal_angular))
     {

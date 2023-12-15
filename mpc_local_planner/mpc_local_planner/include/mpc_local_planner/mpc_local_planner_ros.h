@@ -268,12 +268,14 @@ class MpcLocalPlannerROS : public nav_core::BaseLocalPlanner, public mbf_costmap
 
     /**
      * @brief Callback for custom obstacles that are not obtained from the costmap
+     *        自定义障碍物回调
      * @param obst_msg pointer to the message containing a list of polygon shaped obstacles
      */
     void customObstacleCB(const costmap_converter::ObstacleArrayMsg::ConstPtr& obst_msg);
 
     /**
      * @brief Callback for custom via-points
+     *        自定义<途经点>回调
      * @param via_points_msg pointer to the message containing a list of via-points
      */
     void customViaPointsCB(const nav_msgs::Path::ConstPtr& via_points_msg);
@@ -321,7 +323,7 @@ class MpcLocalPlannerROS : public nav_core::BaseLocalPlanner, public mbf_costmap
 
     /**
      * @brief Estimate the orientation of a pose from the global_plan that is treated as a local goal for the local planner.
-     *
+     *        评估全局路径上的点作为局部规划的局部目标的角度代价
      * If the current (local) goal point is not the final one (global)
      * substitute the goal orientation by the angle of the direction vector between
      * the local goal and the subsequent pose of the global plan.
@@ -363,7 +365,7 @@ class MpcLocalPlannerROS : public nav_core::BaseLocalPlanner, public mbf_costmap
     Publisher _publisher;
     std::shared_ptr<base_local_planner::CostmapModel> _costmap_model;
 
-    corbo::TimeSeries::Ptr _x_seq = std::make_shared<corbo::TimeSeries>();
+    corbo::TimeSeries::Ptr _x_seq = std::make_shared<corbo::TimeSeries>(); // TODO@LMR 状态和控制？
     corbo::TimeSeries::Ptr _u_seq = std::make_shared<corbo::TimeSeries>();
 
     std::vector<geometry_msgs::PoseStamped> _global_plan;  //!< Store the current global plan
@@ -375,13 +377,13 @@ class MpcLocalPlannerROS : public nav_core::BaseLocalPlanner, public mbf_costmap
 
     // std::shared_ptr<dynamic_reconfigure::Server<MpcLocalPlannerReconfigureConfig>>
     //    dynamic_recfg_;                                        //!< Dynamic reconfigure server to allow config modifications at runtime
-    ros::Subscriber _custom_obst_sub;                          //!< Subscriber for custom obstacles received via a ObstacleMsg.
+    ros::Subscriber _custom_obst_sub;                          //!< Subscriber for custom obstacles received via a ObstacleMsg. // 自定义障碍物
     std::mutex _custom_obst_mutex;                             //!< Mutex that locks the obstacle array (multi-threaded)
     costmap_converter::ObstacleArrayMsg _custom_obstacle_msg;  //!< Copy of the most recent obstacle message
 
-    ViaPointContainer _via_points;
+    ViaPointContainer _via_points; // 途经点
     ros::Subscriber _via_points_sub;         //!< Subscriber for custom via-points received via a Path msg.
-    bool _custom_via_points_active = false;  //!< Keep track whether valid via-points have been received from via_points_sub_
+    bool _custom_via_points_active = false;  //!< Keep track whether valid via-points have been received from via_points_sub_ // 是否接收自定义的<途经点>
     std::mutex _via_point_mutex;             //!< Mutex that locks the via_points container (multi-threaded)
 
     PoseSE2 _robot_pose;                   //!< Store current robot pose
@@ -389,7 +391,7 @@ class MpcLocalPlannerROS : public nav_core::BaseLocalPlanner, public mbf_costmap
     geometry_msgs::Twist _robot_vel;       //!< Store current robot translational and angular velocity (vx, vy, omega)
     bool _goal_reached = false;            //!< store whether the goal is reached or not
     ros::Time _time_last_infeasible_plan;  //!< Store at which time stamp the last infeasible plan was detected
-    int _no_infeasible_plans = 0;          //!< Store how many times in a row the planner failed to find a feasible plan.
+    int _no_infeasible_plans = 0;          //!< Store how many times in a row the planner failed to find a feasible plan. // 连续规划失败次数
     geometry_msgs::Twist _last_cmd;        //!< Store the last control command generated in computeVelocityCommands()
     ros::Time _time_last_cmd;
 
@@ -423,6 +425,9 @@ class MpcLocalPlannerROS : public nav_core::BaseLocalPlanner, public mbf_costmap
 
     } _params;
 
+    /**
+     * @brief 代价地图转多边形地图是开线程，定时转换的
+     */
     struct CostmapConverterPlugin
     {
         std::string costmap_converter_plugin;

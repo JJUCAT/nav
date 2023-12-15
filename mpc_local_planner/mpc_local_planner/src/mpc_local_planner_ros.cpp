@@ -221,7 +221,7 @@ bool MpcLocalPlannerROS::computeVelocityCommands(geometry_msgs::Twist& cmd_vel)
     geometry_msgs::TwistStamped dummy_velocity, cmd_vel_stamped;
     uint32_t outcome = computeVelocityCommands(dummy_pose, dummy_velocity, cmd_vel_stamped, dummy_message);
     cmd_vel          = cmd_vel_stamped.twist;
-    return outcome == mbf_msgs::ExePathResult::SUCCESS;
+    return outcome == mbf_msgs::ExePathResult::SUCCESS; // TODO@LMR mbf 到底干嘛的
 }
 
 uint32_t MpcLocalPlannerROS::computeVelocityCommands(const geometry_msgs::PoseStamped& pose, const geometry_msgs::TwistStamped& velocity,
@@ -296,6 +296,7 @@ uint32_t MpcLocalPlannerROS::computeVelocityCommands(const geometry_msgs::PoseSt
     _robot_goal.x() = transformed_plan.back().pose.position.x;
     _robot_goal.y() = transformed_plan.back().pose.position.y;
     // Overwrite goal orientation if needed
+    // 重置局部终点角度
     if (_params.global_plan_overwrite_orientation)
     {
         _robot_goal.theta() = estimateLocalGoalOrientation(_global_plan, transformed_plan.back(), goal_idx, tf_plan_to_global);
@@ -314,7 +315,7 @@ uint32_t MpcLocalPlannerROS::computeVelocityCommands(const geometry_msgs::PoseSt
     {
         transformed_plan.insert(transformed_plan.begin(), geometry_msgs::PoseStamped());  // insert start (not yet initialized)
     }
-    transformed_plan.front() = robot_pose;  // update start
+    transformed_plan.front() = robot_pose;  // update start // 把局部路径的起点改为机器当前位姿
 
     // clear currently existing obstacles
     _obstacles.clear();
@@ -375,6 +376,8 @@ uint32_t MpcLocalPlannerROS::computeVelocityCommands(const geometry_msgs::PoseSt
         costmap_2d::calculateMinAndMaxDistances(_footprint_spec, _robot_inscribed_radius, _robot_circumscribed_radius);
     }
 
+    // 检查规划的路径是否无碰撞
+    // TODO@在控制的时候不检查碰撞的吗？
     bool feasible = _controller.isPoseTrajectoryFeasible(_costmap_model.get(), _footprint_spec, _robot_inscribed_radius, _robot_circumscribed_radius,
                                                          _params.collision_check_min_resolution_angular, _params.collision_check_no_poses);
     if (!feasible)
@@ -393,6 +396,7 @@ uint32_t MpcLocalPlannerROS::computeVelocityCommands(const geometry_msgs::PoseSt
 
     // Get the velocity command for this sampling interval
     // TODO(roesmann): we might also command more than just the imminent action, e.g. in a separate thread, until a new command is available
+    // 根据控制生成接下来的控制指令
     if (!_u_seq || !_controller.getRobotDynamics()->getTwistFromControl(_u_seq->getValuesMap(0), cmd_vel.twist))
     {
         _controller.reset();

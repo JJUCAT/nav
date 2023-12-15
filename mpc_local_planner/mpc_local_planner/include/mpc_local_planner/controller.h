@@ -115,11 +115,11 @@ class Controller : public corbo::PredictiveController
                                         const std::vector<geometry_msgs::PoseStamped>& initial_plan, bool backward);
 
     std::string _robot_type;
-    corbo::DiscretizationGridInterface::Ptr _grid;
-    RobotDynamicsInterface::Ptr _dynamics;
-    corbo::NlpSolverInterface::Ptr _solver;
-    StageInequalitySE2::Ptr _inequality_constraint;
-    corbo::StructuredOptimalControlProblem::Ptr _structured_ocp;
+    corbo::DiscretizationGridInterface::Ptr _grid; // 离散栅格
+    RobotDynamicsInterface::Ptr _dynamics; // TODO@LMR 为啥叫动态
+    corbo::NlpSolverInterface::Ptr _solver; // TODO@LMR 这是啥
+    StageInequalitySE2::Ptr _inequality_constraint; // TODO@LMR 这又是啥
+    corbo::StructuredOptimalControlProblem::Ptr _structured_ocp; // 优化控制问题的描述
 
     ros::Publisher _ocp_result_pub;
     bool _ocp_successful      = false;
