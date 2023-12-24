@@ -58,7 +58,7 @@ namespace mpc_local_planner {
 bool Controller::configure(ros::NodeHandle& nh, const teb_local_planner::ObstContainer& obstacles,
                            teb_local_planner::RobotFootprintModelPtr robot_model, const std::vector<teb_local_planner::PoseSE2>& via_points)
 {
-    _dynamics = configureRobotDynamics(nh);
+    _dynamics = configureRobotDynamics(nh); // 类型转换
     if (!_dynamics) return false;  // we may need state and control dimensions to check other parameters
 
     _grid   = configureGrid(nh);

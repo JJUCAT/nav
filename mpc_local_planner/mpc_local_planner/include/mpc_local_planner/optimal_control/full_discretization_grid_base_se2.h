@@ -46,13 +46,14 @@ namespace mpc_local_planner {
  * requires the first three state components to be embedded in SE2.
  * Whereas the first two states are ordinary real numbers on (-inf, inf),
  * the third component must remain in [-pi, pi).
- *
+ * mpc 中只考虑 SE2 [x,y,theta] 状态的优化
  * Therefore, the minimum dimension state dimension is 3.
  * However, larger dimensions are allowed, but the related state components
  * are considered as standard real numbers on (-inf, inf).
  *
  * Note the full discretization grid currently supports only finite difference collocation
  * to discretize the continuous time dynamics.
+ * 注意，全离散网格目前只支持有限差分配置来离散连续时间动力学。
  * Full discretization is also possible with multiple shooting and (expicit) numerical integration,
  * but for this purpose we need to specialize corbo::ShootingGridBase for SE2.
  *
