@@ -29,6 +29,8 @@
 #include <base_local_planner/costmap_model.h>
 #include <base_local_planner/goal_functions.h>
 #include <base_local_planner/odometry_helper_ros.h>
+// move base flex, includes CostmapPlanner CostmapController CostmapRecovery
+// mbf 包提供了类似 nav_core::base_local_planner 的接口，用于兼容 mbf
 #include <mbf_costmap_core/costmap_controller.h>
 #include <nav_core/base_local_planner.h>
 
@@ -72,6 +74,7 @@ namespace mpc_local_planner {
  * @class MpcLocalPlannerROS
  * @brief Implements both nav_core::BaseLocalPlanner and mbf_costmap_core::CostmapController abstract
  * interfaces, so the teb_local_planner plugin can be used both in move_base and move_base_flex (MBF).
+ * mbf_costmap_core::CostmapController 有类似 nav_core::BaseLocalPlanner 的接口，用来兼容使用 mbf 的系统
  * @todo Escape behavior, more efficient obstacle handling
  */
 class MpcLocalPlannerROS : public nav_core::BaseLocalPlanner, public mbf_costmap_core::CostmapController

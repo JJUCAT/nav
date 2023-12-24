@@ -115,10 +115,12 @@ class Controller : public corbo::PredictiveController
                                         const std::vector<geometry_msgs::PoseStamped>& initial_plan, bool backward);
 
     std::string _robot_type;
-    corbo::DiscretizationGridInterface::Ptr _grid; // 离散栅格
-    RobotDynamicsInterface::Ptr _dynamics; // TODO@LMR 为啥叫动态
-    corbo::NlpSolverInterface::Ptr _solver; // TODO@LMR 这是啥
-    StageInequalitySE2::Ptr _inequality_constraint; // TODO@LMR 这又是啥
+    // 离散栅格，就是超图的抽象，提供了<顶点>优化参数，<边>约束，用来描述非线性优化问题
+    corbo::DiscretizationGridInterface::Ptr _grid;
+    RobotDynamicsInterface::Ptr _dynamics; // corob 库和 ros 库的位姿和控制类型转换工具
+    corbo::NlpSolverInterface::Ptr _solver; // 通用求解器接口
+    // 用机器 footprint 和几何化障碍物作为控制和避障的多阶不等式约束
+    StageInequalitySE2::Ptr _inequality_constraint; 
     corbo::StructuredOptimalControlProblem::Ptr _structured_ocp; // 优化控制问题的描述
 
     ros::Publisher _ocp_result_pub;

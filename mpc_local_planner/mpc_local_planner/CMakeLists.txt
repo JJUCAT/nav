@@ -37,6 +37,7 @@ find_package(catkin REQUIRED COMPONENTS
 # TODO: Currently, we use QUIET rather than REQUIRED to avoid warnings
 #       as some components depend on each other (circularly)
 #       which is currently not handled well by the exported cmake config
+# The control_box_rst package provides C++ libraries for predictive control, direct optimal control, optimization and simulation.
 find_package(control_box_rst QUIET COMPONENTS
   core
   communication

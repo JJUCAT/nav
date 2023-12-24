@@ -37,13 +37,13 @@ namespace mpc_local_planner {
 
 /**
  * @brief Stage inequality constraint for obstacle avoidance and control deviation limits
- *
+ * 用于避障和控制偏差限制的阶段不等式约束
  * This class defines the inequality constraint for obstacle avoidance and control
  * deviation limits (in case limits are active).
  *
  * The current obstacle association strategy is borrowed from the teb_local_planner.
  * It takes the robot footprint model and the geometric obstacle shapes into account.
- *
+ * 参考 teb 用机器的 footprint 和几何形化的障碍物
  * @author Christoph Rösmann (christoph.roesmann@tu-dortmund.de)
  */
 class StageInequalitySE2 : public corbo::StageInequalityConstraint
@@ -57,15 +57,20 @@ class StageInequalitySE2 : public corbo::StageInequalityConstraint
     corbo::StageInequalityConstraint::Ptr getInstance() const override { return std::make_shared<StageInequalitySE2>(); }
 
     // implements interface method
+    // 无积分项
     bool hasNonIntegralTerms(int k) const override { return true; }
     // implements interface method
+    // 有积分项
     bool hasIntegralTerms(int k) const override { return false; }
 
     // implements interface method
+    // 无积分项维度
     int getNonIntegralStateTermDimension(int k) const override;
     // implements interface method
+    // 无积分项的 dt 维度
     int getNonIntegralStateDtTermDimension(int k) const override;
     // implements interface method
+    // 无积分项的控制偏差维度
     int getNonIntegralControlDeviationTermDimension(int k) const override;
 
     // implements interface method

@@ -34,7 +34,7 @@ namespace mpc_local_planner {
 
 /**
  * @brief Specialization of SystemDynamicsInterface for mobile robots
- *
+ * corbo 的类型和 ros 中的类型相互转换，例如位姿，速度/角度控制类型等的转换
  * This abstract class extends cobro::SystemDynamicsInterface
  * by (abstract) conversion methods between states, poses embedded in SE2,
  * controls and twist.
@@ -112,7 +112,7 @@ class RobotDynamicsInterface : public corbo::SystemDynamicsInterface
 
     /**
      * @brief Convert control vector to twist message
-     *
+     * 将控制 u 转换为 ros 中的控制 twsit
      * Convert the control vector to a twist message (containing velocity information)
      * if possible.
      *
@@ -126,7 +126,7 @@ class RobotDynamicsInterface : public corbo::SystemDynamicsInterface
 
     /**
      * @brief Merge custom state feedback with pose and twist feedback
-     *
+     * 融合 位姿信息和控制信息到 Eigen::Ref<Eigen::VectorXd>，Ref 就是引用
      * Many robots in ROS publish their state information (pose, linear and angular velocity)e.g. via an odometry message
      * (potentially corrected by localization).
      * However, for more complex robot models, it might not be possible to obtain the full state information without any observer
