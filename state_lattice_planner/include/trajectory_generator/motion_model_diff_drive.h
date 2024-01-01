@@ -106,6 +106,8 @@ public:
          */
         void calculate_spline_abc(double ratio=0.5);
 
+        void calculate_spline_ab(double ratio=0.5);
+
         double k0;
         double km;
         double kf;
@@ -119,6 +121,11 @@ public:
          * @brief (a, b, c) <- ax^2+bx+c
          */
         std::vector<Eigen::Vector3d> coefficients_abc;
+
+        /**
+         * @brief (a, b) <- ax+b
+         */
+        std::vector<Eigen::Vector2d> coefficients_ab;
     private:
     };
 
@@ -178,8 +185,9 @@ public:
      * @param[in] dt Time interval between each pose in the trajectory [s]
      * @param[in] control_param Control parameters
      * @param[out] trajectory Generated trajectory
+     * @param[out] double trajectory length
      */
-    void generate_trajectory(const double, const ControlParams&, Trajectory&);
+    double generate_trajectory(const double, const ControlParams&, Trajectory&);
     /**
      * @brief Generate a state at the end of a trajectory from given control parameters
      * @param[in] dt Time interval between each pose in the trajectory [s]
@@ -210,6 +218,8 @@ public:
      * @param[out] output_s Next state
      */
     void update(const State&, const double, const double, const double, State&);
+
+    double calculate_linear_function(const double x, const Eigen::Vector2d& coeff);
     /**
      * @brief Calculate ax^2 + bx + c
      * @param[in] x
@@ -237,6 +247,8 @@ public:
      * @param[out] output Next state
      */
     void control_speed(const State& state, State& _state);
+
+    void update_ratio(const Eigen::Vector3d& goal, const double boundary, const double rang);
 
 private:
     double MAX_YAWRATE;

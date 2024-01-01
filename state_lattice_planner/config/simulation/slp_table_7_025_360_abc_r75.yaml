@@ -1,0 +1,85 @@
+# plan & control
+HZ: 10 # lattice 规划控制频率
+ROBOT_FRAME: base_footprint
+N_P: 10 # 基于极坐标系，终点坐标在 MAX_ALPHA 内的采样数，终点跟 base_link 的欧氏距离不变
+N_H: 10 # 基于极坐标系，终点航向角在 MAX_PSI 内的采样数
+MAX_ALPHA: 0.785398 # 基于极坐标系，终点坐标相对 base_link 点的角度采样范围，参数是单侧范围，[0, pi]
+MAX_PSI: 0.523599 # 基于极坐标系，终点航向角的采样范围，参数是单侧范围，[0, pi]
+N_S: 30 # 对 MAX_ALPHA 的采样解析度，MAX_ALPHA / N_S 是采样分辨率，N_S > N_P
+MAX_ACCELERATION: 0.5 # 加速度
+TARGET_VELOCITY: 0.8 # 目标速度，想要达到的匀速度
+# LOOKUP_TABLE_FILE_NAME: std::string(std::getenv("HOME")) + "/lookup_table.csv"
+MAX_ITERATION: 1000  # # 一个 goal 采样的曲线生成最大迭代次数
+OPTIMIZATION_TOLERANCE: 0.05 # 当代价低于该值，结束优化
+MAX_YAWRATE: 2.165674 # 最大航向角速度
+MAX_D_YAWRATE: 0.5 # 航向角加速度 @0.5
+MAX_WHEEL_ANGULAR_VELOCITY: 5.4 # 轮子转动的角速度=v/r
+WHEEL_RADIUS: 0.185 # 驱动轮半径
+TREAD: 0.5 # ?????
+IGNORABLE_OBSTACLE_RANGE: 1.0 # 无视障碍物范围
+VERBOSE: false  # 打印
+CONTROL_DELAY: 2 # 生成轨迹控制点后，因为有计算延迟，控制点的选择需要延后
+TURN_DIRECTION_THRESHOLD: 1.0 # 目标与当前位置相对角度大于该值就原地旋转，@1，设置大于 PI 来禁止旋转
+ENABLE_SHARP_TRAJECTORY: false # 允许轨迹急转
+ENABLE_CONTROL_SPACE_SAMPLING: false # 补充一条控制空间采样的轨迹
+
+# lookup table
+# 基于 base_link，在局部内采样目标，提前计算好路径曲率参数
+MIN_X: -5.0 # 终点 x 轴采样最大偏移 @-10.0
+MAX_X: 7.5 # 终点 x 轴采样最小偏移 @10.0
+DELTA_X: 0.25 # x 轴采样步进 @0.2
+MAX_Y: 5.0 # 终点 y 轴采样最大，最小偏移 @10.0
+DELTA_Y: 0.25 # y 轴采样步进 @0.2
+MAX_YAW: 3.1416 # 终点航向角最大，最小偏移 @2.356194
+DELTA_YAW: 0.523599 # 航向角采样步进 @0.523599
+# LOOKUP_TABLE_FILE_NAME:  # lookup table 保存路径
+# TARGET_VELOCITY: 0.8 # 目标速度，想要达到的匀速度
+MIN_V: 0.1 # 最小速度
+MAX_V: 1.0 # 最大速度
+DELTA_V: 0.1 # 速度采样步进
+MAX_KAPPA: 2.165674 # 最大曲率，uint: rad/m，MIN_RADIUS 的倒数 @2.707093
+DELTA_KAPPA: 0.5 # 曲率步进，uint: rad/m @1.0
+# MAX_ACCELERATION: 0.5 # 最大加速度
+# MAX_YAWRATE: 2.165674 # 最大航向角速度 # w = v / r(转弯半径)
+# MAX_D_YAWRATE: 0.5 # 航向角加速度 @ 0.5
+# MAX_WHEEL_ANGULAR_VELOCITY: 5.4 # 
+# WHEEL_RADIUS: 0.185 # 驱动轮半径
+# TREAD: 0.5 # ???
+DRIVE: false # 是否控制小车运行
+
+# ackermann
+ACKERMANN: false # 阿克曼驱动，/cmd_vel 的角速度转前轮角度
+WHEEL_BASE: 0.95 # 后轮中心到前轮的轴长，uint: m
+MAX_STEERING: 1.2 # 前轮最大转向角，uint: rad
+MIN_RADIUS: 0.3694 # 最小转弯半径，uint: m，公式 tan(MAX_STEERING) = WHEEL_BASE / MIN_RADIUS
+
+# 目标采样，新的采样方法
+NEW_GOAL_SAMPLING: true # 是否用新的采样方法
+NGS_R: 10 # 采样半径
+NGS_NA: 8 # 一圈内采样数
+NGS_NR: 4 # 一个半径内的采样数
+NGS_GY: 0.17 # 航向角采样方位，单侧
+NGS_NY: 1 # 航向角采样数
+SAMPLE_STEP: 3.5 # 采样步进 [m]
+SMAPLE_MAX_DIS: 6 # 采样点与机器最大距离 [m]
+REF_PLAN_SAMPLE_NUM: 2 # 参考轨迹上的采样数 [1, +∞)
+PARALLEL_R: 5.0 # 平行采样宽 [m]
+PARALLEL_N: 2 # 平行采样数量
+PARALLEL_B: 3.0 # 后置平行采样距离 [m]
+
+# 补充车头的碰撞检测
+HEAD: 1.5 # 后轮中心到车头的距离 - 车宽 * 0.5，设置 -1 屏蔽该功能
+COLLISION_COST: 160 # 碰撞检测值
+CHECK_DISTANCE: 4.5 # 前向采样检测的距离 [m]
+LOCAL_REACH_RANG: 0.5 # 该半径内认为到达 local plan [m]
+REF_REACH_RANG: 0.5 # 该半径内认为到达 ref plan [m]
+
+
+# 轨迹代价评分，cost = ERR * SCALE，代价低更优
+DIST_ERR: 6
+YAW_ERR: 0.785398
+ANGULAR_ERR: 2.165674 # 曲率偏差最大值，同 MAX_YAWRATE
+DIST_SCALE: 60
+YAW_SCALE: 20
+ANGULAR_SCALE: 20
+

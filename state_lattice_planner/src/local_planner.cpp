@@ -16,9 +16,11 @@ namespace local_planner {
 #define cos(x) fast_triangular::fast_cos((x))
 #define M_2PI fast_triangular::M_2PI
 
-LocalPlanner::LocalPlanner(std::shared_ptr<navit_costmap::Costmap2DROS>& costmap_ros):
+LocalPlanner::LocalPlanner(std::shared_ptr<navit_costmap::Costmap2DROS>& costmap_ros,
+                           std::shared_ptr<tf2_ros::Buffer>& tf):
   local_nh_("~/local_planner/") {
   costmap_ros_ = costmap_ros;
+  tf_ = tf;
   LoadParams();
 
   slp_.set_sampling_params(StateLatticePlanner::SamplingParams(N_P, N_H, MAX_ALPHA, MAX_PSI));
@@ -36,6 +38,7 @@ LocalPlanner::LocalPlanner(std::shared_ptr<navit_costmap::Costmap2DROS>& costmap
   goal_sampling_pub_ = local_nh_.advertise<geometry_msgs::PoseArray>("goal_sampling", 1);
   goal_in_robot_frame_pub_ = local_nh_.advertise<geometry_msgs::PoseStamped>("goal_in_robot_frame", 1);
   check_plan_pub_ = local_nh_.advertise<nav_msgs::Path>("check_plan", 1);
+  ref_plan_pub_ = local_nh_.advertise<nav_msgs::Path>("ref_plan", 1);
   local_plan_pub_ = local_nh_.advertise<nav_msgs::Path>("local_plan", 1);
   odom_sub_ = nh_.subscribe("/odom", 1, &LocalPlanner::OdomCallback, this);
 
@@ -45,6 +48,7 @@ LocalPlanner::LocalPlanner(std::shared_ptr<navit_costmap::Costmap2DROS>& costmap
 }
 
 void LocalPlanner::SetPlan(const nav_msgs::Path& plan) {
+  ROS_INFO("[LP] set plan.");
   if (plan.poses.empty()) {
     ROS_ERROR("[LP] plan can't be empty !");
     throw "plan can't empty !";
@@ -52,18 +56,20 @@ void LocalPlanner::SetPlan(const nav_msgs::Path& plan) {
   ref_plan_.plan = plan;
   ref_plan_.idx = 0;
   ClearLocalPlan();
+  ClearSamplingIndex();
   if (plan.header.frame_id == "") {
     ROS_WARN("[LP] global plan frame id is empty, set frame id [map].");
     ref_plan_.plan.header.frame_id = "map";
   }
+  ref_plan_pub_.publish(ref_plan_.plan);
 }
 
 bool LocalPlanner::IsFinished() {
   if (!ref_plan_.plan.poses.empty()) {
     bool finished = ref_plan_.idx == ref_plan_.plan.poses.size()-1;
     if (finished) {
-      ROS_INFO("[LP] finish ref plan.");
-      ClearLocalPlan();
+      ROS_INFO("[LP] finish local plan.");
+      // ClearLocalPlan();
       // ClearRefPlan();
     }
     return finished;
@@ -79,55 +85,69 @@ bool LocalPlanner::GetLocalPlan(nav_msgs::Path& plan) {
   double start = ros::Time::now().toSec();
   bool run_on_ref_plan = false;
   UpdateMap();
-  ROS_INFO("[LP] state lattice planner copy map speed time %f s.", ros::Time::now().toSec() - start);
+  ROS_DEBUG("[LP] state lattice planner copy map speed time %f s.", ros::Time::now().toSec() - start);
   if (!UpdateFrame()) return false;
-  ROS_INFO("[LP] state lattice planner update frame speed time %f s.", ros::Time::now().toSec() - start);
+  ROS_DEBUG("[LP] state lattice planner update frame speed time %f s.", ros::Time::now().toSec() - start);
   if (!UpdateRobotPose()) return false;
-  ROS_INFO("[LP] state lattice planner update robot in map speed time %f s.", ros::Time::now().toSec() - start);
+  ROS_DEBUG("[LP] state lattice planner update robot in map speed time %f s.", ros::Time::now().toSec() - start);
   if (!UpdateLocalPlanIndex(LOCAL_REACH_RANG)) {
     if (UpdateRefPlanIndex(REF_REACH_RANG)) {
       ROS_INFO("[LP] run on ref plan");
       run_on_ref_plan = true;
-      plan_connected_ = true;
+      plan_connected_ = true; // emm
+      ClearLocalPlan();
     }
   }
-  ROS_INFO("[LP] state lattice planner update index speed time %f s.", ros::Time::now().toSec() - start);
+  ROS_DEBUG("[LP] state lattice planner update index speed time %f s.", ros::Time::now().toSec() - start);
 
   // 目标点采样，基于 ref plan 坐标系下
   bool plan_safe = false;
   size_t local_plan_end = 0, ref_plan_end = 0;
-  Eigen::Vector3d goal_on_ref_plan, goal_back_on_ref_plan;
+  std::vector<Eigen::Vector3d> ref_plan_sample;
+  UpdateSamplingIndex();
   if (IsNeedForwardSampling(
     CHECK_DISTANCE, plan_connected_, local_plan_end, ref_plan_end)) {
     ROS_INFO("[LP] ref path samping forward.");
-    goal_on_ref_plan = RefForwardSampling(SAMPLE_STEP);
-    goal_back_on_ref_plan = RefForwardSampling(PARALLEL_B, false);
+    ref_plan_sample = RefForwardSampling(REF_PLAN_SAMPLE_NUM, SAMPLE_STEP, PARALLEL_B);
   } else {
     ROS_INFO("[LP] ref path samping inplace.");
-    goal_on_ref_plan = RefForwardSampling(0);
-    goal_back_on_ref_plan = RefForwardSampling(PARALLEL_B, false);
+    ref_plan_sample = RefForwardSampling(REF_PLAN_SAMPLE_NUM, -1, PARALLEL_B);
     plan_safe = true;
   }
   VizCheckPlan(plan_connected_, local_plan_end, ref_plan_end);
-  ROS_INFO("[LP] state lattice planner check path speed time %f s.", ros::Time::now().toSec() - start);
+  ROS_INFO("[LP] sampling size: %lu", ref_plan_sample.size());
+  ROS_DEBUG("[LP] state lattice planner check path speed time %f s.", ros::Time::now().toSec() - start);
 
   std::vector<Eigen::Vector3d> states_in_ref_plan;
-  if (!plan_safe || !run_on_ref_plan) {
-    ROS_INFO("[LP] parallel lookback sampling.");
-    Parallel_Sampling(goal_on_ref_plan, states_in_ref_plan);
-    Parallel_Sampling(goal_back_on_ref_plan, states_in_ref_plan);
-    Lookback_Sampling(LOOKBACK, PARALLEL_B, states_in_ref_plan);
-  }
+  Parallel_Sampling(ref_plan_sample, states_in_ref_plan);
+  Regression_Sampling(ref_plan_sample, states_in_ref_plan);
   ROS_INFO("[LP] goal sampling size: %lu", states_in_ref_plan.size());
-  ROS_INFO("[LP] state lattice planner sampling speed time %f s.", ros::Time::now().toSec() - start);
+  ROS_DEBUG("[LP] state lattice planner sampling speed time %f s.", ros::Time::now().toSec() - start);
 
+  // if (states_in_ref_plan.empty()) return true;
+
+  // 采样点转换到机器坐标系下
+  Eigen::Vector3d goal;
+  PoseTransform(plan_in_robot_frame_, ref_plan_sample.front(), goal);
+  VizGoal(goal);
+  std::vector<Eigen::Vector3d> states;
+  states.reserve(states_in_ref_plan.size());
+  Eigen::Vector3d state;
+  if (!states_in_ref_plan.empty()) {
+    for (auto p : states_in_ref_plan) {
+      PoseTransform(plan_in_robot_frame_, p, state);
+      states.emplace_back(state);
+    }
+    VizGoalSampling(states);    
+  }
+  ROS_DEBUG("[LP] state lattice planner sample to robot frame speed time %f s.", ros::Time::now().toSec() - start);
+  ROS_INFO("[LP] local plan end: %lu, ref plan end: %lu", local_plan_end, ref_plan_end);
   // 机器在参考路径上并且无碰撞，直接按参考路径走
   if (plan_connected_ && plan_safe) {
-    ROS_INFO("[LP] local plan end: %lu, ref plan end: %lu", local_plan_end, ref_plan_end);
     MergePlan(plan_connected_, local_plan_end, ref_plan_end, plan); 
     local_plan_pub_.publish(plan);
     ClearLookbackSample();
-    ROS_INFO("[LP] state lattice planner follow speed time%f s.", ros::Time::now().toSec() - start);
+    ROS_INFO("[LP] state lattice planner (%lu) follow speed time%f s.", plan.poses.size(), ros::Time::now().toSec() - start);
 
     // for clear
     std::vector<MotionModelDiffDrive::Trajectory> clear_trajectories;
@@ -137,43 +157,26 @@ bool LocalPlanner::GetLocalPlan(nav_msgs::Path& plan) {
     return true; 
   }
 
-  // if (states_in_ref_plan.empty()) return true;
-  
-  // 采样点转换到机器坐标系下
-  Eigen::Vector3d goal;
-  PoseTransform(plan_in_robot_frame_, goal_on_ref_plan, goal);
-  VizGoal(goal);
-  std::vector<Eigen::Vector3d> states;
-  states.reserve(states_in_ref_plan.size());
-  Eigen::Vector3d state;
-  for (auto p : states_in_ref_plan) {
-    PoseTransform(plan_in_robot_frame_, p, state);
-    states.emplace_back(state);
-  }
-  VizGoalSampling(states);
-  ROS_INFO("[LP] state lattice planner sample to robot frame speed time %f s.", ros::Time::now().toSec() - start);
-
   // state lattice planner 规划
   auto odom = cur_odom_;
-  // odom.twist.twist.linear.x = 0.8;
   double time_diff = start - odom.header.stamp.toSec();
   if (time_diff > 0.5) { // 检查 odom 数据实时性
     ROS_ERROR("[LP] odom msg is out of date. time_diff:%f, limit is 0.5s.", time_diff);
     return false;
   }
 
-  bool turn_flag = false;
   double relative_direction = atan2(goal(1), goal(0));
   if (goal.segment(0, 2).norm() < 1.5) { // 机器接近参考路径的目标点了，不需要做局部规划
     // ClearLocalPlan();
   } else if (fabs(relative_direction) > TURN_DIRECTION_THRESHOLD) { // 目标点在机器后方，不好规划了
     if(fabs(goal(2)) > TURN_DIRECTION_THRESHOLD){
-      turn_flag = true;
+      // TODO 旋转操作，差速轮支持
     }
   }
 
   slp_.set_target_velocity(1.0);
-  double target_velocity = slp_.get_target_velocity(goal_on_ref_plan);
+  //double target_velocity = slp_.get_target_velocity(ref_plan_sample.front());
+  double target_velocity = GetTargetV(odom);
   std::vector<MotionModelDiffDrive::Trajectory> trajectories;
   bool generated = slp_.generate_trajectories(
     states, odom.twist.twist.linear.x, odom.twist.twist.angular.z, target_velocity, trajectories);
@@ -185,22 +188,18 @@ bool LocalPlanner::GetLocalPlan(nav_msgs::Path& plan) {
       states, odom.twist.twist.linear.x, odom.twist.twist.angular.z - MAX_D_YAWRATE / HZ,
       target_velocity, trajectories);
   }
-  ROS_INFO("[LP] state lattice planner generate plan speed time %f s.", ros::Time::now().toSec() - start);
+  ROS_INFO("[LP] state lattice planner generate plan (%lu) speed time %f s.",
+    trajectories.size(), ros::Time::now().toSec() - start);
 
   if (generated) {
-    UpdateFrame();
     VizTrajectories(trajectories, 0, 1, 0, last_trajectory_num, candidate_trajectories_pub_);
     std::vector<MotionModelDiffDrive::Trajectory> candidate_trajectories;
     unsigned char collision_cost = COLLISION_COST;
     Eigen::Vector3d pose_in_map;
-    int jump = 3;
+    int jump = 1;
     for (const auto& trajectory : trajectories) {
       bool collision = false;
-      for (int i = 0; i < trajectory.trajectory.size()-jump; i += jump) {
-        // auto p = trajectory.trajectory.at(i);
-        // p(2) = atan2(trajectory.trajectory.at(i+jump)(1)-trajectory.trajectory.at(i)(1),
-        //              trajectory.trajectory.at(i+jump)(0)-trajectory.trajectory.at(i)(0));
-        // PoseTransform(robot_in_map_frame_, p, pose_in_map);
+      for (size_t i = 0; i < trajectory.trajectory.size()-jump; i += jump) {
         PoseTransform(robot_in_map_frame_, trajectory.trajectory.at(i), pose_in_map);
         if (IsRobotCollision(pose_in_map, collision_cost)) {
           collision = true;
@@ -224,7 +223,8 @@ bool LocalPlanner::GetLocalPlan(nav_msgs::Path& plan) {
       local_plan_pub_.publish(plan);
       SetLocalPlan(plan);
       CheckPlanConnected(trajectory.trajectory.back());
-      ROS_INFO("[LP] state lattice planner avoid speed time %f s.", ros::Time::now().toSec() - start);
+      ROS_INFO("[LP] state lattice planner (%lu) avoid speed time %f s.", plan.poses.size(), ros::Time::now().toSec() - start);
+      return true;  
     } else { // 原有轨迹有碰撞都不能用了，机器暂停
       ROS_WARN("[LP] local trajectories all collision !");
       // for clear
@@ -243,13 +243,23 @@ bool LocalPlanner::GetLocalPlan(nav_msgs::Path& plan) {
     VizTrajectory(MotionModelDiffDrive::Trajectory(), 1, 0, 0, selected_trajectory_pub_);
     return false;   
   }
-
-  return true;
 }
 
 
 // -------------------- private --------------------
 void LocalPlanner::OdomCallback(const nav_msgs::OdometryConstPtr& msg) {
+  auto odom = *msg;
+  ros::Time now = ros::Time::now();
+  odom.header.stamp = now;
+  if ((now - cur_odom_.header.stamp).toSec() < 0.5) {
+    double alpha = 0.5;
+    cur_odom_.twist.twist.linear.x = alpha * odom.twist.twist.linear.x +
+      (1-alpha) * cur_odom_.twist.twist.linear.x;
+    cur_odom_.twist.twist.linear.y = alpha * odom.twist.twist.linear.y +
+      (1-alpha) * cur_odom_.twist.twist.linear.y;
+    cur_odom_.twist.twist.angular.z = alpha * odom.twist.twist.angular.z +
+      (1-alpha) * cur_odom_.twist.twist.angular.z;
+  }
   cur_odom_ = *msg;
 }
 
@@ -291,7 +301,8 @@ void LocalPlanner::LoadParams() {
   local_nh_.param("PARALLEL_N", PARALLEL_N, {2});
   local_nh_.param("PARALLEL_B", PARALLEL_B, {3.0});
   local_nh_.param("SMAPLE_MAX_DIS", SMAPLE_MAX_DIS, {5.0});
-  local_nh_.param("LOOKBACK", LOOKBACK, {1.5});
+  local_nh_.param("SMAPLE_MAX_JUMP", SMAPLE_MAX_JUMP, {1.0});
+  local_nh_.param("REF_PLAN_SAMPLE_NUM", REF_PLAN_SAMPLE_NUM, {2});
   local_nh_.param("HEAD", HEAD, {-1});
   local_nh_.param("COLLISION_COST", COLLISION_COST, {0});
   local_nh_.param("DIST_ERR", DIST_ERR, {6.0});
@@ -303,6 +314,8 @@ void LocalPlanner::LoadParams() {
   local_nh_.param("CHECK_DISTANCE", CHECK_DISTANCE, {5.0});
   local_nh_.param("LOCAL_REACH_RANG", LOCAL_REACH_RANG, {0.8});
   local_nh_.param("REF_REACH_RANG", REF_REACH_RANG, {0.5});
+  local_nh_.param("TARGET_V_FREE", TARGET_V_FREE, {false});
+  local_nh_.param("FORBID_RIGHT_SAMPLE", FORBID_RIGHT_SAMPLE, {false});
 }
 
 bool LocalPlanner::UpdateFrame() {
@@ -324,10 +337,13 @@ bool LocalPlanner::UpdateFrame() {
   // ref_plan -> map frame
   try{
     src_link.header.frame_id = plan_frame;
-    listener_.transformPose(map_frame, src_link, tgt_link);
-    // ROS_INFO("[LP] ref plan O in map [%f, %f, %f]",
-    //   tgt_link.pose.position.x, tgt_link.pose.position.y, tf::getYaw(tgt_link.pose.orientation));
-  }catch(tf::TransformException ex){
+    geometry_msgs::TransformStamped plan_to_map_transform = 
+      tf_->lookupTransform(map_frame, plan_frame, ros::Time(0));
+    geometry_msgs::PoseStamped robot;
+    tf2::doTransform(src_link, tgt_link, plan_to_map_transform);
+    ROS_DEBUG("[LP] ref plan in map [%f, %f, %f]",
+      tgt_link.pose.position.x, tgt_link.pose.position.y, tf::getYaw(tgt_link.pose.orientation));
+  } catch (const tf2::TransformException& ex) {
     ROS_ERROR("[LP] tf listen ref plan -> map failed, %s", ex.what());
     return false;
   }
@@ -339,9 +355,12 @@ bool LocalPlanner::UpdateFrame() {
   // ref_plan -> robot frame
   try{
     src_link.header.frame_id = plan_frame;
-    listener_.transformPose(robot_frame, src_link, tgt_link);
-    // ROS_INFO("[LP] ref plan O in robot [%f, %f, %f]",
-    //   tgt_link.pose.position.x, tgt_link.pose.position.y, tf::getYaw(tgt_link.pose.orientation));
+    geometry_msgs::TransformStamped plan_to_robot_transform = 
+      tf_->lookupTransform(robot_frame, plan_frame, ros::Time(0));
+    geometry_msgs::PoseStamped robot;
+    tf2::doTransform(src_link, tgt_link, plan_to_robot_transform);
+    ROS_DEBUG("[LP] ref plan in robot [%f, %f, %f]",
+      tgt_link.pose.position.x, tgt_link.pose.position.y, tf::getYaw(tgt_link.pose.orientation));
   }catch(tf::TransformException ex){
     ROS_ERROR("[LP] tf listen ref plan -> robot failed, %s", ex.what());
     return false;
@@ -354,9 +373,12 @@ bool LocalPlanner::UpdateFrame() {
   // robot -> map frame
   try{
     src_link.header.frame_id = robot_frame;
-    listener_.transformPose(map_frame, src_link, tgt_link);
-    // ROS_INFO("[LP] robot O in map [%f, %f, %f]",
-    //   tgt_link.pose.position.x, tgt_link.pose.position.y, tf::getYaw(tgt_link.pose.orientation));
+    geometry_msgs::TransformStamped robot_to_map_transform = 
+      tf_->lookupTransform(map_frame, robot_frame, ros::Time(0));
+    geometry_msgs::PoseStamped robot;
+    tf2::doTransform(src_link, tgt_link, robot_to_map_transform);
+    ROS_DEBUG("[LP] robot in map [%f, %f, %f]",
+      tgt_link.pose.position.x, tgt_link.pose.position.y, tf::getYaw(tgt_link.pose.orientation));
   }catch(tf::TransformException ex){
     ROS_ERROR("[LP] tf listen robot -> map failed, %s", ex.what());
     return false;
@@ -402,7 +424,6 @@ bool LocalPlanner::UpdateLocalPlanIndex(const double rang) {
 bool LocalPlanner::UpdateRefPlanIndex(const double rang) {
   bool find = false;
   geometry_msgs::PoseStamped p;
-  int num = 200;
   for (size_t i = ref_plan_.idx; i < ref_plan_.plan.poses.size(); i ++) {
     PoseTransform(plan_in_map_frame_, ref_plan_.plan.poses.at(i), p);
     float d = Poses2DDistance(robot_pose_, p);
@@ -412,11 +433,72 @@ bool LocalPlanner::UpdateRefPlanIndex(const double rang) {
     } else if (find) {
       break;
     }
-    if (num-- < 0) break;
   }
 
   if (find) return true;
   return false;
+}
+
+bool LocalPlanner::UpdateSamplingIndex() {
+  double v = cur_odom_.twist.twist.linear.x < 0.001 ? 0 : cur_odom_.twist.twist.linear.x;
+  double s = v / HZ;
+  sampling_idx_.cache_dist += s;
+
+  geometry_msgs::PoseStamped p;
+  float check_dist = 0.f, d, min_d = std::numeric_limits<float>::max();
+  size_t clostest_idx = 0;
+  std::vector<float> dist_list;
+  dist_list.push_back(0.f);
+  ROS_INFO("[LP] sampling idx %lu, jump %lu, end %lu", sampling_idx_.idx, sampling_idx_.jump, sampling_idx_.end);
+
+  // 更新 idx
+  for (size_t i = sampling_idx_.idx; i < ref_plan_.plan.poses.size(); i++) {
+    if (i == ref_plan_.plan.poses.size()-1) check_dist += 0.f;
+    else check_dist += Poses2DDistance(ref_plan_.plan.poses.at(i), ref_plan_.plan.poses.at(i+1));
+    dist_list.push_back(check_dist);
+    if (check_dist >= SMAPLE_MAX_DIS) break;
+    PoseTransform(plan_in_map_frame_, ref_plan_.plan.poses.at(i), p);
+    d = Poses2DDistance(robot_pose_, p);
+    if (d < min_d) {
+      min_d = d;
+      clostest_idx = i;
+    }
+  }
+
+  double jump_dist = dist_list.at(clostest_idx-sampling_idx_.idx);
+  if (jump_dist < SMAPLE_MAX_JUMP) {
+    sampling_idx_.idx = clostest_idx;
+    sampling_idx_.cache_dist = 0.f;
+  } else {
+    if (sampling_idx_.cache_dist > dist_list.front()) {
+      sampling_idx_.idx ++;
+      sampling_idx_.idx = std::min(sampling_idx_.idx, ref_plan_.plan.poses.size()-1);
+      // sampling_idx_.cache_dist -= dist_list.front();
+      sampling_idx_.cache_dist = 0;
+    }
+  }
+  ROS_INFO("[LP] sampling idx %lu, jump %lu, end %lu", sampling_idx_.idx, sampling_idx_.jump, sampling_idx_.end);
+
+  // 更新 jump，end
+  sampling_idx_.jump = 0;
+  check_dist = 0;
+  for (size_t i = sampling_idx_.idx; i < ref_plan_.plan.poses.size(); i++) {
+    if (i == ref_plan_.plan.poses.size()-1) check_dist += 0.f;
+    else check_dist += Poses2DDistance(ref_plan_.plan.poses.at(i), ref_plan_.plan.poses.at(i+1));
+    if (check_dist >= SAMPLE_STEP && sampling_idx_.jump == 0) {
+      sampling_idx_.jump = i;
+    }
+    if (check_dist >= SMAPLE_MAX_DIS) {
+      sampling_idx_.end = i;
+      break;
+    }
+  }
+  if (check_dist < SMAPLE_MAX_DIS) {
+    sampling_idx_.end = ref_plan_.plan.poses.size()-1;
+  }
+
+  ROS_INFO("[LP] sampling idx %lu, jump %lu, end %lu", sampling_idx_.idx, sampling_idx_.jump, sampling_idx_.end);
+  return true;
 }
 
 void LocalPlanner::SetLocalPlan(const nav_msgs::Path& plan) {
@@ -434,104 +516,74 @@ void LocalPlanner::ClearRefPlan() {
   ref_plan_.idx = 0;
 }
 
-Eigen::Vector3d LocalPlanner::RefForwardSampling(const float step, const bool update_idx) {
-  size_t idx = ref_plan_.idx;
-  if (step > 1e-3) {
-    float sum = 0.f;
-    Eigen::Vector3d p;
-    for (size_t i = ref_plan_.idx; i < ref_plan_.plan.poses.size()-1; i ++) {
-      PoseTransform(plan_in_map_frame_, ref_plan_.plan.poses.at(i), p);
-      float rang = Poses2DDistance(robot_pose_, p);
-      if (rang >= SMAPLE_MAX_DIS && update_idx) {
-        idx = i;
-        sum = step+1;
-        break;
-      }
-      sum += Poses2DDistance(
-        ref_plan_.plan.poses.at(i), ref_plan_.plan.poses.at(i+1));
-      if (sum >= step) {
-        idx = i+1;
-        break;
-      }
-    }
-    if (sum < step) idx = ref_plan_.plan.poses.size()-1;
-  }
+void LocalPlanner::ClearSamplingIndex() {
+  sampling_idx_.idx = 0;
+  sampling_idx_.end = 0;
+  sampling_idx_.jump = 0;
+  sampling_idx_.cache_dist = 0;
+}
 
-  if(update_idx) ref_plan_.idx = idx;
-  Eigen::Vector3d goal(
-    ref_plan_.plan.poses.at(idx).pose.position.x,
-    ref_plan_.plan.poses.at(idx).pose.position.y,
-    tf::getYaw(ref_plan_.plan.poses.at(idx).pose.orientation));
-  return goal;
+std::vector<Eigen::Vector3d> LocalPlanner::RefForwardSampling(
+  const size_t num, const float step, const float parallel_back) {
+  std::vector<Eigen::Vector3d> sample;
+  refplan_sample_index_.clear();
+  float sum = 0.f, standard = parallel_back;
+  for (size_t i = sampling_idx_.jump; i <= sampling_idx_.end-1; i ++) {
+    sum += Poses2DDistance(
+      ref_plan_.plan.poses.at(i), ref_plan_.plan.poses.at(i+1));
+    if (sum >= standard || sample.empty()) {
+      if (num > 2) sum = 0;
+      Eigen::Vector3d s(
+        ref_plan_.plan.poses.at(i).pose.position.x,
+        ref_plan_.plan.poses.at(i).pose.position.y,
+        tf::getYaw(ref_plan_.plan.poses.at(i).pose.orientation));
+      sample.push_back(s); 
+      refplan_sample_index_.push_back(i);
+    }
+
+    if (sample.size() >= num) break;
+  }
+  return sample;
 }
 
 void LocalPlanner::Parallel_Sampling(
-  const Eigen::Vector3d goal, std::vector<Eigen::Vector3d>& states) {
+  const std::vector<Eigen::Vector3d>& sample, std::vector<Eigen::Vector3d>& states) {
   double yaw_offset = M_PI/6;
-  double radius = PARALLEL_R;
   std::vector<double> R;
   for (int i = 1; i <= PARALLEL_N; i ++) {
     R.push_back(i * PARALLEL_R / PARALLEL_N);  
   }
-  for (auto r : R) {
-    Eigen::Vector3d sl(goal(0) + r * cos(goal(2)+M_PI/2),
-      goal(1) + r * sin(goal(2)+M_PI/2), goal(2));
-    states.push_back(sl);
-    sl(2) = sl(2) - yaw_offset;
-    states.push_back(sl);
-    Eigen::Vector3d sr(goal(0) + r * cos(goal(2)-M_PI/2),
-      goal(1) + r * sin(goal(2)-M_PI/2), goal(2));
-    states.push_back(sr);
-    sr(2) = sr(2) + yaw_offset;
-    states.push_back(sr);
+  for (auto s : sample) {
+    for (auto r : R) {
+      Eigen::Vector3d sl(s(0) + r * cos(s(2)+M_PI/2),
+        s(1) + r * sin(s(2)+M_PI/2), s(2));
+      states.push_back(sl);
+      sl(2) = sl(2) - yaw_offset;
+      states.push_back(sl);
+      if(!FORBID_RIGHT_SAMPLE) {
+        Eigen::Vector3d sr(s(0) + r * cos(s(2)-M_PI/2),
+          s(1) + r * sin(s(2)-M_PI/2), s(2));
+        states.push_back(sr);
+        sr(2) = sr(2) + yaw_offset;
+        states.push_back(sr);        
+      } else {
+        sl(2) = sl(2) + 2*yaw_offset;
+        states.push_back(sl);
+      }
+    }
   }
 }
 
-void LocalPlanner::Lookback_Sampling(
-  const double back_step, const double forward_step,
+void LocalPlanner::Regression_Sampling(
+  const std::vector<Eigen::Vector3d>& sample,
   std::vector<Eigen::Vector3d>& states) {
-  Eigen::Vector3d goal(
-    ref_plan_.plan.poses.at(ref_plan_.idx).pose.position.x,
-    ref_plan_.plan.poses.at(ref_plan_.idx).pose.position.y,
-    tf::getYaw(ref_plan_.plan.poses.at(ref_plan_.idx).pose.orientation));
-  states.push_back(goal);
-  lookback_sample_index_.push_back(ref_plan_.idx);
   double yaw_offset = M_PI/6;
-  auto tgl = goal; tgl(2) = tgl(2) + yaw_offset; states.push_back(tgl);
-  auto tgr = goal; tgr(2) = tgr(2) - yaw_offset; states.push_back(tgr);
-  float sum = 0.f;  
-  if (back_step > 0) {
-    for (int i = ref_plan_.idx; i > 0; i --) {
-      sum += Poses2DDistance(
-        ref_plan_.plan.poses.at(i), ref_plan_.plan.poses.at(i-1));
-      if (sum >= back_step) {
-        Eigen::Vector3d back(
-          ref_plan_.plan.poses.at(i-1).pose.position.x,
-          ref_plan_.plan.poses.at(i-1).pose.position.y,
-          tf::getYaw(ref_plan_.plan.poses.at(i-1).pose.orientation));
-        states.push_back(back);
-        lookback_sample_index_.push_back(i-1);
-        break;
-      }
-    }    
-  }
-  sum = 0;
-  int forward_idx = -1;
-  for (int i = ref_plan_.idx; i < ref_plan_.plan.poses.size()-1; i ++) {
-    sum += Poses2DDistance(
-      ref_plan_.plan.poses.at(i), ref_plan_.plan.poses.at(i+1));
-    forward_idx = i+1;      
-    if (sum >= forward_step) break;
-  }
-  if (forward_idx > 0) {
-    Eigen::Vector3d forward(
-      ref_plan_.plan.poses.at(forward_idx).pose.position.x,
-      ref_plan_.plan.poses.at(forward_idx).pose.position.y,
-      tf::getYaw(ref_plan_.plan.poses.at(forward_idx).pose.orientation));
-    states.push_back(forward);
-    lookback_sample_index_.push_back(forward_idx);
-    auto tfl = forward; tfl(2) = tfl(2) + yaw_offset; states.push_back(tfl);
-    auto tfr = forward; tfr(2) = tfr(2) - yaw_offset; states.push_back(tfr);
+  for (auto s : sample) {
+    states.push_back(s);    
+    if(!FORBID_RIGHT_SAMPLE) {
+      auto tfl = s; tfl(2) = tfl(2) + yaw_offset; states.push_back(tfl);
+    }
+    auto tfr = s; tfr(2) = tfr(2) - yaw_offset; states.push_back(tfr);
   }
 }
 
@@ -646,10 +698,10 @@ bool LocalPlanner::IsNeedForwardSampling(
   float sum = 0.f;
   unsigned char collision_cost = COLLISION_COST;
   if (!local_plan_.plan.poses.empty()) {
-    for (int i = local_plan_.idx; i < local_plan_.plan.poses.size()-1; i ++) {
+    for (size_t i = local_plan_.idx; i < local_plan_.plan.poses.size()-1; i ++) {
       if (IsRobotCollision(local_plan_.plan.poses.at(i+1), collision_cost)) {
         ROS_WARN("[LP] local plan collision !");
-        ClearLocalPlan();
+        // ClearLocalPlan();
         local_plan_end = 0;
         return true;
       }
@@ -657,14 +709,15 @@ bool LocalPlanner::IsNeedForwardSampling(
         local_plan_.plan.poses.at(i), local_plan_.plan.poses.at(i+1));
       if (sum >= check_dist) {
         local_plan_end = i+1;
+        ROS_INFO("[LP] local plan saft.");
         return false;
       }
       local_plan_end = i+1;
-    }    
+    }
   }
 
   if (plan_connected || local_plan_.plan.poses.empty()) {
-    for (int i = ref_plan_.idx; i < ref_plan_.plan.poses.size()-1; i ++) {
+    for (size_t i = ref_plan_.idx; i < ref_plan_.plan.poses.size()-1; i ++) {
       geometry_msgs::PoseStamped tp;
       PoseTransform(plan_in_map_frame_, ref_plan_.plan.poses.at(i+1), tp);
       if (IsRobotCollision(tp, collision_cost)) {
@@ -675,10 +728,12 @@ bool LocalPlanner::IsNeedForwardSampling(
         ref_plan_.plan.poses.at(i), ref_plan_.plan.poses.at(i+1));
       if (sum >= check_dist) {
         ref_plan_end = i+1;
+        ROS_INFO("[LP] local plan connect ref plan, saft.");
         return false;
       }
       ref_plan_end = i+1;
     }
+    ROS_INFO("[LP] plan connect saft.");
     return false;
   }
 
@@ -686,22 +741,24 @@ bool LocalPlanner::IsNeedForwardSampling(
     ROS_INFO("[LP] local plan is too short.");
     return true;    
   }
-
   return false;    
 }
 
 void LocalPlanner::CheckPlanConnected(const Eigen::Vector3d trajectory_end) {
-  if (!lookback_sample_index_.empty()) {
-    for (auto j : lookback_sample_index_) {
+  if (!refplan_sample_index_.empty()) {
+    for (auto j : refplan_sample_index_) {
       auto pose = ref_plan_.plan.poses.at(j);
       geometry_msgs::PoseStamped pose_in_robot_frame;
       PoseTransform(plan_in_robot_frame_, pose, pose_in_robot_frame);
-      if (Poses2DDistance(pose_in_robot_frame, trajectory_end) < 0.1) {    
+      if (Poses2DDistance(pose_in_robot_frame, trajectory_end) < 0.1) {
+        ROS_INFO("[LP] check plan connected !");
         ref_plan_.idx = j;
         plan_connected_ = true;        
         return;
       }
-    }    
+    }
+    ROS_INFO("[LP] check plan disconnected !");
+    plan_connected_ = false;    
   }
   plan_connected_ = false;
 }
@@ -719,7 +776,7 @@ void LocalPlanner::MergePlan(const bool plan_connected,
     ref_plan_end > ref_plan_.idx) {
     geometry_msgs::PoseStamped pose;
     pose.header = plan.header;
-    for (int i = ref_plan_.idx; i <= ref_plan_end; i ++) {
+    for (size_t i = ref_plan_.idx; i <= ref_plan_end; i ++) {
       PoseTransform(plan_in_map_frame_, ref_plan_.plan.poses.at(i), pose);
       plan.poses.push_back(pose);
     }
@@ -851,6 +908,18 @@ void LocalPlanner::VizTrajectory(
   }
   pub.publish(v_trajectory);
 }
+
+double LocalPlanner::GetTargetV(const nav_msgs::Odometry& cur_odom)
+{
+  if (TARGET_V_FREE) {
+    double v = cur_odom.twist.twist.linear.x;
+    v = v < 0.1 ? 0.1 : v;
+    return v;
+  } 
+  return TARGET_VELOCITY;
+}
+
+
 
 
 } // namespace local_planner

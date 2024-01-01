@@ -70,11 +70,11 @@ bool StateLatticePlanner::Critic::pickup_trajectory(
 {
   double cost_min = std::numeric_limits<double>::max();
   int cost_min_index = -1;
-  for (int i = 0; i < trajectories.size(); i ++) {
+  for (size_t i = 0; i < trajectories.size(); i ++) {
     double cost = 0;
     cost += evaluate_dist_err(trajectories.at(i), goal);
     cost += evaluate_yaw_err(trajectories.at(i), goal);
-    cost += evaluate_angular_err(trajectories.at(i));
+    // cost += evaluate_angular_err(trajectories.at(i));
     if (cost < cost_min) {
       cost_min = cost;
       cost_min_index = i;
@@ -98,8 +98,9 @@ double StateLatticePlanner::Critic::evaluate_dist_err(
 double StateLatticePlanner::Critic::evaluate_yaw_err(
   const MotionModelDiffDrive::Trajectory& trajectory, const Eigen::Vector3d& goal)
 {
-  auto yaw = fabs((trajectory.trajectory.back()-goal)(2));
-  return yaw / yaw_err_* yaw_scale_;
+  // auto yaw = fabs((trajectory.trajectory.back()-goal)(2));
+  // return yaw / yaw_err_* yaw_scale_;
+  return fabs(trajectory.trajectory.front()(2)) / yaw_err_* yaw_scale_;
 }
 
 double StateLatticePlanner::Critic::evaluate_angular_err(
@@ -286,7 +287,8 @@ bool StateLatticePlanner::generate_trajectories(
   const double angular_velocity, const double target_velocity,
   std::vector<MotionModelDiffDrive::Trajectory>& trajectories)
 {
-    std::cout << "generate trajectories to boundary states" << std::endl;
+    ROS_DEBUG("[SLP] sample size:%lu, v:%.3f, a:%.3f, tv:%.3f",
+      boundary_states.size(), velocity, angular_velocity, target_velocity);
     int count = 0;
     int trajectory_num = boundary_states.size();
     std::vector<MotionModelDiffDrive::Trajectory> trajectories_(trajectory_num);
@@ -294,33 +296,32 @@ bool StateLatticePlanner::generate_trajectories(
     // for循环里的内容必须满足可以并行执行，即每次循环互不相干，后一次循环不依赖于前面的循环。
     #pragma omp parallel for
     for(int i=0;i<trajectory_num;i++){
-        Eigen::Vector3d boundary_state = boundary_states[i];
-        TrajectoryGeneratorDiffDrive tg;
-        tg.set_verbose(VERBOSE);
-        tg.set_motion_param(MAX_YAWRATE, MAX_D_YAWRATE, MAX_ACCELERATION, MAX_WHEEL_ANGULAR_VELOCITY, WHEEL_RADIUS, TREAD);
-        MotionModelDiffDrive::ControlParams output;
-        double k0 = angular_velocity;
+      Eigen::Vector3d boundary_state = boundary_states[i];
+      TrajectoryGeneratorDiffDrive tg;
+      tg.set_verbose(VERBOSE);
+      tg.set_motion_param(MAX_YAWRATE, MAX_D_YAWRATE, MAX_ACCELERATION, MAX_WHEEL_ANGULAR_VELOCITY, WHEEL_RADIUS, TREAD);
+      MotionModelDiffDrive::ControlParams output;
+      double k0 = angular_velocity;
 
-        MotionModelDiffDrive::ControlParams param;
-        // 根据采样点在状态表中找到能到达 goal 附近的机器状态信息
-        LookupTableUtils::get_optimized_param_from_lookup_table(lookup_table, boundary_state, velocity, k0, param);
-        // std::cout << "v0: " << velocity << ", " << "k0: " << k0 << ", " << "km: " << param.omega.km << ", " << "kf: " << param.omega.kf << ", " << "sf: " << param.omega.sf << std::endl;
-        
-        // 初始化机器当前状态
-        MotionModelDiffDrive::ControlParams init(
-          MotionModelDiffDrive::VelocityParams(velocity, MAX_ACCELERATION, target_velocity, target_velocity, MAX_ACCELERATION),
-          MotionModelDiffDrive::AngularVelocityParams(k0, param.omega.km, param.omega.kf, param.omega.sf));
+      MotionModelDiffDrive::ControlParams param;
+      // 根据采样点在状态表中找到能到达 goal 附近的机器状态信息
+      LookupTableUtils::get_optimized_param_from_lookup_table(lookup_table, boundary_state, velocity, k0, param);
+      ROS_DEBUG("[SLP] lookup msg, v:%.3f, k0:%.3f, km:%.3f, kf:%.3f, sf:%.3f",
+        velocity, k0, param.omega.km, param.omega.kf, param.omega.sf);
 
-        MotionModelDiffDrive::Trajectory trajectory;
-        // std::cout << boundary_state.transpose() << std::endl;
-        // 根据上面配置的初始状态计算到目标的轨迹
-        double cost = tg.generate_optimized_trajectory(
-          boundary_state, init, 1.0 / HZ, OPTIMIZATION_TOLERANCE, MAX_ITERATION, output, trajectory);
-        // std::cout << trajectory.trajectory.back().transpose() << std::endl;
-        if(cost > 0){
-            trajectories_[i] = trajectory;
-            count++;
-        }
+      // 初始化机器当前状态
+      MotionModelDiffDrive::ControlParams init(
+        MotionModelDiffDrive::VelocityParams(velocity, MAX_ACCELERATION, target_velocity, target_velocity, MAX_ACCELERATION),
+        MotionModelDiffDrive::AngularVelocityParams(k0, param.omega.km, param.omega.kf, param.omega.sf));
+
+      MotionModelDiffDrive::Trajectory trajectory;
+      // 根据上面配置的初始状态计算到目标的轨迹
+      double cost = tg.generate_optimized_trajectory(
+        boundary_state, init, 1.0 / HZ, OPTIMIZATION_TOLERANCE, MAX_ITERATION, output, trajectory);
+      if(cost > 0){
+          trajectories_[i] = trajectory;
+          count++;
+      }
     }
     for(auto it=trajectories_.begin();it!=trajectories_.end();){
         if(it->trajectory.size() == 0){
@@ -361,8 +362,8 @@ bool StateLatticePlanner::generate_trajectories(
     }
     std::copy(trajectories_.begin(), trajectories_.end(), std::back_inserter(trajectories));
     if(trajectories.size() == 0){
-        std::cout << "\033[91mERROR: no trajectory was generated\033[00m" << std::endl;
-        return false;
+      ROS_WARN("[SLP] no trajectory was generated.");
+      return false;
     }
     return true;
 }

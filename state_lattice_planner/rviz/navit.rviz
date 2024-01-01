@@ -1,12 +1,11 @@
 Panels:
   - Class: rviz/Displays
-    Help Height: 138
+    Help Height: 78
     Name: Displays
     Property Tree Widget:
-      Expanded:
-        - /Marker2/Namespaces1
-      Splitter Ratio: 0.5454545617103577
-    Tree Height: 802
+      Expanded: ~
+      Splitter Ratio: 0.705539345741272
+    Tree Height: 746
   - Class: rviz/Selection
     Name: Selection
   - Class: rviz/Tool Properties
@@ -132,8 +131,6 @@ Visualization Manager:
       Value: true
     - Class: rviz/TF
       Enabled: true
-      Filter (blacklist): ""
-      Filter (whitelist): ""
       Frame Timeout: 15
       Frames:
         All Enabled: true
@@ -290,26 +287,10 @@ Visualization Manager:
       Use rainbow: true
       Value: true
     - Alpha: 1
-      Axes Length: 1
-      Axes Radius: 0.10000000149011612
-      Class: rviz/Pose
-      Color: 255; 25; 0
-      Enabled: false
-      Head Length: 0.30000001192092896
-      Head Radius: 0.10000000149011612
-      Name: Pose
-      Queue Size: 10
-      Shaft Length: 1
-      Shaft Radius: 0.05000000074505806
-      Shape: Arrow
-      Topic: /current_pose
-      Unreliable: false
-      Value: false
-    - Alpha: 1
       Buffer Length: 1
       Class: rviz/Path
       Color: 114; 159; 207
-      Enabled: true
+      Enabled: false
       Head Diameter: 0.30000001192092896
       Head Length: 0.20000000298023224
       Length: 0.30000001192092896
@@ -328,12 +309,12 @@ Visualization Manager:
       Shaft Length: 0.10000000149011612
       Topic: /navit_controller_node/avoidance/global_plan
       Unreliable: false
-      Value: true
+      Value: false
     - Alpha: 1
       Buffer Length: 1
       Class: rviz/Path
       Color: 252; 233; 79
-      Enabled: true
+      Enabled: false
       Head Diameter: 0.30000001192092896
       Head Length: 0.20000000298023224
       Length: 0.30000001192092896
@@ -352,14 +333,14 @@ Visualization Manager:
       Shaft Length: 0.10000000149011612
       Topic: /navit_controller_node/avoidance/local_plan
       Unreliable: false
-      Value: true
+      Value: false
     - Alpha: 0.699999988079071
       Class: rviz/Map
       Color Scheme: costmap
       Draw Behind: false
       Enabled: true
       Name: controller_costmap
-      Topic: /move_base/local_costmap/costmap
+      Topic: /navit_controller_node/controller_costmap/costmap
       Unreliable: false
       Use Timestamp: false
       Value: true
@@ -377,459 +358,25 @@ Visualization Manager:
       Class: rviz/Polygon
       Color: 25; 255; 0
       Enabled: true
-      Name: Polygon
+      Name: controller_fp
       Queue Size: 10
-      Topic: /move_base/local_costmap/footprint
-      Unreliable: false
-      Value: true
-    - Alpha: 1
-      Buffer Length: 1
-      Class: rviz/Path
-      Color: 173; 127; 168
-      Enabled: false
-      Head Diameter: 0.30000001192092896
-      Head Length: 0.20000000298023224
-      Length: 0.30000001192092896
-      Line Style: Billboards
-      Line Width: 0.029999999329447746
-      Name: mpc_global
-      Offset:
-        X: 0
-        Y: 0
-        Z: 0
-      Pose Color: 255; 85; 255
-      Pose Style: None
-      Queue Size: 10
-      Radius: 0.029999999329447746
-      Shaft Diameter: 0.10000000149011612
-      Shaft Length: 0.10000000149011612
-      Topic: /navit_controller_node/tracking_mpc/global_plan
-      Unreliable: false
-      Value: false
-    - Alpha: 1
-      Buffer Length: 1
-      Class: rviz/Path
-      Color: 25; 255; 0
-      Enabled: false
-      Head Diameter: 0.30000001192092896
-      Head Length: 0.20000000298023224
-      Length: 0.30000001192092896
-      Line Style: Billboards
-      Line Width: 0.029999999329447746
-      Name: mpc_local
-      Offset:
-        X: 0
-        Y: 0
-        Z: 0
-      Pose Color: 255; 85; 255
-      Pose Style: None
-      Queue Size: 10
-      Radius: 0.029999999329447746
-      Shaft Diameter: 0.10000000149011612
-      Shaft Length: 0.10000000149011612
-      Topic: /navit_controller_node/tracking_mpc/local_plan
-      Unreliable: false
-      Value: false
-    - Class: rviz/Marker
-      Enabled: false
-      Marker Topic: /navit_controller_node/tracking_mpc/mpc_markers
-      Name: mpc_marker
-      Namespaces:
-        {}
-      Queue Size: 100
-      Value: false
-    - Alpha: 1
-      Buffer Length: 1
-      Class: rviz/Path
-      Color: 25; 255; 0
-      Enabled: false
-      Head Diameter: 0.30000001192092896
-      Head Length: 0.20000000298023224
-      Length: 0.30000001192092896
-      Line Style: Billboards
-      Line Width: 0.029999999329447746
-      Name: ppt_lookahead_collision_arc
-      Offset:
-        X: 0
-        Y: 0
-        Z: 0
-      Pose Color: 255; 85; 255
-      Pose Style: None
-      Queue Size: 10
-      Radius: 0.029999999329447746
-      Shaft Diameter: 0.10000000149011612
-      Shaft Length: 0.10000000149011612
-      Topic: /navit_controller_node/tracking_purepursuit/lookahead_collision_arc
-      Unreliable: false
-      Value: false
-    - Alpha: 1
-      Class: rviz/PointStamped
-      Color: 204; 41; 204
-      Enabled: false
-      History Length: 1
-      Name: ppt_aheadpoint
-      Queue Size: 10
-      Radius: 0.20000000298023224
-      Topic: /navit_controller_node/tracking_purepursuit/lookahead_point
-      Unreliable: false
-      Value: false
-    - Alpha: 1
-      Buffer Length: 1
-      Class: rviz/Path
-      Color: 237; 212; 0
-      Enabled: false
-      Head Diameter: 0.30000001192092896
-      Head Length: 0.20000000298023224
-      Length: 0.30000001192092896
-      Line Style: Billboards
-      Line Width: 0.029999999329447746
-      Name: ppt_global
-      Offset:
-        X: 0
-        Y: 0
-        Z: 0
-      Pose Color: 255; 85; 255
-      Pose Style: None
-      Queue Size: 10
-      Radius: 0.029999999329447746
-      Shaft Diameter: 0.10000000149011612
-      Shaft Length: 0.10000000149011612
-      Topic: /navit_controller_node/tracking_purepursuit/received_global_plan
-      Unreliable: false
-      Value: false
-    - Class: rviz/MarkerArray
-      Enabled: false
-      Marker Topic: /display_smap
-      Name: MarkerArray
-      Namespaces:
-        {}
-      Queue Size: 100
-      Value: false
-    - Alpha: 1
-      Class: rviz/Polygon
-      Color: 25; 255; 0
-      Enabled: false
-      Name: Polygon
-      Queue Size: 10
-      Topic: /cushion_bounding_box
-      Unreliable: false
-      Value: false
-    - Alpha: 1
-      Class: rviz/Polygon
-      Color: 25; 255; 0
-      Enabled: false
-      Name: Polygon
-      Queue Size: 10
-      Topic: /replan_bounding_box
-      Unreliable: false
-      Value: false
-    - Alpha: 1
-      Arrow Length: 0.30000001192092896
-      Axes Length: 0.30000001192092896
-      Axes Radius: 0.009999999776482582
-      Class: rviz/PoseArray
-      Color: 255; 25; 0
-      Enabled: false
-      Head Length: 0.07000000029802322
-      Head Radius: 0.029999999329447746
-      Name: PoseArray
-      Queue Size: 10
-      Shaft Length: 0.23000000417232513
-      Shaft Radius: 0.009999999776482582
-      Shape: Axes
-      Topic: /anchor_poses
-      Unreliable: false
-      Value: false
-    - Class: rviz/Group
-      Displays:
-        - Class: rviz/Marker
-          Enabled: false
-          Marker Topic: /nem_edges
-          Name: Marker
-          Namespaces:
-            {}
-          Queue Size: 100
-          Value: false
-        - Class: rviz/Marker
-          Enabled: false
-          Marker Topic: /nem_nodes
-          Name: Marker
-          Namespaces:
-            {}
-          Queue Size: 100
-          Value: false
-        - Class: rviz/Marker
-          Enabled: false
-          Marker Topic: /nem_nodes_id
-          Name: Marker
-          Namespaces:
-            {}
-          Queue Size: 100
-          Value: false
-      Enabled: false
-      Name: Group
-    - Class: rviz/Group
-      Displays:
-        - Class: rviz/Marker
-          Enabled: true
-          Marker Topic: /nem_edges
-          Name: Marker
-          Namespaces:
-            {}
-          Queue Size: 100
-          Value: true
-        - Class: rviz/Marker
-          Enabled: true
-          Marker Topic: /nem_nodes
-          Name: Marker
-          Namespaces:
-            {}
-          Queue Size: 100
-          Value: true
-        - Class: rviz/Marker
-          Enabled: false
-          Marker Topic: /nem_nodes_id
-          Name: Marker
-          Namespaces:
-            {}
-          Queue Size: 100
-          Value: false
-      Enabled: true
-      Name: Group
-    - Class: rviz/MarkerArray
-      Enabled: true
-      Marker Topic: debug_edges_markers
-      Name: MarkerArray
-      Namespaces:
-        {}
-      Queue Size: 100
-      Value: true
-    - Alpha: 1
-      Buffer Length: 1
-      Class: rviz/Path
-      Color: 25; 255; 0
-      Enabled: false
-      Head Diameter: 0.30000001192092896
-      Head Length: 0.20000000298023224
-      Length: 0.30000001192092896
-      Line Style: Billboards
-      Line Width: 0.5
-      Name: Path
-      Offset:
-        X: 0
-        Y: 0
-        Z: 0
-      Pose Color: 255; 85; 255
-      Pose Style: None
-      Queue Size: 10
-      Radius: 0.029999999329447746
-      Shaft Diameter: 0.10000000149011612
-      Shaft Length: 0.10000000149011612
-      Topic: /planned_path
-      Unreliable: false
-      Value: false
-    - Class: rviz/MarkerArray
-      Enabled: true
-      Marker Topic: edge_markers
-      Name: MarkerArray
-      Namespaces:
-        {}
-      Queue Size: 1000
-      Value: true
-    - Class: rviz/Marker
-      Enabled: true
-      Marker Topic: /anchor_point
-      Name: Marker
-      Namespaces:
-        {}
-      Queue Size: 100
-      Value: true
-    - Alpha: 1
-      Buffer Length: 1
-      Class: rviz/Path
-      Color: 52; 101; 164
-      Enabled: true
-      Head Diameter: 0.30000001192092896
-      Head Length: 0.20000000298023224
-      Length: 0.30000001192092896
-      Line Style: Billboards
-      Line Width: 0.10000000149011612
-      Name: Path
-      Offset:
-        X: 0
-        Y: 0
-        Z: 0
-      Pose Color: 255; 85; 255
-      Pose Style: None
-      Queue Size: 10
-      Radius: 0.029999999329447746
-      Shaft Diameter: 0.10000000149011612
-      Shaft Length: 0.10000000149011612
-      Topic: trajectory_controller_smooth_path
-      Unreliable: false
-      Value: true
-    - Alpha: 1
-      Class: rviz/Polygon
-      Color: 32; 74; 135
-      Enabled: true
-      Name: Polygon
-      Queue Size: 10
-      Topic: /collision_checker_footprint
-      Unreliable: false
-      Value: true
-    - Alpha: 1
-      Class: rviz/Polygon
-      Color: 25; 255; 0
-      Enabled: true
-      Name: Polygon
-      Queue Size: 10
-      Topic: /replan_bounding_box
-      Unreliable: false
-      Value: true
-    - Alpha: 1
-      Buffer Length: 1
-      Class: rviz/Path
-      Color: 0; 255; 0
-      Enabled: true
-      Head Diameter: 0.30000001192092896
-      Head Length: 0.20000000298023224
-      Length: 0.30000001192092896
-      Line Style: Billboards
-      Line Width: 0.10000000149011612
-      Name: Path
-      Offset:
-        X: 0
-        Y: 0
-        Z: 0
-      Pose Color: 255; 85; 255
-      Pose Style: None
-      Queue Size: 10
-      Radius: 0.029999999329447746
-      Shaft Diameter: 0.10000000149011612
-      Shaft Length: 0.10000000149011612
-      Topic: /local_smooth_path
-      Unreliable: false
-      Value: true
-    - Alpha: 1
-      Arrow Length: 0.800000011920929
-      Axes Length: 0.30000001192092896
-      Axes Radius: 0.009999999776482582
-      Class: rviz/PoseArray
-      Color: 255; 25; 0
-      Enabled: true
-      Head Length: 0.07000000029802322
-      Head Radius: 0.029999999329447746
-      Name: PoseArray
-      Queue Size: 10
-      Shaft Length: 0.23000000417232513
-      Shaft Radius: 0.009999999776482582
-      Shape: Axes
-      Topic: /anchor_poses
-      Unreliable: false
-      Value: true
-    - Class: rviz/MarkerArray
-      Enabled: false
-      Marker Topic: /bounding_boxes
-      Name: MarkerArray
-      Namespaces:
-        {}
-      Queue Size: 100
-      Value: false
-    - Alpha: 1
-      Buffer Length: 1
-      Class: rviz/Path
-      Color: 25; 255; 0
-      Enabled: false
-      Head Diameter: 0.30000001192092896
-      Head Length: 0.20000000298023224
-      Length: 0.30000001192092896
-      Line Style: Lines
-      Line Width: 0.029999999329447746
-      Name: Path
-      Offset:
-        X: 0
-        Y: 0
-        Z: 0
-      Pose Color: 255; 85; 255
-      Pose Style: None
-      Queue Size: 10
-      Radius: 0.029999999329447746
-      Shaft Diameter: 0.10000000149011612
-      Shaft Length: 0.10000000149011612
-      Topic: /generated_path
-      Unreliable: false
-      Value: false
-    - Alpha: 1
-      Class: rviz/Polygon
-      Color: 32; 74; 135
-      Enabled: true
-      Name: Polygon
-      Queue Size: 10
-      Topic: /closest_polygon
-      Unreliable: false
-      Value: true
-    - Alpha: 1
-      Buffer Length: 1
-      Class: rviz/Path
-      Color: 25; 255; 0
-      Enabled: true
-      Head Diameter: 0.30000001192092896
-      Head Length: 0.20000000298023224
-      Length: 0.30000001192092896
-      Line Style: Lines
-      Line Width: 0.029999999329447746
-      Name: Path
-      Offset:
-        X: 0
-        Y: 0
-        Z: 0
-      Pose Color: 255; 85; 255
-      Pose Style: None
-      Queue Size: 10
-      Radius: 0.029999999329447746
-      Shaft Diameter: 0.10000000149011612
-      Shaft Length: 0.10000000149011612
-      Topic: /smooth_path
-      Unreliable: false
-      Value: true
-    - Alpha: 1
-      Buffer Length: 1
-      Class: rviz/Path
-      Color: 25; 255; 0
-      Enabled: true
-      Head Diameter: 0.30000001192092896
-      Head Length: 0.20000000298023224
-      Length: 0.30000001192092896
-      Line Style: Billboards
-      Line Width: 0.20000000298023224
-      Name: Path
-      Offset:
-        X: 0
-        Y: 0
-        Z: 0
-      Pose Color: 255; 85; 255
-      Pose Style: None
-      Queue Size: 10
-      Radius: 0.029999999329447746
-      Shaft Diameter: 0.10000000149011612
-      Shaft Length: 0.10000000149011612
-      Topic: /navit_planner_node/lattice/plan
+      Topic: /navit_controller_node/controller_costmap/footprint
       Unreliable: false
       Value: true
     - Class: rviz/MarkerArray
       Enabled: true
-      Marker Topic: /state_lattice_planner/candidate_trajectories/no_collision
-      Name: MarkerArray
+      Marker Topic: /navit_controller_node/local_planner/candidate_trajectories/no_collision
+      Name: LocalPlanNoCollision
       Namespaces:
-        /state_lattice_planner/candidate_trajectories/no_collision: true
+        {}
       Queue Size: 100
       Value: true
-    - Class: rviz/Marker
+    - Class: rviz/MarkerArray
       Enabled: true
-      Marker Topic: /state_lattice_planner/selected_trajectory
-      Name: Marker
+      Marker Topic: /navit_controller_node/local_planner/candidate_trajectories
+      Name: LocalPlans
       Namespaces:
-        /state_lattice_planner/selected_trajectory: true
+        {}
       Queue Size: 100
       Value: true
     - Alpha: 1
@@ -889,7 +436,7 @@ Visualization Manager:
       Shaft Length: 1
       Shaft Radius: 0.05000000074505806
       Shape: Arrow
-      Topic: /state_lattice_planner/goal
+      Topic: /navit_controller_node/local_planner/goal_in_robot_frame
       Unreliable: false
       Value: true
     - Alpha: 1
@@ -906,7 +453,7 @@ Visualization Manager:
       Shaft Length: 0.23000000417232513
       Shaft Radius: 0.009999999776482582
       Shape: Arrow (Flat)
-      Topic: /state_lattice_planner/goal_sampling
+      Topic: /navit_controller_node/local_planner/goal_sampling
       Unreliable: false
       Value: true
     - Alpha: 1
@@ -919,7 +466,7 @@ Visualization Manager:
       Length: 0.30000001192092896
       Line Style: Billboards
       Line Width: 0.20000000298023224
-      Name: Path
+      Name: GlobalPath
       Offset:
         X: 0
         Y: 0
@@ -930,7 +477,55 @@ Visualization Manager:
       Radius: 0.029999999329447746
       Shaft Diameter: 0.10000000149011612
       Shaft Length: 0.10000000149011612
-      Topic: /state_lattice_planner/best_trajectory
+      Topic: /global_path
+      Unreliable: false
+      Value: true
+    - Alpha: 1
+      Buffer Length: 1
+      Class: rviz/Path
+      Color: 138; 226; 52
+      Enabled: true
+      Head Diameter: 0.30000001192092896
+      Head Length: 0.20000000298023224
+      Length: 0.30000001192092896
+      Line Style: Billboards
+      Line Width: 0.25
+      Name: LocalCheckPath
+      Offset:
+        X: 0
+        Y: 0
+        Z: 0
+      Pose Color: 255; 85; 255
+      Pose Style: None
+      Queue Size: 10
+      Radius: 0.029999999329447746
+      Shaft Diameter: 0.10000000149011612
+      Shaft Length: 0.10000000149011612
+      Topic: /navit_controller_node/local_planner/check_plan
+      Unreliable: false
+      Value: true
+    - Alpha: 1
+      Buffer Length: 1
+      Class: rviz/Path
+      Color: 239; 41; 41
+      Enabled: true
+      Head Diameter: 0.30000001192092896
+      Head Length: 0.20000000298023224
+      Length: 0.30000001192092896
+      Line Style: Billboards
+      Line Width: 0.30000001192092896
+      Name: LocalPlan
+      Offset:
+        X: 0
+        Y: 0
+        Z: 0
+      Pose Color: 255; 85; 255
+      Pose Style: None
+      Queue Size: 10
+      Radius: 0.029999999329447746
+      Shaft Diameter: 0.10000000149011612
+      Shaft Length: 0.10000000149011612
+      Topic: /navit_controller_node/local_planner/local_plan
       Unreliable: false
       Value: true
   Enabled: true
@@ -961,7 +556,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 10.817962646484375
+      Distance: 41.06812286376953
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
@@ -969,25 +564,25 @@ Visualization Manager:
         Value: false
       Field of View: 0.7853981852531433
       Focal Point:
-        X: 89.2241439819336
-        Y: 100.2603759765625
-        Z: 8.326058387756348
+        X: 88.33766174316406
+        Y: 104.22615051269531
+        Z: 7.483422756195068
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 1.5697963237762451
+      Pitch: 1.4797964096069336
       Target Frame: <Fixed Frame>
-      Yaw: 6.125414848327637
+      Yaw: 0.09222118556499481
     Saved: ~
 Window Geometry:
   Displays:
     collapsed: false
-  Height: 1312
+  Height: 1043
   Hide Left Dock: false
   Hide Right Dock: false
-  QMainWindow State: 000000ff00000000fd0000000400000000000001f70000041afc0200000008fb0000001200530065006c0065006300740069006f006e00000001e10000009b000000b000fffffffb0000001e0054006f006f006c002000500072006f007000650072007400690065007302000001ed000001df00000185000000b0fb000000120056006900650077007300200054006f006f02000001df000002110000018500000122fb000000200054006f006f006c002000500072006f0070006500720074006900650073003203000002880000011d000002210000017afb000000100044006900730070006c006100790073010000006e0000041a0000018200fffffffb0000002000730065006c0065006300740069006f006e00200062007500660066006500720200000138000000aa0000023a00000294fb00000014005700690064006500530074006500720065006f02000000e6000000d2000003ee0000030bfb0000000c004b0069006e0065006300740200000186000001060000030c00000261000000010000015f0000041afc0200000003fb0000001e0054006f006f006c002000500072006f00700065007200740069006500730100000041000000780000000000000000fb0000000a00560069006500770073010000006e0000041a0000013200fffffffb0000001200530065006c0065006300740069006f006e010000025a000000b200000000000000000000000200000490000000a9fc0100000001fb0000000a00560069006500770073030000004e00000080000002e10000019700000003000009700000005efc0100000002fb0000000800540069006d0065010000000000000970000006dc00fffffffb0000000800540069006d00650100000000000004500000000000000000000006020000041a00000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
+  QMainWindow State: 000000ff00000000fd00000004000000000000015900000375fc0200000008fb0000001200530065006c0065006300740069006f006e00000001e10000009b0000005c00fffffffb0000001e0054006f006f006c002000500072006f007000650072007400690065007302000001ed000001df00000185000000a3fb000000120056006900650077007300200054006f006f02000001df000002110000018500000122fb000000200054006f006f006c002000500072006f0070006500720074006900650073003203000002880000011d000002210000017afb000000100044006900730070006c006100790073010000003d00000375000000c900fffffffb0000002000730065006c0065006300740069006f006e00200062007500660066006500720200000138000000aa0000023a00000294fb00000014005700690064006500530074006500720065006f02000000e6000000d2000003ee0000030bfb0000000c004b0069006e0065006300740200000186000001060000030c00000261000000010000010f00000375fc0200000003fb0000001e0054006f006f006c002000500072006f00700065007200740069006500730100000041000000780000000000000000fb0000000a00560069006500770073010000003d00000375000000a400fffffffb0000001200530065006c0065006300740069006f006e010000025a000000b200000000000000000000000200000490000000a9fc0100000001fb0000000a00560069006500770073030000004e00000080000002e10000019700000003000007800000003efc0100000002fb0000000800540069006d0065010000000000000780000003bc00fffffffb0000000800540069006d006501000000000000045000000000000000000000050c0000037500000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
   Selection:
     collapsed: false
   Time:
@@ -996,6 +591,6 @@ Window Geometry:
     collapsed: false
   Views:
     collapsed: false
-  Width: 2416
-  X: 144
-  Y: 54
+  Width: 1920
+  X: 1920
+  Y: 0

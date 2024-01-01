@@ -71,6 +71,8 @@ public:
      */
     void calculate_scale_factor(double, double, const Eigen::Vector3d&, Eigen::Vector3d&, MotionModelDiffDrive::ControlParams&, MotionModelDiffDrive::Trajectory&, Eigen::Vector3d&);
 
+    void update_h(const Eigen::Vector3d& goal);
+
 private:
     double MAX_YAWRATE;
     MotionModelDiffDrive model;

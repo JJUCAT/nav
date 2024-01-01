@@ -17,21 +17,6 @@ define floorplan model
   laser_return 1
 )
 
-define dock model
-(
-  block
-  (
-    points 6
-    point[0] [0.75 0]
-    point[1] [1 0.25]
-    point[2] [1 0.75]
-    point[3] [0.75 1]
-    point[4] [0 1]
-    point[5] [0 0]
-    z [0 1]
-  )  
-)
-
 # set the resolution of the underlying raytrace model in meters
 resolution 0.1
 
@@ -45,11 +30,9 @@ floorplan
   name "googol_park"
   bitmap "maps/googol_park.pgm"
   # 地图的大小, 可在 rviz 中进行测量获取
-  #size [305.4 414.9 1.0] # fg100.pgm
   size [191.2 116.15 1.0] # googol_park.pgm
 
   # 地图中心在 stage 中的坐标和朝向
-  #pose [152.2 212.45 0 0]  # fg100.pgm
   pose [95.6 58.075 0 0]  # googol_park.pgm
 )
 
@@ -63,9 +46,26 @@ jw10
   color "yellow"  
 )
 
+define dock model
+(
+  block
+  (
+    points 6
+    point[0] [0.75 0]
+    point[1] [1 0.25]
+    point[2] [1 0.75]
+    point[3] [0.75 1]
+    point[4] [0 1]
+    point[5] [0 0]
+    z [0 1]
+  )
+  laser_return 1
+)
+
 dock
 ( 
-  pose [79.0 94.0 0.0 20] 
+  pose [78.5 93.2 0.0 20] 
   name "dock" 
   color "red"  
+  laser_return 1
 )

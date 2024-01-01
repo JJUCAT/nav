@@ -10,7 +10,7 @@ MotionModelDiffDrive::MotionModelDiffDrive()
     TREAD = 0.5;
     MAX_WHEEL_ANGULAR_VELOCITY = 11.6;
 
-    ratio = 0.50;
+    ratio = 0.35;
 }
 
 MotionModelDiffDrive::State::State(double _x, double _y, double _yaw, double _v, double _omega)
@@ -51,6 +51,10 @@ MotionModelDiffDrive::AngularVelocityParams::AngularVelocityParams(void)
     for(auto c : coefficients_abc){
         c = Eigen::Vector3d::Zero();
     }
+    coefficients_ab.resize(2);
+    for(auto c : coefficients_ab){
+        c = Eigen::Vector2d::Zero();
+    }
 }
 
 /**
@@ -73,6 +77,10 @@ MotionModelDiffDrive::AngularVelocityParams::AngularVelocityParams(double _k0, d
     coefficients_abc.resize(2);
     for(auto c : coefficients_abc){
         c = Eigen::Vector3d::Zero();
+    }
+    coefficients_ab.resize(2);
+    for(auto c : coefficients_ab){
+        c = Eigen::Vector2d::Zero();
     }
 }
 
@@ -122,6 +130,11 @@ void MotionModelDiffDrive::update(const State& s, const double v, const double o
     if(output_s.yaw < -M_PI || output_s.yaw > M_PI){
         output_s.yaw = atan2(sin(output_s.yaw), cos(output_s.yaw));
     }
+}
+
+double MotionModelDiffDrive::calculate_linear_function(const double x, const Eigen::Vector2d& coeff)
+{
+    return coeff(0) * x + coeff(1);
 }
 
 double MotionModelDiffDrive::calculate_quadratic_function(const double x, const Eigen::Vector3d& coeff)
@@ -186,7 +199,7 @@ void MotionModelDiffDrive::control_speed(const State& state, State& _state)
     // }
 }
 
-void MotionModelDiffDrive::generate_trajectory(const double dt, const ControlParams& control_param, Trajectory& trajectory)
+double MotionModelDiffDrive::generate_trajectory(const double dt, const ControlParams& control_param, Trajectory& trajectory)
 {
     // std::cout << "gen start" << std::endl;
     auto start = std::chrono::system_clock::now();
@@ -210,11 +223,12 @@ void MotionModelDiffDrive::generate_trajectory(const double dt, const ControlPar
     // std::cout << vel.v0 << ", " << vel.vt << ", " << vel.vf << ", " << vel.time << ", " << omega.sf << ", " << std::endl;
 
     // omega.calculate_spline(ratio); // ratio = 0.5
-    omega.calculate_spline_abc(ratio); // ratio = 0.5
+    // omega.calculate_spline_abc(ratio); // ratio = 0.5
+    omega.calculate_spline_ab(ratio); // ratio = 0.5
     const int N = s_profile.size(); // 生成控制点的速度，和累计的距离
-    // std::cout << "n: " << N << std::endl;
+    // std::cout << "s_profile size: " << N << std::endl;
     if(N == 0){
-        return;
+        return 0.0;
     }
     // omega.sf 是 control_param 状态表中路径曲线长度
     // sf_2 是准备插值的点在总曲线的长度位置
@@ -238,10 +252,12 @@ void MotionModelDiffDrive::generate_trajectory(const double dt, const ControlPar
       double k = 0;
       if(s < sf_2){
         // k = calculate_cubic_function(s, omega.coefficients[0]); // 插值角速度前的系数
-        k = calculate_quadratic_function(s, omega.coefficients_abc[0]); // 插值角速度前的系数
+        // k = calculate_quadratic_function(s, omega.coefficients_abc[0]); // 插值角速度前的系数
+        k = calculate_linear_function(s, omega.coefficients_ab[0]); // 插值角速度前的系数
       }else{
         // k = calculate_cubic_function(s, omega.coefficients[1]); // 插值角速度后的系数
-        k = calculate_quadratic_function(s, omega.coefficients_abc[1]); // 插值角速度前的系数
+        // k = calculate_quadratic_function(s, omega.coefficients_abc[1]); // 插值角速度前的系数
+        k = calculate_linear_function(s, omega.coefficients_ab[1]); // 插值角速度前的系数
       }
       update(state, v_profile[i], k, dt, state_);
       state = state_;
@@ -254,12 +270,14 @@ void MotionModelDiffDrive::generate_trajectory(const double dt, const ControlPar
     time = std::chrono::system_clock::now();
     elapsed_time = std::chrono::duration_cast<std::chrono::seconds>(time - start).count();
     // std::cout << "gen t: " << elapsed_time << "[s]" << std::endl;
+    return s_profile.back();
 }
 
 void MotionModelDiffDrive::generate_last_state(
   const double dt, const double trajectory_length, const VelocityParams& _vel,
   const double k0, const double km, const double kf, Eigen::Vector3d& output)
 {
+  // std::cout << "generate_last_state start" << trajectory_length << std::endl;
     // std::cout << "--- generate last state ---" << std::endl;
     // std::cout << k0 << ", " << km << ", " << kf << ", " << trajectory_length << std::endl;
     AngularVelocityParams omega(k0, km, kf, trajectory_length);
@@ -270,7 +288,8 @@ void MotionModelDiffDrive::generate_last_state(
     make_velocity_profile(dt, vel);
 
     // omega.calculate_spline(ratio);
-    omega.calculate_spline_abc(ratio);
+    // omega.calculate_spline_abc(ratio);
+    omega.calculate_spline_ab(ratio);
     const int N = s_profile.size();
     double sf_2 = omega.sf * ratio;
     State state(0, 0, 0, vel.v0, omega.k0);
@@ -280,14 +299,17 @@ void MotionModelDiffDrive::generate_last_state(
         double k = 0;
         if(s < sf_2){
             // k = calculate_cubic_function(s, omega.coefficients[0]);
-            k = calculate_quadratic_function(s, omega.coefficients_abc[0]);
+            // k = calculate_quadratic_function(s, omega.coefficients_abc[0]);
+            k = calculate_linear_function(s, omega.coefficients_ab[0]);
         }else{
             // k = calculate_cubic_function(s, omega.coefficients[1]);
-            k = calculate_quadratic_function(s, omega.coefficients_abc[1]);
+            // k = calculate_quadratic_function(s, omega.coefficients_abc[1]);
+            k = calculate_linear_function(s, omega.coefficients_ab[1]);
         }
         update(state, v_profile[i], k, dt, state);
     }
     output << state.x, state.y, state.yaw; // 终点 x y yaw 状态
+    // std::cout << "generate_last_state end" << trajectory_length << std::endl;
 }
 
 /**
@@ -322,7 +344,7 @@ void MotionModelDiffDrive::AngularVelocityParams::calculate_spline(double ratio)
 
 /**
  * @brief 求解曲线参数  (a, b, c) <- ax^2+bx+c
- *       std::vector<Eigen::Vector4d> coefficients_abc;
+ *       std::vector<Eigen::Vector3d> coefficients_abc;
  * @param ratio 角速度插值的位置，x 轴是曲线长度，y 轴是角速度
  */
 void MotionModelDiffDrive::AngularVelocityParams::calculate_spline_abc(double ratio)
@@ -346,6 +368,32 @@ void MotionModelDiffDrive::AngularVelocityParams::calculate_spline_abc(double ra
     Eigen::VectorXd a = s.inverse() * c;
     coefficients_abc[0] = a.segment(0, 3); // k0~km 曲线的 a,b,c 系数
     coefficients_abc[1] = a.segment(3, 3); // km~kf 曲线的 a,b,c 系数
+}
+
+/**
+ * @brief 求解曲线参数  (a, b) <- ax+b
+ *       std::vector<Eigen::Vector2d> coefficients_ab;
+ * @param ratio 角速度插值的位置，x 轴是曲线长度，y 轴是角速度
+ */
+void MotionModelDiffDrive::AngularVelocityParams::calculate_spline_ab(double ratio)
+{
+    // std::cout << "spline" << std::endl;
+    // 3d spline interpolation
+    // 轨迹点累计的距离，0 起点累计 0 距离， sf * ratio 插值位置的距离，sf 轨迹总距离
+    Eigen::Vector3d x(0, sf * ratio, sf);
+    // 轨迹点的角速度，k0 起点角速度，km 插值角速度，kf 终点角速度
+    Eigen::Vector3d y(k0, km, kf); 
+    Eigen::Matrix<double, 4, 4> s;
+    // a0*x^2+b0*x+c0 + a1*x^2+b1*x+c1
+    s << x(0), 1, 0, 0, // [s0~sm] ; a0*x+b0 + a1*x+b1
+         x(1), 1, 0, 0, // [s0~sm] ; a0*x+b0 + a1*x+b1
+         0, 0, x(2), 1, // [sm~sf] ; a0*x+b0 + a1*x+b1
+         x(1), 1, -x(1), -1; // [sm] 相等
+    Eigen::VectorXd c = Eigen::VectorXd::Zero(4);
+    c << y(0), y(1), y(2), 0;
+    Eigen::VectorXd a = s.inverse() * c;
+    coefficients_ab[0] = a.segment(0, 2); // k0~km 曲线的 a,b,c 系数
+    coefficients_ab[1] = a.segment(2, 2); // km~kf 曲线的 a,b,c 系数
 }
 
 void MotionModelDiffDrive::make_velocity_profile(const double dt, const VelocityParams& v_param)
@@ -409,12 +457,14 @@ void MotionModelDiffDrive::make_velocity_profile(const double dt, const Velocity
 double MotionModelDiffDrive::estimate_driving_time(const ControlParams& control)
 {
     // acceleration time
+    // std::cout << "a0:" << control.vel.a0 << ", af:" << control.vel.af << std::endl;
     double t0 = fabs((control.vel.vt - control.vel.v0) / control.vel.a0);
     // deceleration time
     double td = fabs((control.vel.vf - control.vel.vt) / control.vel.af);
     // std::cout << t0 << ", " << td << std::endl;
     
     // 加速距离
+    // std::cout << "v0:" << control.vel.v0 << ", vt:" << control.vel.vt << ", vf:" << control.vel.vf << std::endl;
     double s0 = 0.5 * fabs(control.vel.vt + control.vel.v0) * t0;
     // 减速距离
     double sd = 0.5 * fabs(control.vel.vt + control.vel.vf) * td;
@@ -428,3 +478,12 @@ double MotionModelDiffDrive::estimate_driving_time(const ControlParams& control)
     return driving_time;
 }
 
+void MotionModelDiffDrive::update_ratio(const Eigen::Vector3d& goal, const double boundary, const double rang)
+{
+  int move_dir = goal.segment(0,2).norm() < boundary ? 1 : -1;
+  double yaw_max = 0.17*4;
+  double move = fabs(goal(2))/yaw_max * rang * move_dir;
+  move = std::min(rang, std::max(-rang, move));
+  ratio = 0.5 + move;
+  // std::cout << "[SLP] new ratio is " << ratio << std::endl;
+}

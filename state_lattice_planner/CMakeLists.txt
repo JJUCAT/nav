@@ -15,6 +15,7 @@ find_package(catkin REQUIRED COMPONENTS
   tf2
   tf2_ros
   tf2_geometry_msgs
+  navit_costmap
 )
 
 find_package(Eigen3 REQUIRED COMPONENTS system)
@@ -110,3 +111,8 @@ install(TARGETS
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   RUNTIME DESTINATION ${CATKIN_GLOBAL_BIN_DESTINATION}
 )
+
+install(DIRECTORY
+        lookup_table
+        DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+        )

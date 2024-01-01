@@ -33,12 +33,21 @@ class LocalPlanner
     size_t idx;
   };
 
+  struct SamplingIndex
+  {
+    size_t idx;
+    size_t end;
+    size_t jump;
+    double cache_dist;
+  };
+
   LocalPlanner() = delete;
 
   /**
    * @brief Construct a new Local Planner object
    */
-  LocalPlanner(std::shared_ptr<navit_costmap::Costmap2DROS>& costmap_ros);
+  LocalPlanner(std::shared_ptr<navit_costmap::Costmap2DROS>& costmap_ros,
+               std::shared_ptr<tf2_ros::Buffer>& tf);
 
   /**
    * @brief  设置全局参考路径
@@ -109,6 +118,13 @@ class LocalPlanner
   bool UpdateRefPlanIndex(const double rang);
   
   /**
+   * @brief 更新在 ref plan 的采样起点
+   * @return true 
+   * @return false 
+   */
+  bool UpdateSamplingIndex();
+
+  /**
    * @brief  设置局部路径
    * @param  plan  局部路径，基于地图坐标系
    */
@@ -125,36 +141,42 @@ class LocalPlanner
   void ClearRefPlan();
 
   /**
-   * @brief  在参考路径上选择一个点作为局部规划的 goal
-   * @param  step        选点的步进 [m]
-   * @param  update_idx  更新 ref plan 的参考采样点
-   * @return Eigen::Vector3d 
+   * @brief 清空采样数据
    */
-  Eigen::Vector3d RefForwardSampling(const float step, const bool update_idx = true);
+  void ClearSamplingIndex();
+
+  /**
+   * @brief  在参考路径上的采样点
+   * @param  num            采样数量      
+   * @param  step           选点的步进 [m]
+   * @param  parallel_back  平行采样间距 [m]
+   * @return std::vector<Eigen::Vector3d>
+   */
+  std::vector<Eigen::Vector3d> RefForwardSampling(
+    const size_t num, const float step, const float parallel_back);
 
   /**
    * @brief  平行采样
-   * @param  goal    目标
+   * @param  sample  采样点
    * @param  states  返回的采样点
    */
   void Parallel_Sampling(
-    const Eigen::Vector3d goal, std::vector<Eigen::Vector3d>& states);
+    const std::vector<Eigen::Vector3d>& sample, std::vector<Eigen::Vector3d>& states);
 
   /**
-   * @brief  ref plan 后退采样
-   * @param  back_step     后退步长 [m]
-   * @param  forward_step  前进步长 [m]
+   * @brief  回归 ref plan 的采样
+   * @param  sample  采样点
    * @param  states  返回的采样点
    */
-  void Lookback_Sampling(
-    const double back_step, const double forward_step,
+  void Regression_Sampling(
+    const std::vector<Eigen::Vector3d>& sample,
     std::vector<Eigen::Vector3d>& states);
 
   /**
    * @brief 清空历史采样点
    */
   void ClearLookbackSample() {
-    lookback_sample_index_.clear();
+    refplan_sample_index_.clear();
   }
 
   /**
@@ -234,7 +256,7 @@ class LocalPlanner
                  const size_t ref_plan_end, nav_msgs::Path& plan);
 
   /**
-   * @brief  检查局部路径和全局路径是否相连
+   * @brief  检查局部路径和全局路径是否相连，在局部规划成功时候使用
    * @param  trajectory_end  局部路径终点，基于机器坐标系
    */
   void CheckPlanConnected(const Eigen::Vector3d trajectory_end);
@@ -277,19 +299,23 @@ class LocalPlanner
     const MotionModelDiffDrive::Trajectory& trajectory,
     const double r, const double g, const double b, const ros::Publisher& pub);
 
+  double GetTargetV(const nav_msgs::Odometry& cur_odom);
+
   ros::NodeHandle nh_;
   ros::NodeHandle local_nh_;
   tf::TransformListener listener_;
+  std::shared_ptr<tf2_ros::Buffer> tf_;
   Eigen::Vector3d plan_in_map_frame_;
   Eigen::Vector3d plan_in_robot_frame_;
   Eigen::Vector3d robot_in_map_frame_;
   geometry_msgs::PoseStamped robot_pose_; 
   std::shared_ptr<navit_costmap::Costmap2DROS> costmap_ros_;  
   std::shared_ptr<navit_costmap::Costmap2D> costmap_;
-  std::vector<size_t> lookback_sample_index_;
+  std::vector<size_t> refplan_sample_index_;
   TrackingPath ref_plan_;
   TrackingPath local_plan_; // 和 costmap_ros_ 同个 frame_id
-  bool plan_connected_ = true;
+  SamplingIndex sampling_idx_;
+  bool plan_connected_ = true; // 一开始在参考轨迹上认为就是连接的
   StateLatticePlanner slp_;
   ros::Publisher candidate_trajectories_pub_;
   ros::Publisher candidate_trajectories_no_collision_pub_;
@@ -297,6 +323,7 @@ class LocalPlanner
   ros::Publisher goal_sampling_pub_;
   ros::Publisher goal_in_robot_frame_pub_;
   ros::Publisher check_plan_pub_;
+  ros::Publisher ref_plan_pub_;
   ros::Publisher local_plan_pub_;
   ros::Subscriber odom_sub_;
   std::vector<Eigen::Vector3d> xyyaw_table_;
@@ -338,14 +365,17 @@ class LocalPlanner
   int NGS_NY;
   double SAMPLE_STEP; // 采样步进 [m]
   double SMAPLE_MAX_DIS; // 采样点与机器最大距离 [m]
-  double LOOKBACK; // 历史采样距离 [m]
+  double SMAPLE_MAX_JUMP; // 采样点更新跳动最大距离，大于该距离就改用 v*t 来移动采样点
+  int REF_PLAN_SAMPLE_NUM; // 参考轨迹上的采样数 [1, +∞)
   double HEAD; // 车头碰撞检测位置
   int COLLISION_COST; // 碰撞检测值，[-1,100]
-  double LOCAL_REACH_RANG; // 该半径内认为到达 local plan [m]
+  double LOCAL_REACH_RANG; // 该半径内认为到bool LocalPlanner::UpdateSamplingIndex() {达 local plan [m]
   double REF_REACH_RANG; // 该半径内认为到达 ref plan [m]
   double PARALLEL_R; // 平行采样宽 [m]
   int PARALLEL_N; // 平行采样数量
   double PARALLEL_B; // 后置平行采样距离 [m]
+  bool TARGET_V_FREE; // 是否把当前 odom 速度设置为目标速度，这样 slp 少了加速过程
+  bool FORBID_RIGHT_SAMPLE; // 禁止右侧采样，防止进入雷达盲区
 
   // 轨迹评价
   double DIST_ERR;

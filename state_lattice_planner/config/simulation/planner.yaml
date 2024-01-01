@@ -6,7 +6,6 @@ coverage_planner:
 nav_planner:
      # - {name: topoint, type: navfn/NavfnROS}
      - {name: topoint, type: global_planner/GlobalPlanner}
-    #  - {name: lattice, type: SBPLLatticePlanner}
 
 smooth_path_planner:
      # - {name: topoint, type: navfn/NavfnROS}
@@ -24,18 +23,3 @@ ccpp:
 gsl_smooth:
   step_points: 5                    # interval of picking up keypoints in rough path.
   step_s: 0.02                      # [m], default = 0.02, interval of two points in smooth path.
-
-lattice:
-  environment_type: XYThetaLattice
-  planner_type: ADPlanner # ADPlanner, ARAPlanner
-  allocated_time: 5.0
-  initial_epsilon: 3
-  forward_search: false # for ADPlanner
-  # primitive_filename: 
-  force_scratch_limit: 500 # for ADPlanner
-  nominalvel_mpersecs: 0.5 # linear velocity
-  timetoturn45degsinplace_secs: 1.3 # (原地)旋转 45° 需要的时间
-  lethal_obstacle: 254 # 障碍物值
-  publish_footprint_path: true
-  visualizer_skip_poses: 5
-  allow_unknown: false
