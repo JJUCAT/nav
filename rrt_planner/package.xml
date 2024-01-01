@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format2.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="2">
+    <name>rrt_planner</name>
+    <version>0.0.1</version>
+    <description>
+
+        RRT
+
+    </description>
+    <author>jucat</author>
+    <maintainer email="lmr2887@163.com">Jucat</maintainer>
+    <license>BSD</license>
+
+    <buildtool_depend>catkin</buildtool_depend>
+
+    <depend>angles</depend>
+    <depend>base_local_planner</depend>
+    <depend>costmap_2d</depend>
+    <depend>eigen</depend>
+    <depend>nav_core</depend>
+    <depend>pluginlib</depend>
+    <depend>roscpp</depend>
+    <depend>tf2</depend>
+    <depend>tf2_ros</depend>
+
+    <export>
+        <nav_core plugin="${prefix}/rrt_plugin.xml" />
+    </export>
+</package>
+
+

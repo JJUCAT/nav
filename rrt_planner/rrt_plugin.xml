@@ -1,0 +1,7 @@
+<library path="lib/librrt_planner">
+  <class name="rrt_planner/RrtPlanner" type="rrt_planner::RrtPlanner" base_class_type="nav_core::BaseGlobalPlanner">
+    <description>
+      rrt
+    </description>
+  </class>
+</library>
