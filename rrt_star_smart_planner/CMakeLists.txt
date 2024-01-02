@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.0.2)
-project(rrt_planner)
+project(rrt_star_smart_planner)
 
 find_package(catkin REQUIRED
   COMPONENTS
@@ -22,7 +22,7 @@ add_definitions(${EIGEN3_DEFINITIONS})
 
 catkin_package(
   INCLUDE_DIRS include
-  LIBRARIES rrt_planner
+  # LIBRARIES rrt_star_smart_planner
   CATKIN_DEPENDS
     angles
     base_local_planner
@@ -34,13 +34,13 @@ catkin_package(
     tf2_ros
 )
 
-add_library(rrt_planner src/rrt_planner.cpp)
-add_dependencies(rrt_planner ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(rrt_planner
+add_library(rrt_star_smart_planner src/rrt_star_smart_planner.cpp)
+add_dependencies(rrt_star_smart_planner ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(rrt_star_smart_planner
     ${catkin_LIBRARIES}
     )
 
-install(TARGETS rrt_planner
+install(TARGETS rrt_star_smart_planner
        ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
        LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
        RUNTIME DESTINATION ${CATKIN_GLOBAL_BIN_DESTINATION}

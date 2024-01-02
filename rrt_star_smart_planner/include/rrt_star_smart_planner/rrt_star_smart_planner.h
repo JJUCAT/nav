@@ -4,8 +4,8 @@
  * @date 2024-01-01
  * @brief 
  */
-#ifndef RRT_PLANNER_H_
-#define RRT_PLANNER_H_
+#ifndef RRT_STAR_SMART_PLANNER_H_
+#define RRT_STAR_SMART_PLANNER_H_
 #include <ros/ros.h>
 #include <costmap_2d/costmap_2d_ros.h>
 #include <costmap_2d/costmap_2d.h>
@@ -16,29 +16,29 @@
 #include <base_local_planner/world_model.h>
 #include <base_local_planner/costmap_model.h>
 
-namespace rrt_planner{
+namespace rrt_star_smart{
 
 /**
   * @brief 
   */
-class RrtPlanner : public nav_core::BaseGlobalPlanner {
+class RrtStarSmartPlanner : public nav_core::BaseGlobalPlanner {
   public:
     /**
       * @brief  Constructor for the CarrotPlanner
       */
-    RrtPlanner() = default;
+    RrtStarSmartPlanner() = default;
 
     /**
       * @brief Destructor
       */
-    virtual ~RrtPlanner();
+    virtual ~RrtStarSmartPlanner();
 
     /**
       * @brief  Constructor for the CarrotPlanner
       * @param  name The name of this planner
       * @param  costmap_ros A pointer to the ROS wrapper of the costmap to use for planning
       */
-    RrtPlanner(std::string name, costmap_2d::Costmap2DROS* costmap_ros);
+    RrtStarSmartPlanner(std::string name, costmap_2d::Costmap2DROS* costmap_ros);
 
     /**
       * @brief  Initialization function for the CarrotPlanner
@@ -74,6 +74,6 @@ class RrtPlanner : public nav_core::BaseGlobalPlanner {
     bool initialized_;
 };
 
-}; // namespace rrt_planner
+}; // namespace rrt_star_smart
 
-#endif // RRT_PLANNER_H_
+#endif // RRT_STAR_SMART_PLANNER_H_

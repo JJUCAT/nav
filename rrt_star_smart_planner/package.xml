@@ -1,17 +1,17 @@
 <?xml version="1.0"?>
 <?xml-model href="http://download.ros.org/schema/package_format2.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="2">
-    <name>rrt_planner</name>
+    <name>rrt_star_smart_planner</name>
     <version>0.0.1</version>
     <description>
 
-        RRT
+      RRT* Smart Planner
 
     </description>
     <author>jucat</author>
     <maintainer email="lmr2887@163.com">Jucat</maintainer>
     <license>BSD</license>
-
+    <url>https://blog.csdn.net/jucat/article/details/134356668</url>
     <buildtool_depend>catkin</buildtool_depend>
 
     <depend>angles</depend>
