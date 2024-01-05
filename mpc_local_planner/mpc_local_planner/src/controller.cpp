@@ -227,7 +227,7 @@ corbo::DiscretizationGridInterface::Ptr Controller::configureGrid(const ros::Nod
 {
     if (!_dynamics) return {};
 
-    std::string grid_type = "fd_grid";
+    std::string grid_type = "fd_grid"; // 有限时间差值网格
     nh.param("grid/type", grid_type, grid_type);
 
     if (grid_type == "fd_grid")
@@ -236,10 +236,11 @@ corbo::DiscretizationGridInterface::Ptr Controller::configureGrid(const ros::Nod
 
         bool variable_grid = true;
         nh.param("grid/variable_grid/enable", variable_grid, variable_grid);
-        if (variable_grid)
+        if (variable_grid) // 动态时间网格，包括时间网格大小和时间网格数量的动态调整
         {
             FiniteDifferencesVariableGridSE2::Ptr var_grid = std::make_shared<FiniteDifferencesVariableGridSE2>();
 
+            // 时间网格大小
             double min_dt = 0.0;
             nh.param("grid/variable_grid/min_dt", min_dt, min_dt);
             double max_dt = 10.0;
@@ -249,7 +250,7 @@ corbo::DiscretizationGridInterface::Ptr Controller::configureGrid(const ros::Nod
             bool grid_adaptation = true;
             nh.param("grid/variable_grid/grid_adaptation/enable", grid_adaptation, grid_adaptation);
 
-            if (grid_adaptation)
+            if (grid_adaptation) // 时间网格数量大小
             {
                 int max_grid_size = 50;
                 nh.param("grid/variable_grid/grid_adaptation/max_grid_size", max_grid_size, max_grid_size);
@@ -267,20 +268,20 @@ corbo::DiscretizationGridInterface::Ptr Controller::configureGrid(const ros::Nod
             }
             grid = var_grid;
         }
-        else
+        else // 固定时间网格大小
         {
             grid = std::make_shared<FiniteDifferencesGridSE2>();
         }
         // common grid parameters
         int grid_size_ref = 20;
         nh.param("grid/grid_size_ref", grid_size_ref, grid_size_ref);
-        grid->setNRef(grid_size_ref);
+        grid->setNRef(grid_size_ref); // 时间网格数量 N 的大小
 
         double dt_ref = 0.3;
         nh.param("grid/dt_ref", dt_ref, dt_ref);
-        grid->setDtRef(dt_ref);
+        grid->setDtRef(dt_ref); // 时间网格大小（分辨率）
 
-        std::vector<bool> xf_fixed = {true, true, true};
+        std::vector<bool> xf_fixed = {true, true, true}; // TODO xf fixed 这是什么
         nh.param("grid/xf_fixed", xf_fixed, xf_fixed);
         if ((int)xf_fixed.size() != _dynamics->getStateDimension())
         {
@@ -296,6 +297,7 @@ corbo::DiscretizationGridInterface::Ptr Controller::configureGrid(const ros::Nod
         nh.param("grid/warm_start", warm_start, warm_start);
         grid->setWarmStart(warm_start);
 
+        // TODO 搭配方法是什么
         std::string collocation_method = "forward_differences";
         nh.param("grid/collocation_method", collocation_method, collocation_method);
 
@@ -316,14 +318,15 @@ corbo::DiscretizationGridInterface::Ptr Controller::configureGrid(const ros::Nod
             ROS_ERROR_STREAM("Unknown collocation method '" << collocation_method << "' specified. Falling back to default...");
         }
 
-        std::string cost_integration_method = "left_sum";
+        // 时间网格代价计算方法
+        std::string cost_integration_method = "left_sum"; // 当前位置值 = 左值数值相加的和
         nh.param("grid/cost_integration_method", cost_integration_method, cost_integration_method);
 
         if (cost_integration_method == "left_sum")
         {
             grid->setCostIntegrationRule(FullDiscretizationGridBaseSE2::CostIntegrationRule::LeftSum);
         }
-        else if (cost_integration_method == "trapezoidal_rule")
+        else if (cost_integration_method == "trapezoidal_rule") // 梯度规则，就是拟似积分，函数与 x y 轴包围面积
         {
             grid->setCostIntegrationRule(FullDiscretizationGridBaseSE2::CostIntegrationRule::TrapezoidalRule);
         }
@@ -347,22 +350,22 @@ RobotDynamicsInterface::Ptr Controller::configureRobotDynamics(const ros::NodeHa
     _robot_type = "unicycle";
     nh.param("robot/type", _robot_type, _robot_type);
 
-    if (_robot_type == "unicycle")
+    if (_robot_type == "unicycle") // 独轮车模型
     {
         return std::make_shared<UnicycleModel>();
     }
-    else if (_robot_type == "simple_car")
+    else if (_robot_type == "simple_car") // 类车模型
     {
         double wheelbase = 0.5;
         nh.param("robot/simple_car/wheelbase", wheelbase, wheelbase);
         bool front_wheel_driving = false;
         nh.param("robot/simple_car/front_wheel_driving", front_wheel_driving, front_wheel_driving);
         if (front_wheel_driving)
-            return std::make_shared<SimpleCarFrontWheelDrivingModel>(wheelbase);
+            return std::make_shared<SimpleCarFrontWheelDrivingModel>(wheelbase); // 前驱车
         else
             return std::make_shared<SimpleCarModel>(wheelbase);
     }
-    else if (_robot_type == "kinematic_bicycle_vel_input")
+    else if (_robot_type == "kinematic_bicycle_vel_input") // 单车模型
     {
         double length_rear = 1.0;
         nh.param("robot/kinematic_bicycle_vel_input/length_rear", length_rear, length_rear);
@@ -861,7 +864,7 @@ bool Controller::isPoseTrajectoryFeasible(base_local_planner::CostmapModel* cost
                                           double inscribed_radius, double circumscribed_radius, double min_resolution_collision_check_angular,
                                           int look_ahead_idx)
 {
-    if (!_grid)
+    if (!_grid) // TODO@LMR 是时间网格吗 ?
     {
         ROS_ERROR("Controller must be configured before invoking step().");
         return false;
@@ -890,6 +893,7 @@ bool Controller::isPoseTrajectoryFeasible(base_local_planner::CostmapModel* cost
         // Checks if the distance between two poses is higher than the robot radius or the orientation diff is bigger than the specified threshold
         // and interpolates in that case.
         // (if obstacles are pushing two consecutive poses away, the center between two consecutive poses might coincide with the obstacle ;-)!
+        // TODO@LMR 为什么不用 x 和 u 来查碰撞检测，而是用时间网格来插值
         if (i < look_ahead_idx)
         {
             double delta_rot           = normalize_theta(fd_grid->getState(i + 1)[2] - fd_grid->getState(i)[2]);
@@ -897,9 +901,7 @@ bool Controller::isPoseTrajectoryFeasible(base_local_planner::CostmapModel* cost
             if (std::abs(delta_rot) > min_resolution_collision_check_angular || delta_dist.norm() > inscribed_radius)
             {
                 int n_additional_samples = std::max(std::ceil(std::abs(delta_rot) / min_resolution_collision_check_angular),
-                                                    std::ceil(delta_dist.norm() / inscribed_radius)) -
-                                           1;
-
+                                                    std::ceil(delta_dist.norm() / inscribed_radius)) - 1;
                 PoseSE2 intermediate_pose(fd_grid->getState(i)[0], fd_grid->getState(i)[1], fd_grid->getState(i)[2]);
                 for (int step = 0; step < n_additional_samples; ++step)
                 {

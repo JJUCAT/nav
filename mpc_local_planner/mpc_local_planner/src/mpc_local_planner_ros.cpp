@@ -99,7 +99,7 @@ void MpcLocalPlannerROS::initialize(std::string name, tf2_ros::Buffer* tf, costm
                  _costmap_conv_params.costmap_converter_spin_thread);
 
         // reserve some memory for obstacles
-        _obstacles.reserve(700);
+        _obstacles.reserve(700); // 700 个障碍物的指针
 
         // init other variables
         _tf          = tf;
@@ -318,6 +318,7 @@ uint32_t MpcLocalPlannerROS::computeVelocityCommands(const geometry_msgs::PoseSt
     transformed_plan.front() = robot_pose;  // update start // 把局部路径的起点改为机器当前位姿
 
     // clear currently existing obstacles
+    // 每次都会清除障碍物重新计算
     _obstacles.clear();
 
     // Update obstacle container with costmap information or polygons provided by a costmap_converter plugin
@@ -327,6 +328,7 @@ uint32_t MpcLocalPlannerROS::computeVelocityCommands(const geometry_msgs::PoseSt
         updateObstacleContainerWithCostmap();
 
     // also consider custom obstacles (must be called after other updates, since the container is not cleared)
+    // 自定义的障碍物
     updateObstacleContainerWithCustomObstacles();
 
     // estimate current state vector and previous control
@@ -346,6 +348,7 @@ uint32_t MpcLocalPlannerROS::computeVelocityCommands(const geometry_msgs::PoseSt
     // double dt = time_last_cmd_.isZero() ? 0.0 : (t - time_last_cmd_).toSec();
 
     // set previous control value for control deviation bounds
+    // 设置上一次的轨迹的第一个控制和时间间隔，推算当前的理论位置 ?
     if (_u_seq && !_u_seq->isEmpty()) _controller.getOptimalControlProblem()->setPreviousControlInput(_u_seq->getValuesMap(0), dt);
 
     bool success = false;
@@ -369,6 +372,7 @@ uint32_t MpcLocalPlannerROS::computeVelocityCommands(const geometry_msgs::PoseSt
     }
 
     // Check feasibility (but within the first few states only)
+    // 更新 footprint
     if (_params.is_footprint_dynamic)
     {
         // Update footprint of the robot and minimum and maximum distance from the center of the robot to its footprint vertices.
@@ -377,7 +381,6 @@ uint32_t MpcLocalPlannerROS::computeVelocityCommands(const geometry_msgs::PoseSt
     }
 
     // 检查规划的路径是否无碰撞
-    // TODO@在控制的时候不检查碰撞的吗？
     bool feasible = _controller.isPoseTrajectoryFeasible(_costmap_model.get(), _footprint_spec, _robot_inscribed_radius, _robot_circumscribed_radius,
                                                          _params.collision_check_min_resolution_angular, _params.collision_check_no_poses);
     if (!feasible)
@@ -396,7 +399,7 @@ uint32_t MpcLocalPlannerROS::computeVelocityCommands(const geometry_msgs::PoseSt
 
     // Get the velocity command for this sampling interval
     // TODO(roesmann): we might also command more than just the imminent action, e.g. in a separate thread, until a new command is available
-    // 根据控制生成接下来的控制指令
+    // 状态和控制无法转换为 ros 的 twist 控制
     if (!_u_seq || !_controller.getRobotDynamics()->getTwistFromControl(_u_seq->getValuesMap(0), cmd_vel.twist))
     {
         _controller.reset();
@@ -456,6 +459,7 @@ void MpcLocalPlannerROS::updateObstacleContainerWithCostmap()
                     _costmap->mapToWorld(i, j, obs.coeffRef(0), obs.coeffRef(1));
 
                     // check if obstacle is interesting (e.g. not far behind the robot)
+                    // 检查障碍物是否在机器后方 && 障碍物距离
                     Eigen::Vector2d obs_dir = obs - _robot_pose.position();
                     if (obs_dir.dot(robot_orient) < 0 && obs_dir.norm() > _params.costmap_obstacles_behind_robot_dist) continue;
 

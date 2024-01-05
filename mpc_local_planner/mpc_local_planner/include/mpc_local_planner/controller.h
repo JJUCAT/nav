@@ -83,7 +83,8 @@ class Controller : public corbo::PredictiveController
 
     /**
      * @brief Check whether the planned trajectory is feasible or not.
-     *
+     *        mpc 只规划了时间网格上的每个网格的起点，网格中间的没有位姿的，需要根据前后两个网格的距离和角度作线性插值检查是否有碰撞
+     *        由于线性插值有些粗糙，当时间网格分辨率比较大，且车速较快的时候，这个地方误差就比较大
      * This method currently checks only that the trajectory, or a part of the trajectory is collision free.
      * Obstacles are here represented as costmap instead of the internal ObstacleContainer.
      * @param costmap_model Pointer to the costmap model
@@ -117,7 +118,7 @@ class Controller : public corbo::PredictiveController
     std::string _robot_type;
     // 离散栅格，就是超图的抽象，提供了<顶点>优化参数，<边>约束，用来描述非线性优化问题
     corbo::DiscretizationGridInterface::Ptr _grid;
-    RobotDynamicsInterface::Ptr _dynamics; // corob 库和 ros 库的位姿和控制类型转换工具
+    RobotDynamicsInterface::Ptr _dynamics; // corob 库和 ros 库的位姿和控制类型转换工具，动力学模型（独轮车，类车等）
     corbo::NlpSolverInterface::Ptr _solver; // 通用求解器接口
     // 用机器 footprint 和几何化障碍物作为控制和避障的多阶不等式约束
     StageInequalitySE2::Ptr _inequality_constraint; 

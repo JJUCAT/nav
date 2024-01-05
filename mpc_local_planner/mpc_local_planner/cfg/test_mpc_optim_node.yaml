@@ -1,23 +1,23 @@
 ## Robot settings
 robot:
   type: "unicycle"
-  unicycle:
+  unicycle: # 独轮车模型，差速轮模型
     max_vel_x: 0.4
     max_vel_x_backwards: 0.2
     max_vel_theta: 0.3
     acc_lim_x: 0.0 # deactive bounds with zero
     dec_lim_x: 0.0 # deactive bounds with zero
     acc_lim_theta: 0.0 # deactivate bounds with zero
-  simple_car:
+  simple_car: # 类车模型
     wheelbase: 0.4
-    front_wheel_driving: False
+    front_wheel_driving: False # 是否前驱，后驱车爬坡能力差
     max_vel_x: 0.4
     max_vel_x_backwards: 0.2
     max_steering_angle: 1.4
     acc_lim_x: 0.0 # deactive bounds with zero
     dec_lim_x: 0.0 # deactive bounds with zero
     max_steering_rate: 0.5 # deactive bounds with zero
-  kinematic_bicycle_vel_input:
+  kinematic_bicycle_vel_input: # 单车模型
     length_rear: 1.0
     length_front: 1.0
     max_vel_x: 0.4

@@ -63,6 +63,7 @@ namespace teb_local_planner
 /**
  * @class Obstacle
  * @brief Abstract class that defines the interface for modelling obstacles
+ *        障碍物与点/线段/多边形的碰撞检测，移动障碍物的移动位置估计
  */
 class Obstacle
 {
@@ -88,12 +89,14 @@ public:
 
   /**
     * @brief Get centroid coordinates of the obstacle
+    *        获取障碍物的形心
     * @return Eigen::Vector2d containing the centroid
     */
   virtual const Eigen::Vector2d& getCentroid() const = 0;
 
   /**
     * @brief Get centroid coordinates of the obstacle as complex number
+    *        以复数形式获取质心坐标
     * @return std::complex containing the centroid coordinate
     */
   virtual std::complex<double> getCentroidCplx() const = 0;
@@ -106,23 +109,26 @@ public:
 
   /**
     * @brief Check if a given point collides with the obstacle
+    *        点是否和障碍相撞
     * @param position 2D reference position that should be checked
-    * @param min_dist Minimum distance allowed to the obstacle to be collision free
+    * @param min_dist Minimum distance allowed to the obstacle to be collision free 点的安全距离
     * @return \c true if position is inside the region of the obstacle or if the minimum distance is lower than min_dist
     */
   virtual bool checkCollision(const Eigen::Vector2d& position, double min_dist) const = 0;
 
   /**
     * @brief Check if a given line segment between two points intersects with the obstacle (and additionally keeps a safty distance \c min_dist)
+    *        线段是否和障碍物相交
     * @param line_start 2D point for the end of the reference line
     * @param line_end 2D point for the end of the reference line
-    * @param min_dist Minimum distance allowed to the obstacle to be collision/intersection free
+    * @param min_dist Minimum distance allowed to the obstacle to be collision/intersection free 线段的安全距离
     * @return \c true if given line intersects the region of the obstacle or if the minimum distance is lower than min_dist
     */
   virtual bool checkLineIntersection(const Eigen::Vector2d& line_start, const Eigen::Vector2d& line_end, double min_dist=0) const = 0;
 
   /**
     * @brief Get the minimum euclidean distance to the obstacle (point as reference)
+    *        点到障碍物最短距离
     * @param position 2d reference position
     * @return The nearest possible distance to the obstacle
     */
@@ -130,6 +136,7 @@ public:
 
   /**
    * @brief Get the minimum euclidean distance to the obstacle (line as reference)
+   *        线段到障碍物最短距离
    * @param line_start 2d position of the begin of the reference line
    * @param line_end 2d position of the end of the reference line
    * @return The nearest possible distance to the obstacle
@@ -138,6 +145,7 @@ public:
   
   /**
    * @brief Get the minimum euclidean distance to the obstacle (polygon as reference)
+   *        多边形和障碍物的最短距离
    * @param polygon Vertices (2D points) describing a closed polygon
    * @return The nearest possible distance to the obstacle
    */
@@ -145,6 +153,7 @@ public:
 
   /**
    * @brief Get the closest point on the boundary of the obstacle w.r.t. a specified reference position
+   *        障碍物边上与点的最近点
    * @param position reference 2d position
    * @return closest point on the obstacle boundary
    */
@@ -159,6 +168,7 @@ public:
 
   /**
     * @brief Get the estimated minimum spatiotemporal distance to the moving obstacle using a constant velocity model (point as reference)
+    *        等速模型的移动障碍物的最小时空距离
     * @param position 2d reference position
     * @param t time, for which the minimum distance to the obstacle is estimated
     * @return The nearest possible distance to the obstacle at time t
@@ -184,6 +194,7 @@ public:
 
   /**
     * @brief Predict position of the centroid assuming a constant velocity model
+    *        估计移动障碍物 t 时间后的位置
     * @param[in]  t         time in seconds for the prediction (t>=0)
     * @param[out] position  predicted 2d position of the centroid
     */
@@ -200,6 +211,7 @@ public:
 
   /**
     * @brief Set the 2d velocity (vx, vy) of the obstacle w.r.t to the centroid
+    *        设置移动障碍物质心的速度
     * @remarks Setting the velocity using this function marks the obstacle as dynamic (@see isDynamic)
     * @param vel 2D vector containing the velocities of the centroid in x and y directions
     */
@@ -740,6 +752,7 @@ public:
 
 /**
 * @class PillObstacle
+*        球形障碍物 ???
 * @brief Implements a 2D pill/stadium/capsular-shaped obstacle (line + distance/radius)
 */
 

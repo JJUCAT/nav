@@ -229,6 +229,7 @@ class MpcLocalPlannerROS : public nav_core::BaseLocalPlanner, public mbf_costmap
  protected:
     /**
      * @brief Update internal obstacle vector based on occupied costmap cells
+     *        以 teb_obstacle 中的点障碍物形式存储地图中所有致命障碍物栅格，一个栅格就是一个点障碍物
      * @remarks All occupied cells will be added as point obstacles.
      * @remarks All previous obstacles are cleared.
      * @sa updateObstacleContainerWithCostmapConverter
@@ -239,6 +240,7 @@ class MpcLocalPlannerROS : public nav_core::BaseLocalPlanner, public mbf_costmap
 
     /**
      * @brief Update internal obstacle vector based on polygons provided by a costmap_converter plugin
+     *        由 costmap_converter 提供障碍物的形状（点，线段，多边形）以及障碍物质心的速度和朝向
      * @remarks Requires a loaded costmap_converter plugin.
      * @remarks All previous obstacles are cleared.
      * @sa updateObstacleContainerWithCostmap
@@ -247,6 +249,7 @@ class MpcLocalPlannerROS : public nav_core::BaseLocalPlanner, public mbf_costmap
 
     /**
      * @brief Update internal obstacle vector based on custom messages received via subscriber
+     *        把所有自定义的障碍物根据 tf 转换转到地图中，这里没有检查障碍物是否在地图范围内
      * @remarks All previous obstacles are NOT cleared. Call this method after other update methods.
      * @sa updateObstacleContainerWithCostmap, updateObstacleContainerWithCostmapConverter
      */
@@ -363,13 +366,13 @@ class MpcLocalPlannerROS : public nav_core::BaseLocalPlanner, public mbf_costmap
     tf2_ros::Buffer* _tf;                    //!< pointer to tf buffer
 
     // internal objects
-    Controller _controller;
+    Controller _controller; // corbo::PredictiveController
     ObstContainer _obstacles;  //!< Obstacle vector that should be considered during local trajectory optimization
     Publisher _publisher;
     std::shared_ptr<base_local_planner::CostmapModel> _costmap_model;
-
-    corbo::TimeSeries::Ptr _x_seq = std::make_shared<corbo::TimeSeries>(); // TODO@LMR 状态和控制？
-    corbo::TimeSeries::Ptr _u_seq = std::make_shared<corbo::TimeSeries>();
+    // corbo::TimeSeries 具有独立时间戳的向量序列
+    corbo::TimeSeries::Ptr _x_seq = std::make_shared<corbo::TimeSeries>(); // 带时间的状态
+    corbo::TimeSeries::Ptr _u_seq = std::make_shared<corbo::TimeSeries>(); // 带时间的控制
 
     std::vector<geometry_msgs::PoseStamped> _global_plan;  //!< Store the current global plan
 
