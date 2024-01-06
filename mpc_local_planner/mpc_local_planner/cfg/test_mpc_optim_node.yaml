@@ -40,27 +40,29 @@ collision_avoidance:
 
 ## Planning grid 
 grid:
-  type: "fd_grid"
-  grid_size_ref: 20
-  dt_ref: 0.3
+  type: "fd_grid" # 有限离散时间网格，默认是固定网格
+  grid_size_ref: 20 # 网格数量大小
+  dt_ref: 0.3 # 网格分辨率大小
+  # xf 是最后一个时间网格，这里设置最后网格的 x y theta 是否是硬约束
   xf_fixed: [True, True, True] # E.g., set last one to False in order to unfix the final orientation
   warm_start: True
   collocation_method: "forward_differences"
-  cost_integration_method: "left_sum"
-  variable_grid:
-    enable: True  
+  cost_integration_method: "left_sum" # 时间网格代价是累加的
+  variable_grid: # 动态时间网格
+    enable: True  # 动态网格分辨率大小
     min_dt: 0.0;
     max_dt: 10.0;
     grid_adaptation:
-      enable: True
+      enable: True # 动态网格数量大小
       dt_hyst_ratio: 0.1
       min_grid_size: 2
       max_grid_size: 50
- 
+
 
 ## Planning options
 planning:
-  objective:
+  objective: # 代价配置
+    # @ minimum_time 时间最小 @ quadratic_form ? @ minimum_time_via_points ? @ 
     type: "minimum_time" # minimum_time requires grid/variable_grid/enable=True and grid/xf_fixed set properly
     quadratic_form:
       state_weights: [2.0, 2.0, 2.0]
@@ -71,16 +73,18 @@ planning:
       position_weight: 8.0
       orientation_weight: 0.0
       via_points_ordered: False
-  terminal_cost:
+  terminal_cost: # 终点代价配置
+    # @none ? @ quadratic ?
     type: "quadratic" # can be "none"
     quadratic:
       final_state_weights: [2.0, 2.0, 2.0]
-  terminal_constraint:
+  terminal_constraint: # 终点约束
+    # @ none @ l2_ball ?
     type: "none" # can be "none"
     l2_ball:
       weight_matrix: [1.0, 1.0, 1.0]
       radius: 5
-      
+
 
 ## Controller options
 controller:
