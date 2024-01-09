@@ -5,16 +5,17 @@
  * @brief 
  */
 #include <angles/angles.h>
-#include <rrt_star_smart_planner/rrt_star_smart_planner.h>
+#include <rrt_ssplanner/rrt_ssplanner.h>
 #include <pluginlib/class_list_macros.hpp>
 #include <tf2/convert.h>
 #include <tf2/utils.h>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
 
 //register this planner as a BaseGlobalPlanner plugin
-PLUGINLIB_EXPORT_CLASS(rrt_star_smart::RrtStarSmartPlanner, nav_core::BaseGlobalPlanner)
+PLUGINLIB_EXPORT_CLASS(rrt_planner::RrtStarSmartPlanner, nav_core::BaseGlobalPlanner)
+//TODO:cmake 依赖添加，完成单独编译
 
-namespace rrt_star_smart {
+namespace rrt_planner {
 RrtStarSmartPlanner::~RrtStarSmartPlanner() {
 
 }
@@ -39,4 +40,4 @@ bool RrtStarSmartPlanner::makePlan(const geometry_msgs::PoseStamped& start,
   return true;
 }
 
-}; // namespace rrt_star_smart
+}; // namespace rrt_planner

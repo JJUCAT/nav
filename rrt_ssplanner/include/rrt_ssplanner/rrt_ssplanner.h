@@ -4,8 +4,8 @@
  * @date 2024-01-01
  * @brief 
  */
-#ifndef RRT_STAR_SMART_PLANNER_H_
-#define RRT_STAR_SMART_PLANNER_H_
+#ifndef RRT_PLANNER_H_
+#define RRT_PLANNER_H_
 #include <ros/ros.h>
 #include <costmap_2d/costmap_2d_ros.h>
 #include <costmap_2d/costmap_2d.h>
@@ -16,7 +16,7 @@
 #include <base_local_planner/world_model.h>
 #include <base_local_planner/costmap_model.h>
 
-namespace rrt_star_smart {
+namespace rrt_planner {
 
 /**
   * @brief 
@@ -74,6 +74,6 @@ class RrtStarSmartPlanner : public nav_core::BaseGlobalPlanner {
     bool initialized_;
 };
 
-}; // namespace rrt_star_smart
+}; // namespace rrt_planner
 
-#endif // RRT_STAR_SMART_PLANNER_H_
+#endif // RRT_PLANNER_H_

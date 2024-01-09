@@ -1,0 +1,7 @@
+<library path="lib/librrt_ssplanner">
+  <class name="rrt_planner/RrtStarSmartPlanner" type="rrt_planner::RrtStarSmartPlanner" base_class_type="nav_core::BaseGlobalPlanner">
+    <description>
+      rrt* smart planner
+    </description>
+  </class>
+</library>
