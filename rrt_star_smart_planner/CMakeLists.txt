@@ -22,7 +22,7 @@ add_definitions(${EIGEN3_DEFINITIONS})
 
 catkin_package(
   INCLUDE_DIRS include
-  # LIBRARIES rrt_star_smart_planner
+  LIBRARIES rrt_star_smart_planner
   CATKIN_DEPENDS
     angles
     base_local_planner

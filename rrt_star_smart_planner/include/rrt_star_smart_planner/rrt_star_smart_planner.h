@@ -16,7 +16,7 @@
 #include <base_local_planner/world_model.h>
 #include <base_local_planner/costmap_model.h>
 
-namespace rrt_star_smart{
+namespace rrt_star_smart {
 
 /**
   * @brief 
