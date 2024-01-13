@@ -15,7 +15,8 @@ find_package(catkin REQUIRED
 )
 
 include_directories(
-    include 
+    include
+    3rdparty
     ${catkin_INCLUDE_DIRS}
     )
 add_definitions(${EIGEN3_DEFINITIONS})
@@ -34,8 +35,19 @@ catkin_package(
     tf2_ros
 )
 
-add_library(rrt_ssplanner src/rrt_ssplanner.cpp)
-add_dependencies(rrt_ssplanner ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+# nanoflann
+add_library(nanoflann_port
+  src/nanoflann_port.cpp)
+add_dependencies(nanoflann_port
+  ${${PROJECT_NAME}_EXPORTED_TARGETS}
+  ${catkin_EXPORTED_TARGETS})
+
+add_library(rrt_ssplanner
+  src/rrt_ssplanner.cpp)
+add_dependencies(rrt_ssplanner
+  nanoflann_port
+  ${${PROJECT_NAME}_EXPORTED_TARGETS}
+  ${catkin_EXPORTED_TARGETS})
 target_link_libraries(rrt_ssplanner
     ${catkin_LIBRARIES}
     )
