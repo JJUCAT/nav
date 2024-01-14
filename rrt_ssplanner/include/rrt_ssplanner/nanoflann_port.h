@@ -1,11 +1,19 @@
-#ifndef NANOFLANN_PORT_H
-#define NANOFLANN_PORT_H
+/**
+ * @copyright Copyright (c) {2022} JUCAT
+ * @author jucat (lmr2887@163.com)
+ * @date 2024-01-14
+ * @brief 
+ */
+#ifndef NANOFLANN_PORT_H_
+#define NANOFLANN_PORT_H_
 
 #include <nanoflann/nanoflann.hpp>
 #include <nanoflann/utils.h>
 #include <geometry_msgs/Point32.h>
 #include <nav_msgs/Path.h>
 
+
+#include <rrt_ssplanner/tree.h>
 namespace nanoflann_port_ns {
 
 typedef struct
@@ -14,7 +22,9 @@ typedef struct
   double dist;
 } KDTIndex;
 
-
+/**
+ * @brief port of 3rd party library 'nanoflann'
+ */
 class NanoflannPort
 {
   using kd_tree_t = nanoflann::KDTreeSingleIndexAdaptor<
@@ -24,10 +34,11 @@ class NanoflannPort
  public:
   NanoflannPort() {}
   NanoflannPort(const std::vector<geometry_msgs::Point>& pl);
+  NanoflannPort(std::vector<rrt_planner::Node>* nl);
   ~NanoflannPort();
 
   void Init(const std::vector<geometry_msgs::Point>& pl);
-
+  void Init(std::vector<rrt_planner::Node>* nl);
   void Reset();
 
   KDTIndex FindClosestPoint(const geometry_msgs::Point p) const;
@@ -47,4 +58,4 @@ class NanoflannPort
 } // namespace nanoflann_port_ns
 
 
-#endif // NANOFLANN_PORT_H
+#endif // NANOFLANN_PORT_H_

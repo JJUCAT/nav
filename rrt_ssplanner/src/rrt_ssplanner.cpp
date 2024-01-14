@@ -37,7 +37,8 @@ void RrtStarSmartPlanner::initialize(std::string name, costmap_2d::Costmap2DROS*
     costmap_ros_ = costmap_ros;
     costmap_ = costmap_ros_->getCostmap();
     world_model_ = std::make_shared<base_local_planner::CostmapModel>(*costmap_);
-    samples_.reserve(size_t(10000));
+    tree_ = std::make_shared<rrt_planner::Tree>();
+
     ros::NodeHandle private_nh("~/" + name);
     private_nh.param("max_iterations", max_iterations_, 10000);
     private_nh.param("timeout", timeout_, 3.0);
@@ -60,21 +61,22 @@ double RrtStarSmartPlanner::footprintCost(double x_i, double y_i, double theta_i
 bool RrtStarSmartPlanner::makePlan(const geometry_msgs::PoseStamped& start, 
     const geometry_msgs::PoseStamped& goal, std::vector<geometry_msgs::PoseStamped>& plan)
 {
-  Insert(start.pose.position);
-  for (int i = 0; i < max_iterations_; i ++) {
-
+  tree_->Insert(0, start.pose.position);
+  for (int i = 1; i < max_iterations_; i ++) {
+    geometry_msgs::Point sample = Sample();
+    size_t nearest_index = GetNearestPoint(sample);
+    geometry_msgs::Point nearest_point = tree_->nodes()->at(nearest_index).point();
+    geometry_msgs::Point new_point;
+    if (Steer(nearest_point, sample, new_point)) {
+      double r = GetNearRadius(i);
+      std::vector<size_t> near_index = GetNearPoints(new_point, r);
+      tree_->InsertNode(i, new_point, near_index);
+    }
   }
   return true;
 }
 
 // -------------------- private --------------------
-
-
-size_t RrtStarSmartPlanner::Insert(const geometry_msgs::Point point)
-{
-  samples_.push_back(point);
-  return samples_.size()-1;
-}
 
 geometry_msgs::Point RrtStarSmartPlanner::Sample()
 {
@@ -94,9 +96,9 @@ geometry_msgs::Point RrtStarSmartPlanner::Sample()
 
 size_t RrtStarSmartPlanner::GetNearestPoint(const geometry_msgs::Point random_point)
 {
-  ROS_ASSERT_MSG(samples_.empty(), "[RRT] samples must be has size.");
+  ROS_ASSERT_MSG(tree_->nodes()->empty(), "[RRT] samples must be has size.");
 
-  auto kdt = nanoflann_port_ns::NanoflannPort(samples_);
+  auto kdt = nanoflann_port_ns::NanoflannPort(tree_->nodes());
   nanoflann_port_ns::KDTIndex idx = kdt.FindClosestPoint(random_point);
   return idx.dist;
 }
@@ -146,19 +148,13 @@ double RrtStarSmartPlanner::GetNearRadius(size_t n)
 std::vector<size_t> RrtStarSmartPlanner::GetNearPoints(
   const geometry_msgs::Point center_point, const double radius)
 {
-  auto kdt = nanoflann_port_ns::NanoflannPort(samples_);
+  auto kdt = nanoflann_port_ns::NanoflannPort(tree_->nodes());
   std::vector<nanoflann_port_ns::KDTIndex> idxs;
   kdt.FindClosestPoint(center_point, radius, idxs);
 
   std::vector<size_t> near_points_index;
   for (auto i : idxs) near_points_index.push_back(i.idx);
   return near_points_index;
-}
-
-size_t RrtStarSmartPlanner::ChooseParent(
-  const std::vector<size_t>& near_points, const geometry_msgs::Point new_point)
-{
-
 }
 
 }; // namespace rrt_planner

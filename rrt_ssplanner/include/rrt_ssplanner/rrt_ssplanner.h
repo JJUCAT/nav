@@ -15,12 +15,12 @@
 #include <geometry_msgs/PoseStamped.h>
 #include <base_local_planner/world_model.h>
 #include <base_local_planner/costmap_model.h>
-
+#include <rrt_ssplanner/tree.h>
 
 namespace rrt_planner {
 
 /**
-  * @brief 
+  * @brief rrt star smart planner
   */
 class RrtStarSmartPlanner : public nav_core::BaseGlobalPlanner {
   public:
@@ -67,13 +67,6 @@ class RrtStarSmartPlanner : public nav_core::BaseGlobalPlanner {
       * @return 
       */
     double footprintCost(double x_i, double y_i, double theta_i);
-
-    /**
-     * @brief  插入点
-     * @param  point  采样点
-     * @return size_t 插入点下标
-     */
-    size_t Insert(const geometry_msgs::Point point);
 
     /**
      * @brief  采样一个随机点
@@ -149,8 +142,7 @@ class RrtStarSmartPlanner : public nav_core::BaseGlobalPlanner {
     costmap_2d::Costmap2DROS* costmap_ros_;
     costmap_2d::Costmap2D* costmap_;
     std::shared_ptr<base_local_planner::WorldModel> world_model_;
-    
-    std::vector<geometry_msgs::Point> samples_;
+    std::shared_ptr<rrt_planner::Tree> tree_;
     double check_dstep_;
 
 

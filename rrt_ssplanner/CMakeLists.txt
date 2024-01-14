@@ -37,7 +37,9 @@ catkin_package(
 
 # nanoflann
 add_library(nanoflann_port
-  src/nanoflann_port.cpp)
+  src/nanoflann_port.cpp
+  src/node.cpp
+  src/tree.cpp)
 add_dependencies(nanoflann_port
   ${${PROJECT_NAME}_EXPORTED_TARGETS}
   ${catkin_EXPORTED_TARGETS})

@@ -9,6 +9,11 @@ namespace nanoflann_port_ns
     Init(pl);
   }
 
+  NanoflannPort::NanoflannPort(std::vector<rrt_planner::Node>* nl)
+  {
+    Init(nl);
+  }
+
   NanoflannPort::~NanoflannPort()
   {
     Reset();
@@ -26,6 +31,23 @@ namespace nanoflann_port_ns
       pc_->pts.at(i).x = pl.at(i).x;
       pc_->pts.at(i).y = pl.at(i).y;
       pc_->pts.at(i).z = pl.at(i).z;
+    }
+
+    kdtree_ = std::make_shared<kd_tree_t>(3, *pc_, 10);
+  }
+
+  void NanoflannPort::Init(std::vector<rrt_planner::Node>* nl)
+  {
+    if (nl->empty()) return;
+
+    Reset();
+
+    pc_ = std::make_shared<PointCloud<double>>();
+    pc_->pts.resize(nl->size());
+    for (int i = 0; i < nl->size(); ++i) {
+      pc_->pts.at(i).x = nl->at(i).point().x;
+      pc_->pts.at(i).y = nl->at(i).point().y;
+      pc_->pts.at(i).z = nl->at(i).point().z;
     }
 
     kdtree_ = std::make_shared<kd_tree_t>(3, *pc_, 10);
