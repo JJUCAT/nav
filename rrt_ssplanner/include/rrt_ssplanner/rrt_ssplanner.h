@@ -13,6 +13,7 @@
 #include <costmap_2d/costmap_2d.h>
 #include <nav_core/base_global_planner.h>
 #include <geometry_msgs/PoseStamped.h>
+#include <nav_msgs/Path.h>
 #include <base_local_planner/world_model.h>
 #include <base_local_planner/costmap_model.h>
 #include <rrt_ssplanner/tree.h>
@@ -138,6 +139,22 @@ class RrtStarSmartPlanner : public nav_core::BaseGlobalPlanner {
      */
     void calculateCheckDeltaStep();
 
+    /**
+     * @brief  是否搜索到终点了
+     * @param  goal  终点
+     * @param  point  当前节点
+     * @return true 
+     * @return false 
+     */
+    bool IsReach(const geometry_msgs::PoseStamped& goal, const geometry_msgs::Point point);
+
+    /**
+     * @brief  获取路径
+     * @param  plan  路径
+     * @return size_t
+     */
+    size_t GetPlan(std::vector<geometry_msgs::PoseStamped>& plan);
+
     bool initialized_;
     costmap_2d::Costmap2DROS* costmap_ros_;
     costmap_2d::Costmap2D* costmap_;
@@ -153,6 +170,7 @@ class RrtStarSmartPlanner : public nav_core::BaseGlobalPlanner {
     double timeout_;
     double step_;
     double r_gamma_;
+    double goal_err_;
 
 
 

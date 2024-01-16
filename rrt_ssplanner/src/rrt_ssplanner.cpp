@@ -4,6 +4,8 @@
  * @date 2024-01-01
  * @brief 
  */
+#include "nav_msgs/Path.h"
+#include "ros/duration.h"
 #include "tf/transform_datatypes.h"
 #include <angles/angles.h>
 #include <limits>
@@ -44,6 +46,7 @@ void RrtStarSmartPlanner::initialize(std::string name, costmap_2d::Costmap2DROS*
     private_nh.param("timeout", timeout_, 3.0);
     private_nh.param("step", step_, 1.0);
     private_nh.param("r_gamma", r_gamma_, 10.0);
+    private_nh.param("goal_err", goal_err_, 0.25);
 
     calculateCheckDeltaStep();
 
@@ -61,8 +64,12 @@ double RrtStarSmartPlanner::footprintCost(double x_i, double y_i, double theta_i
 bool RrtStarSmartPlanner::makePlan(const geometry_msgs::PoseStamped& start, 
     const geometry_msgs::PoseStamped& goal, std::vector<geometry_msgs::PoseStamped>& plan)
 {
+  ros::Time start_time = ros::Time::now();
+  bool reach = false;
+
   tree_->Insert(0, start.pose.position);
-  for (int i = 1; i < max_iterations_; i ++) {
+  for (int i = 1; i < max_iterations_;) {
+    if (ros::Time::now()-start_time > ros::Duration(timeout_)) break;
     geometry_msgs::Point sample = Sample();
     size_t nearest_index = GetNearestPoint(sample);
     geometry_msgs::Point nearest_point = tree_->nodes()->at(nearest_index).point();
@@ -71,9 +78,23 @@ bool RrtStarSmartPlanner::makePlan(const geometry_msgs::PoseStamped& start,
       double r = GetNearRadius(i);
       std::vector<size_t> near_index = GetNearPoints(new_point, r);
       tree_->InsertNode(i, new_point, near_index);
+      i ++;
+
+      if (IsReach(goal, new_point)) {
+        reach = true;
+        break;
+      }
     }
   }
-  return true;
+
+  if (reach) {
+    GetPlan(plan);
+    ROS_INFO("[RRT] make plan succeed !");
+    return true;
+  }
+
+  ROS_ERROR("[RRT] make plan failed !");
+  return false;
 }
 
 // -------------------- private --------------------
@@ -125,8 +146,9 @@ bool RrtStarSmartPlanner::IsCollised(const geometry_msgs::Pose p)
   double cost = world_model_->footprintCost(
     p.position.x, p.position.y, tf2::getYaw(p.orientation),
     costmap_ros_->getRobotFootprint());
-
-  return cost < 0.0;
+  bool is_collised = cost < 0.0;
+  if (is_collised) ROS_WARN("[RRT] point [%f, %f] collised", p.position.x, p.position.y);
+  return is_collised;
 }
 
 void RrtStarSmartPlanner::calculateCheckDeltaStep()
@@ -155,6 +177,28 @@ std::vector<size_t> RrtStarSmartPlanner::GetNearPoints(
   std::vector<size_t> near_points_index;
   for (auto i : idxs) near_points_index.push_back(i.idx);
   return near_points_index;
+}
+
+bool RrtStarSmartPlanner::IsReach(const geometry_msgs::PoseStamped& goal, const geometry_msgs::Point point)
+{
+  double dist_err = pow(goal.pose.position.y-point.y, 2) + pow(goal.pose.position.x-point.x, 2);
+  bool is_reach = dist_err <= goal_err_;
+  if (is_reach) ROS_INFO("[RRT] goal reach, err %f, limit %f", dist_err, goal_err_);
+  return is_reach;
+}
+
+size_t RrtStarSmartPlanner::GetPlan(std::vector<geometry_msgs::PoseStamped>& plan)
+{
+  geometry_msgs::PoseStamped pose;
+  pose.header.frame_id = costmap_ros_->getGlobalFrameID();
+  pose.header.stamp = ros::Time::now();
+  std::vector<geometry_msgs::Point> poses = tree_->GeTrajectory(&tree_->nodes()->back());
+  plan.reserve(poses.size());
+  for (auto p : poses) {
+    pose.pose.position = p;
+    plan.emplace_back(pose);
+  }
+  return plan.size();
 }
 
 }; // namespace rrt_planner

@@ -28,6 +28,12 @@ class Node
   void set_parent(Node* p);
 
   /**
+   * @brief  获取父节点
+   * @return Node* 
+   */
+  Node* parent();
+
+  /**
    * @brief  设置到父节点的移动代价
    * @param  cost  移动代价
    */
@@ -44,12 +50,6 @@ class Node
    * @return geometry_msgs::Point 
    */
   geometry_msgs::Point point();
-  
-  /**
-   * @brief  从该节点向父节点一直遍历到根节点，累积节点移动代价
-   * @return double 
-   */
-  double trajectory_cost();
 
  protected:
 

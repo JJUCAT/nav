@@ -17,6 +17,11 @@ void Node::set_parent(Node* p)
   parent_ = p;
 }
 
+Node* Node::parent()
+{
+  return parent_;
+}
+
 void Node::set_cost(const double cost)
 {
   cost_ = cost;
@@ -32,16 +37,6 @@ geometry_msgs::Point Node::point()
   return point_;
 }
 
-double Node::trajectory_cost()
-{
-  double cost = 0.0;
-  auto p = this;
-  while (this->parent_ != nullptr) {
-    cost += p->cost();
-    p = p->parent_;
-  }
-  return cost;
-}
 
 } // namespace rrt_planner
 

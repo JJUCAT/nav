@@ -29,6 +29,20 @@ class Tree
 
   std::vector<rrt_planner::Node>* nodes();
 
+  /**
+   * @brief  从节点向父节点一直遍历到根节点，累积节点移动代价
+   * @param  node  要遍历的起始节点
+   * @return double  总移动代价
+   */
+  double TrajectoryCost(rrt_planner::Node* node);
+
+  /**
+   * @brief  获取轨迹
+   * @param  node  轨迹的终点节点
+   * @return std::vector<geometry_msgs::Point> 
+   */
+  std::vector<geometry_msgs::Point> GeTrajectory(rrt_planner::Node* node);
+
  private:
   std::vector<rrt_planner::Node> nodes_;
 
