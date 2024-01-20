@@ -1,0 +1,99 @@
+include "../robot/diff_robot.inc"
+
+# 定义地图
+define floorplan model
+(
+  color "gray30"
+
+  # 是否需要添加边界 @0:不添加边界 @1:添加边界
+  boundary 0
+
+  gui_nose 1
+  gui_grid 0
+  gui_outline 0
+
+  # 是否可抓取
+  gripper_return 0
+
+  # 是否反射光源
+  fiducial_return 0
+
+  # 是否反射雷达
+  laser_return 1
+)
+
+# 世界名
+name "carlike_world"
+
+# 仿真周期，uint:ms
+interval_sim 100
+
+# 等待时间
+quit_time 0
+
+# 
+resolution 0.05
+
+# 显示时间
+show_clock 0
+
+# 时间最小单位，uint:ms
+show_clock_interval 100
+
+# 线程数
+threads 1
+
+# stage 仿真器的窗口
+window
+(
+  size [ 800 600 ] # 窗口大小
+  center [ 0.000 0.000 ] # 窗口位置
+  rotate [ 0.000 0.000 ] # 视角旋转
+  scale 10.000 # 视角缩放
+
+  # perspective camera options
+  pcam_loc [ 0.000 -4.000 2.000 ]
+  pcam_angle [ 70.000 0.000 ]
+
+  # GUI options
+  show_data 0
+  show_flags 1
+  show_blocks 1
+  show_clock 1
+  show_footprints 0
+  show_grid 1
+  show_trailarrows 0
+  show_trailrise 0
+  show_trailfast 0
+  show_occupancy 0
+  show_tree 0
+  pcam_on 0
+  screenshots 0
+)
+
+# 导入图片生成地图
+floorplan
+(
+  # 地图名
+  name "o" 
+
+  # 图片路径
+  bitmap "../maps/simple.pgm"
+
+  # 生成 stage 地图模型，需要和 map server 生成的地图对齐，uint:m
+  # map server 中的地图的尺寸由图片大小及 yaml 中的分辨率来决定，pixel * resolution
+  size [ 20.000 20.000 2.000 ]
+
+  # 地图模型的中心在 stage 中的位置
+  # 这里也需要和 map server 对齐，否则 stage 中反馈的定位和 map server 对不上
+  # map server 中，地图 origin 在左下角(yaml 中的 origin)
+  pose [ 10.000 10.000 0.000 0.000 ]
+)
+
+# 放置机器人
+diff_robot
+(
+  # 机器人在地图中的位置
+  pose [ 8.000 8.000 0.000 0.000 ]
+)
+

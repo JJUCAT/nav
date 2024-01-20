@@ -8,6 +8,7 @@
 #define RRT_PLANNER_H_
 #include "geometry_msgs/Point.h"
 #include "geometry_msgs/PoseArray.h"
+#include "ros/publisher.h"
 #include <ros/ros.h>
 #include <costmap_2d/costmap_2d_ros.h>
 #include <costmap_2d/costmap_2d.h>
@@ -17,6 +18,8 @@
 #include <base_local_planner/world_model.h>
 #include <base_local_planner/costmap_model.h>
 #include <rrt_ssplanner/tree.h>
+#include <visualization_msgs/Marker.h>
+#include <visualization_msgs/MarkerArray.h>
 
 namespace rrt_planner {
 
@@ -155,6 +158,21 @@ class RrtStarSmartPlanner : public nav_core::BaseGlobalPlanner {
      */
     size_t GetPlan(std::vector<geometry_msgs::PoseStamped>& plan);
 
+    /**
+     * @brief  可视化节点
+     * @param  point  节点
+     * @param  index  id 
+     */
+    void PubNode(const geometry_msgs::Point& point, const size_t index);
+
+    /**
+     * @brief  可视化路径
+     * @param  points  路径点
+     */
+    void PubPlan(const std::vector<geometry_msgs::PoseStamped>& points);
+
+
+
     bool initialized_;
     costmap_2d::Costmap2DROS* costmap_ros_;
     costmap_2d::Costmap2D* costmap_;
@@ -162,8 +180,8 @@ class RrtStarSmartPlanner : public nav_core::BaseGlobalPlanner {
     std::shared_ptr<rrt_planner::Tree> tree_;
     double check_dstep_;
 
-
-
+    ros::Publisher nodes_pub_;
+    ros::Publisher plan_pub_;
 
     // -------------------- parameters --------------------
     int max_iterations_;

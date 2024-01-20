@@ -48,6 +48,9 @@ void RrtStarSmartPlanner::initialize(std::string name, costmap_2d::Costmap2DROS*
     private_nh.param("r_gamma", r_gamma_, 10.0);
     private_nh.param("goal_err", goal_err_, 0.25);
 
+    nodes_pub_ = private_nh.advertise<visualization_msgs::Marker>("tree_nodes", 1);
+    plan_pub_ = private_nh.advertise<nav_msgs::Path>("plan", 1);
+
     calculateCheckDeltaStep();
 
     initialized_ = true;
@@ -78,6 +81,7 @@ bool RrtStarSmartPlanner::makePlan(const geometry_msgs::PoseStamped& start,
       double r = GetNearRadius(i);
       std::vector<size_t> near_index = GetNearPoints(new_point, r);
       tree_->InsertNode(i, new_point, near_index);
+      PubNode(new_point, i);
       i ++;
 
       if (IsReach(goal, new_point)) {
@@ -89,6 +93,7 @@ bool RrtStarSmartPlanner::makePlan(const geometry_msgs::PoseStamped& start,
 
   if (reach) {
     GetPlan(plan);
+    PubPlan(plan);
     ROS_INFO("[RRT] make plan succeed !");
     return true;
   }
@@ -199,6 +204,34 @@ size_t RrtStarSmartPlanner::GetPlan(std::vector<geometry_msgs::PoseStamped>& pla
     plan.emplace_back(pose);
   }
   return plan.size();
+}
+
+void RrtStarSmartPlanner::PubNode(const geometry_msgs::Point& point, const size_t index)
+{
+  visualization_msgs::Marker v_trajectory;
+  v_trajectory.header.frame_id = costmap_ros_->getGlobalFrameID();
+  v_trajectory.header.stamp = ros::Time::now();
+  v_trajectory.color.r = 0.8;
+  v_trajectory.color.g = 0;
+  v_trajectory.color.b = 0;
+  v_trajectory.color.a = 0.8;
+  v_trajectory.scale.x = 0.1;
+  v_trajectory.type = visualization_msgs::Marker::SPHERE;
+  v_trajectory.action = visualization_msgs::Marker::ADD;
+  v_trajectory.lifetime = ros::Duration();
+  v_trajectory.id = index;
+  v_trajectory.points.push_back(point);
+  nodes_pub_.publish(v_trajectory);
+}
+
+void RrtStarSmartPlanner::PubPlan(const std::vector<geometry_msgs::PoseStamped>& points)
+{
+  nav_msgs::Path plan;
+  plan.header.frame_id = costmap_ros_->getGlobalFrameID();
+  plan.header.stamp = ros::Time::now();
+  plan.poses.reserve(points.size());
+  for (auto p : points) plan.poses.emplace_back(p);
+  plan_pub_.publish(plan);
 }
 
 }; // namespace rrt_planner

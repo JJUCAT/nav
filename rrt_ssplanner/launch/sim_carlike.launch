@@ -1,0 +1,23 @@
+<launch>
+  <env name="ROSCONSOLE_CONFIG_FILE" value="$(find rrt_ssplanner)/config/roslog.config" />
+  <arg name="world" default="diff.world" />
+  <arg name="map" default="simple.yaml" />
+  <arg name="rviz" default="true" />
+
+  <param name="/use_sim_time" value="true"/>
+
+  <node pkg="map_server" type="map_server" name="map_server" args="$(find rrt_ssplanner)/maps/$(arg map)" output="screen"/>
+
+  <node pkg="stage_ros" type="stageros" name="stageros" args="$(find rrt_ssplanner)/world/$(arg world)" />
+
+  <node pkg="fake_localization" type="fake_localization" name="fake_localization" respawn="false" />
+
+  <node pkg="tf" type="static_transform_publisher" name="map_odom_broadcaster" args="0 0 0 0 0 0 /map /odom 10000" />
+
+  <node pkg="rrt_ssplanner" type="sim.py" name="stage_sim" output="screen"/>
+
+  <include file="$(find rrt_ssplanner)/launch/move_base.launch" />
+  
+	<node name="rviz" pkg="rviz" type="rviz" args="-d $(find rrt_ssplanner)/rviz/sim.rviz" if="$(arg rviz)"/>
+
+</launch>
