@@ -21,7 +21,7 @@ void Tree::InsertNode(const size_t index, const geometry_msgs::Point point,
 
 void Tree::Insert(const size_t index, const geometry_msgs::Point point)
 {
-  nodes_.push_back(rrt_planner::Node(index, point));
+  nodes_.insert(std::make_pair(index, rrt_planner::Node(index, point)));
 }
 
 void Tree::Rewire(const size_t node, const std::vector<size_t>& near_points)
@@ -31,7 +31,6 @@ void Tree::Rewire(const size_t node, const std::vector<size_t>& near_points)
   size_t parent_index;
   double c2p_cost;
   for (auto p : near_points) {
-    std::cout << "p: " << p << std::endl;
     auto pp = nodes_.at(p).point();
     double new_cost = std::hypot(pp.y-point.y, pp.x-point.x);
     std::cout << "pp [" << p << "][" << pp.x << "," << pp.y << "], cost " << new_cost << std::endl;
@@ -51,15 +50,16 @@ void Tree::Rewire(const size_t node, const std::vector<size_t>& near_points)
     if (nodes_.at(p).is_root()) continue;
     double original_cost = TrajectoryCost(&nodes_.at(p));
     auto pp = nodes_.at(p).point();
-    double new_cost = std::hypot(pp.y-point.y, pp.x-point.x) + cost_min;
-    if (original_cost > new_cost) {
+    double new_cost = std::hypot(pp.y-point.y, pp.x-point.x);
+    if (original_cost > new_cost+cost_min) {
+      std::cout << "index [" << p << "] set new node as parent." << std::endl;
       nodes_.at(p).set_parent(&nodes_.at(node));
       nodes_.at(p).set_cost(new_cost);
     }
   }
 }
 
-std::vector<rrt_planner::Node>* Tree::nodes()
+std::map<size_t, rrt_planner::Node>* Tree::nodes()
 {
   return &nodes_;
 }
@@ -68,10 +68,12 @@ double Tree::TrajectoryCost(rrt_planner::Node* node)
 {
   double cost = 0.0;
   auto p = node;
-  while (p->parent() != nullptr) {
+  std::cout << "get trajectory cost" << std::endl;
+  while (!p->is_root()) {
     cost += p->cost();
     p = p->parent();
   }
+  std::cout << "get trajectory cost end." << std::endl;
   return cost;
 }
 
@@ -79,7 +81,7 @@ std::vector<geometry_msgs::Point> Tree::GeTrajectory(rrt_planner::Node* node)
 {
   std::vector<geometry_msgs::Point> points;
   auto p = node;
-  while (p->parent() != nullptr) {
+  while (!p->is_root()) {
     points.push_back(p->point());
     p = p->parent();
   }

@@ -71,6 +71,7 @@ bool RrtStarSmartPlanner::makePlan(const geometry_msgs::PoseStamped& start,
   bool reach = false;
 
   tree_->Insert(0, start.pose.position);
+  PubNode(tree_->nodes()->at(0).point(), 0);
   std::cout << "star [" << start.pose.position.x << "," << start.pose.position.y << "]" << std::endl;
   for (int i = 1; i < max_iterations_;) {
     if (ros::Time::now()-start_time > ros::Duration(timeout_)) break;
@@ -207,7 +208,8 @@ size_t RrtStarSmartPlanner::GetPlan(std::vector<geometry_msgs::PoseStamped>& pla
   geometry_msgs::PoseStamped pose;
   pose.header.frame_id = costmap_ros_->getGlobalFrameID();
   pose.header.stamp = ros::Time::now();
-  std::vector<geometry_msgs::Point> poses = tree_->GeTrajectory(&tree_->nodes()->back());
+  std::vector<geometry_msgs::Point> poses =
+    tree_->GeTrajectory(&tree_->nodes()->at(tree_->nodes()->size()-1));
   plan.reserve(poses.size());
   for (auto p : poses) {
     pose.pose.position = p;

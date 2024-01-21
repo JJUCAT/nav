@@ -35,10 +35,12 @@ class NanoflannPort
   NanoflannPort() {}
   NanoflannPort(const std::vector<geometry_msgs::Point>& pl);
   NanoflannPort(std::vector<rrt_planner::Node>* nl);
+  NanoflannPort(std::map<size_t, rrt_planner::Node>* pl);  
   ~NanoflannPort();
 
   void Init(const std::vector<geometry_msgs::Point>& pl);
   void Init(std::vector<rrt_planner::Node>* nl);
+  void Init(std::map<size_t, rrt_planner::Node>* nl);
   void Reset();
 
   KDTIndex FindClosestPoint(const geometry_msgs::Point p) const;

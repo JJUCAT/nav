@@ -27,7 +27,7 @@ class Tree
 
   void Rewire(const size_t node, const std::vector<size_t>& near_points);
 
-  std::vector<rrt_planner::Node>* nodes();
+  std::map<size_t, rrt_planner::Node>* nodes();
 
   /**
    * @brief  从节点向父节点一直遍历到根节点，累积节点移动代价
@@ -44,7 +44,7 @@ class Tree
   std::vector<geometry_msgs::Point> GeTrajectory(rrt_planner::Node* node);
 
  private:
-  std::vector<rrt_planner::Node> nodes_;
+  std::map<size_t, rrt_planner::Node> nodes_;
 
 }; // class Tree
 
