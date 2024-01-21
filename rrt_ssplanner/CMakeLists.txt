@@ -37,22 +37,23 @@ catkin_package(
 
 # nanoflann
 add_library(nanoflann_port
-  src/nanoflann_port.cpp
-  src/node.cpp
-  src/tree.cpp)
+  src/nanoflann_port.cpp)
 add_dependencies(nanoflann_port
   ${${PROJECT_NAME}_EXPORTED_TARGETS}
   ${catkin_EXPORTED_TARGETS})
 
 add_library(rrt_ssplanner
-  src/rrt_ssplanner.cpp)
+  src/rrt_ssplanner.cpp
+  src/node.cpp
+  src/tree.cpp)
 add_dependencies(rrt_ssplanner
   nanoflann_port
   ${${PROJECT_NAME}_EXPORTED_TARGETS}
   ${catkin_EXPORTED_TARGETS})
 target_link_libraries(rrt_ssplanner
-    ${catkin_LIBRARIES}
-    )
+  nanoflann_port
+  ${catkin_LIBRARIES}
+  )
 
 install(TARGETS rrt_ssplanner
        ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}

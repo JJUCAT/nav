@@ -51,6 +51,13 @@ class Node
    */
   geometry_msgs::Point point();
 
+  /**
+   * @brief  是否是根节点
+   * @return true 
+   * @return false 
+   */
+  bool is_root();
+
  protected:
 
   Node* parent_;

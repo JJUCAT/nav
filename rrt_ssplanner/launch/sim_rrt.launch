@@ -14,7 +14,7 @@
 
   <node pkg="tf" type="static_transform_publisher" name="map_odom_broadcaster" args="0 0 0 0 0 0 /map /odom 10000" />
 
-  <node pkg="rrt_ssplanner" type="sim.py" name="stage_sim" output="screen"/>
+  <node pkg="rrt_ssplanner" type="stage_sim.py" name="stage_sim" output="screen"/>
 
   <include file="$(find rrt_ssplanner)/launch/move_base.launch" />
   

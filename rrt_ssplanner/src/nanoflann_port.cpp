@@ -44,6 +44,7 @@ namespace nanoflann_port_ns
 
     pc_ = std::make_shared<PointCloud<double>>();
     pc_->pts.resize(nl->size());
+    std::cout << "kdt init size" << nl->size() << std::endl;
     for (int i = 0; i < nl->size(); ++i) {
       pc_->pts.at(i).x = nl->at(i).point().x;
       pc_->pts.at(i).y = nl->at(i).point().y;

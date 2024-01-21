@@ -71,26 +71,35 @@ bool RrtStarSmartPlanner::makePlan(const geometry_msgs::PoseStamped& start,
   bool reach = false;
 
   tree_->Insert(0, start.pose.position);
+  std::cout << "star [" << start.pose.position.x << "," << start.pose.position.y << "]" << std::endl;
   for (int i = 1; i < max_iterations_;) {
     if (ros::Time::now()-start_time > ros::Duration(timeout_)) break;
     geometry_msgs::Point sample = Sample();
+    std::cout << "iter " << i << ", sample [" << sample.x << "," << sample.y << "]" << std::endl;
     size_t nearest_index = GetNearestPoint(sample);
+    std::cout << "nearest index:" << nearest_index << std::endl;
     geometry_msgs::Point nearest_point = tree_->nodes()->at(nearest_index).point();
     geometry_msgs::Point new_point;
+    std::cout << "nearest point [" << nearest_point.x << "," << nearest_point.y << "]" << std::endl;
     if (Steer(nearest_point, sample, new_point)) {
+      std::cout << "new point [" << new_point.x << "," << new_point.y << "]" << std::endl;
       double r = GetNearRadius(i);
-      std::vector<size_t> near_index = GetNearPoints(new_point, r);
+      std::cout << "near radius " << r << std::endl;
+      std::vector<size_t> near_index;
+      if (i == 1) near_index.push_back(0u);
+      else near_index = GetNearPoints(new_point, r);
+      std::cout << "near index size is " << near_index.size() << std::endl;
       tree_->InsertNode(i, new_point, near_index);
       PubNode(new_point, i);
       i ++;
-
       if (IsReach(goal, new_point)) {
+        std::cout << "reach goal !" << std::endl;
         reach = true;
         break;
       }
     }
   }
-
+  std::cout << "finish search." << std::endl;
   if (reach) {
     GetPlan(plan);
     PubPlan(plan);
@@ -106,7 +115,8 @@ bool RrtStarSmartPlanner::makePlan(const geometry_msgs::PoseStamped& start,
 
 geometry_msgs::Point RrtStarSmartPlanner::Sample()
 {
-  srand(static_cast<unsigned int>(time(NULL)));
+  unsigned int now = clock();
+  srand(static_cast<unsigned int>(now));
   int rand0 = rand();
   srand(static_cast<unsigned int>(rand0));
   int rand1 = rand();
@@ -122,11 +132,11 @@ geometry_msgs::Point RrtStarSmartPlanner::Sample()
 
 size_t RrtStarSmartPlanner::GetNearestPoint(const geometry_msgs::Point random_point)
 {
-  ROS_ASSERT_MSG(tree_->nodes()->empty(), "[RRT] samples must be has size.");
+  ROS_ASSERT_MSG(!tree_->nodes()->empty(), "[RRT] samples must be has size.");
 
   auto kdt = nanoflann_port_ns::NanoflannPort(tree_->nodes());
   nanoflann_port_ns::KDTIndex idx = kdt.FindClosestPoint(random_point);
-  return idx.dist;
+  return idx.idx;
 }
 
 bool RrtStarSmartPlanner::Steer(const geometry_msgs::Point nestest_point,
@@ -168,7 +178,7 @@ void RrtStarSmartPlanner::calculateCheckDeltaStep()
 
 double RrtStarSmartPlanner::GetNearRadius(size_t n)
 {
-  ROS_ASSERT_MSG(n <= 1, "[RRT] iterations must be greater than 1.");
+  ROS_ASSERT_MSG(n >= 1, "[RRT] iterations must be greater than 1.");
   return r_gamma_ * std::sqrt(log(n)/n);
 }
 
@@ -177,7 +187,7 @@ std::vector<size_t> RrtStarSmartPlanner::GetNearPoints(
 {
   auto kdt = nanoflann_port_ns::NanoflannPort(tree_->nodes());
   std::vector<nanoflann_port_ns::KDTIndex> idxs;
-  kdt.FindClosestPoint(center_point, radius, idxs);
+  kdt.FindPointsInRadius(center_point, radius, idxs);
 
   std::vector<size_t> near_points_index;
   for (auto i : idxs) near_points_index.push_back(i.idx);
@@ -215,12 +225,16 @@ void RrtStarSmartPlanner::PubNode(const geometry_msgs::Point& point, const size_
   v_trajectory.color.g = 0;
   v_trajectory.color.b = 0;
   v_trajectory.color.a = 0.8;
+  v_trajectory.pose.position.x = point.x;
+  v_trajectory.pose.position.y = point.y;
+  v_trajectory.pose.orientation.w = 1.0;
   v_trajectory.scale.x = 0.1;
+  v_trajectory.scale.y = 0.1;
+  v_trajectory.scale.z = 0.1;
   v_trajectory.type = visualization_msgs::Marker::SPHERE;
   v_trajectory.action = visualization_msgs::Marker::ADD;
   v_trajectory.lifetime = ros::Duration();
   v_trajectory.id = index;
-  v_trajectory.points.push_back(point);
   nodes_pub_.publish(v_trajectory);
 }
 

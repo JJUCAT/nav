@@ -37,6 +37,10 @@ geometry_msgs::Point Node::point()
   return point_;
 }
 
+bool Node::is_root()
+{
+  return index_ == 0;
+}
 
 } // namespace rrt_planner
 

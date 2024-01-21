@@ -31,9 +31,12 @@ void Tree::Rewire(const size_t node, const std::vector<size_t>& near_points)
   size_t parent_index;
   double c2p_cost;
   for (auto p : near_points) {
+    std::cout << "p: " << p << std::endl;
     auto pp = nodes_.at(p).point();
     double new_cost = std::hypot(pp.y-point.y, pp.x-point.x);
+    std::cout << "pp [" << p << "][" << pp.x << "," << pp.y << "], cost " << new_cost << std::endl;
     double total_cost = new_cost + TrajectoryCost(&nodes_.at(p));
+    std::cout << "total cost " << total_cost << std::endl;
     if (total_cost < cost_min) {
       cost_min = total_cost;
       parent_index = p;
@@ -42,9 +45,10 @@ void Tree::Rewire(const size_t node, const std::vector<size_t>& near_points)
   }
   nodes_.at(node).set_cost(c2p_cost);
   nodes_.at(node).set_parent(&nodes_.at(parent_index));
-
+  std::cout << "new node cost " << c2p_cost << ", parent " << parent_index << std::endl;
   for (auto p : near_points) {
     if (p == parent_index) continue;
+    if (nodes_.at(p).is_root()) continue;
     double original_cost = TrajectoryCost(&nodes_.at(p));
     auto pp = nodes_.at(p).point();
     double new_cost = std::hypot(pp.y-point.y, pp.x-point.x) + cost_min;
