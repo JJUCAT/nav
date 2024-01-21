@@ -11,9 +11,6 @@
 #include <limits>
 #include <rrt_ssplanner/rrt_ssplanner.h>
 #include <pluginlib/class_list_macros.hpp>
-#include <tf2/convert.h>
-#include <tf2/utils.h>
-#include <tf2_geometry_msgs/tf2_geometry_msgs.h>
 #include <rrt_ssplanner/nanoflann_port.h>
 
 //register this planner as a BaseGlobalPlanner plugin
@@ -39,7 +36,6 @@ void RrtStarSmartPlanner::initialize(std::string name, costmap_2d::Costmap2DROS*
     costmap_ros_ = costmap_ros;
     costmap_ = costmap_ros_->getCostmap();
     world_model_ = std::make_shared<base_local_planner::CostmapModel>(*costmap_);
-    tree_ = std::make_shared<rrt_planner::Tree>();
 
     ros::NodeHandle private_nh("~/" + name);
     private_nh.param("max_iterations", max_iterations_, 10000);
@@ -50,7 +46,9 @@ void RrtStarSmartPlanner::initialize(std::string name, costmap_2d::Costmap2DROS*
 
     nodes_pub_ = private_nh.advertise<visualization_msgs::Marker>("tree_nodes", 1);
     plan_pub_ = private_nh.advertise<nav_msgs::Path>("plan", 1);
+    arrows_pub_ = private_nh.advertise<visualization_msgs::Marker>("arrows", 1);
 
+    tree_ = std::make_shared<rrt_planner::Tree>(costmap_ros_->getGlobalFrameID(), arrows_pub_);
     calculateCheckDeltaStep();
 
     initialized_ = true;
@@ -76,7 +74,7 @@ bool RrtStarSmartPlanner::makePlan(const geometry_msgs::PoseStamped& start,
   for (int i = 1; i < max_iterations_;) {
     if (ros::Time::now()-start_time > ros::Duration(timeout_)) break;
     geometry_msgs::Point sample = Sample();
-    std::cout << "iter " << i << ", sample [" << sample.x << "," << sample.y << "]" << std::endl;
+    std::cout << "<========== iter " << i << ", sample [" << sample.x << "," << sample.y << "] ==========>" << std::endl;
     size_t nearest_index = GetNearestPoint(sample);
     std::cout << "nearest index:" << nearest_index << std::endl;
     geometry_msgs::Point nearest_point = tree_->nodes()->at(nearest_index).point();
@@ -90,9 +88,11 @@ bool RrtStarSmartPlanner::makePlan(const geometry_msgs::PoseStamped& start,
       if (i == 1) near_index.push_back(0u);
       else near_index = GetNearPoints(new_point, r);
       std::cout << "near index size is " << near_index.size() << std::endl;
+      if (near_index.empty()) near_index.push_back(nearest_index);
+      PubNode(new_point, i);      
       tree_->InsertNode(i, new_point, near_index);
-      PubNode(new_point, i);
       i ++;
+
       if (IsReach(goal, new_point)) {
         std::cout << "reach goal !" << std::endl;
         reach = true;
@@ -105,6 +105,7 @@ bool RrtStarSmartPlanner::makePlan(const geometry_msgs::PoseStamped& start,
     GetPlan(plan);
     PubPlan(plan);
     ROS_INFO("[RRT] make plan succeed !");
+    while(1);
     return true;
   }
 
@@ -125,9 +126,8 @@ geometry_msgs::Point RrtStarSmartPlanner::Sample()
   double x_size = costmap_->getSizeInMetersX();
   double y_size = costmap_->getSizeInMetersY();
   geometry_msgs::Point p;
-  p.x = static_cast<double>(rand0) / RAND_MAX * x_size - x_size / 2;
-  p.y = static_cast<double>(rand1) / RAND_MAX * y_size - y_size / 2;
-  ROS_INFO("[RRT] rand sample [%f,%f]", p.x, p.y);
+  p.x = static_cast<double>(rand0) / RAND_MAX * x_size + costmap_->getOriginX();
+  p.y = static_cast<double>(rand1) / RAND_MAX * y_size + costmap_->getOriginY();
   return p;
 }
 
@@ -144,15 +144,18 @@ bool RrtStarSmartPlanner::Steer(const geometry_msgs::Point nestest_point,
   const geometry_msgs::Point random_point, geometry_msgs::Point& new_point)
 {
   double orient = atan2(random_point.y - nestest_point.y, random_point.x - nestest_point.x);
+  double dist = std::hypot(random_point.y - nestest_point.y, random_point.x - nestest_point.x);
   geometry_msgs::Pose pose;
   pose.orientation = tf::createQuaternionMsgFromYaw(orient);
 
   new_point = nestest_point;
-  for (double d = 0.0; d <= step_; d+= check_dstep_) {
-    new_point.x = new_point.x + check_dstep_ * cos(orient);
-    new_point.y = new_point.y + check_dstep_ * sin(orient);
+  for (double d = 0.0; d <= step_; d += check_dstep_) {
+    d = d >= dist ? dist : d;
+    new_point.x = nestest_point.x + d * cos(orient);
+    new_point.y = nestest_point.y + d * sin(orient);
     pose.position = new_point;
     if (IsCollised(pose)) return false;
+    if (d >= dist) break;
   }
   return true;
 }

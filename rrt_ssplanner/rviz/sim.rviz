@@ -3,7 +3,8 @@ Panels:
     Help Height: 138
     Name: Displays
     Property Tree Widget:
-      Expanded: ~
+      Expanded:
+        - /RRT1/plan1
       Splitter Ratio: 0.6247504949569702
     Tree Height: 454
   - Class: rviz/Selection
@@ -304,8 +305,8 @@ Visualization Manager:
           Head Diameter: 0.30000001192092896
           Head Length: 0.20000000298023224
           Length: 0.30000001192092896
-          Line Style: Lines
-          Line Width: 0.029999999329447746
+          Line Style: Billboards
+          Line Width: 0.10000000149011612
           Name: plan
           Offset:
             X: 0
@@ -319,6 +320,14 @@ Visualization Manager:
           Shaft Length: 0.10000000149011612
           Topic: /move_base/RrtStarSmartPlanner/plan
           Unreliable: false
+          Value: true
+        - Class: rviz/Marker
+          Enabled: true
+          Marker Topic: /move_base/RrtStarSmartPlanner/arrows
+          Name: arrows
+          Namespaces:
+            {}
+          Queue Size: 100
           Value: true
       Enabled: true
       Name: RRT
@@ -387,4 +396,4 @@ Window Geometry:
     collapsed: false
   Width: 1440
   X: 90
-  Y: 48
+  Y: 27

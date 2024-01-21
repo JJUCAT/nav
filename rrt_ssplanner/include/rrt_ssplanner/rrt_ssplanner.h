@@ -20,6 +20,9 @@
 #include <rrt_ssplanner/tree.h>
 #include <visualization_msgs/Marker.h>
 #include <visualization_msgs/MarkerArray.h>
+#include <tf2/convert.h>
+#include <tf2/utils.h>
+#include <tf2_geometry_msgs/tf2_geometry_msgs.h>
 
 namespace rrt_planner {
 
@@ -182,6 +185,7 @@ class RrtStarSmartPlanner : public nav_core::BaseGlobalPlanner {
 
     ros::Publisher nodes_pub_;
     ros::Publisher plan_pub_;
+    ros::Publisher arrows_pub_;
 
     // -------------------- parameters --------------------
     int max_iterations_;

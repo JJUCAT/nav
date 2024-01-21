@@ -8,7 +8,12 @@
 #ifndef TREE_H_
 #define TREE_H_
 
+#include "ros/publisher.h"
+#include <ros/ros.h>
 #include <geometry_msgs/Point.h>
+#include <string>
+#include <visualization_msgs/Marker.h>
+#include <visualization_msgs/MarkerArray.h>
 
 #include <rrt_ssplanner/node.h>
 
@@ -17,7 +22,11 @@ namespace rrt_planner {
 class Tree
 {
  public:
-  Tree() = default;
+  Tree() = delete;
+  Tree(const std::string& map_frame, const ros::Publisher& arrows_pub) {
+    map_frame_ = map_frame;
+    arrows_pub_ = arrows_pub;
+  }
   ~Tree() = default;
 
   void InsertNode(const size_t index, const geometry_msgs::Point point,
@@ -43,8 +52,20 @@ class Tree
    */
   std::vector<geometry_msgs::Point> GeTrajectory(rrt_planner::Node* node);
 
+  /**
+   * @brief  发布箭头，从子节点指向父节点
+   * @param  index  子节点下标
+   * @param  child  子节点
+   * @param  parent  父节点
+   */
+  void PubArrow(const size_t index,
+    const geometry_msgs::Point& child, const geometry_msgs::Point& parent);
+
  private:
   std::map<size_t, rrt_planner::Node> nodes_;
+
+  std::string map_frame_;
+  ros::Publisher arrows_pub_;
 
 }; // class Tree
 
