@@ -38,6 +38,10 @@ class Tree
 
   std::map<size_t, rrt_planner::Node>* nodes();
 
+  void SetTerminal(const size_t terminal);
+
+  rrt_planner::Node* GetTerminal();
+
   /**
    * @brief  从节点向父节点一直遍历到根节点，累积节点移动代价
    * @param  node  要遍历的起始节点
@@ -59,13 +63,15 @@ class Tree
    * @param  parent  父节点
    */
   void PubArrow(const size_t index,
-    const geometry_msgs::Point& child, const geometry_msgs::Point& parent);
+    const geometry_msgs::Point& child, const geometry_msgs::Point& parent,
+    const double r, const double g, const double b);
 
  private:
   std::map<size_t, rrt_planner::Node> nodes_;
 
   std::string map_frame_;
   ros::Publisher arrows_pub_;
+  size_t terminal_;
 
 }; // class Tree
 

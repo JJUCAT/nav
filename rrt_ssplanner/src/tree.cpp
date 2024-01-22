@@ -31,13 +31,10 @@ void Tree::Rewire(const size_t node, const std::vector<size_t>& near_points)
   double cost_min = std::numeric_limits<double>::max();
   size_t parent_index;
   double c2p_cost;
-  std::cout << "rewire node index:" << node << std::endl;
   for (auto p : near_points) {
     auto pp = nodes_.at(p).point();
     double new_cost = std::hypot(pp.y-point.y, pp.x-point.x);
-    std::cout << "pp [" << p << "][" << pp.x << "," << pp.y << "], cost " << new_cost << std::endl;
     double total_cost = new_cost + TrajectoryCost(&nodes_.at(p));
-    std::cout << "total cost " << total_cost << std::endl;
     if (total_cost < cost_min) {
       cost_min = total_cost;
       parent_index = p;
@@ -46,8 +43,8 @@ void Tree::Rewire(const size_t node, const std::vector<size_t>& near_points)
   }
   nodes_.at(node).set_cost(c2p_cost);
   nodes_.at(node).set_parent(&nodes_.at(parent_index));
-  std::cout << "new node cost " << c2p_cost << ", parent " << parent_index << std::endl;
-  PubArrow(node, point, nodes_.at(parent_index).point());
+  ROS_INFO("[RRT] insert point [%lu], child [%f,%f] to parent [%f,%f]", node, point.x, point.y, nodes_.at(parent_index).point().x, nodes_.at(parent_index).point().y);
+  PubArrow(node, point, nodes_.at(parent_index).point(), 1, 1, 0);
 
   for (auto p : near_points) {
     if (p == parent_index) continue;
@@ -56,10 +53,10 @@ void Tree::Rewire(const size_t node, const std::vector<size_t>& near_points)
     auto pp = nodes_.at(p).point();
     double new_cost = std::hypot(pp.y-point.y, pp.x-point.x);
     if (original_cost > new_cost+cost_min) {
-      std::cout << "index [" << p << "] set new node as parent." << std::endl;
       nodes_.at(p).set_parent(&nodes_.at(node));
       nodes_.at(p).set_cost(new_cost);
-      PubArrow(p, nodes_.at(p).point(), nodes_.at(node).point());
+      ROS_INFO("[RRT] rewire index [%lu], child [%f,%f] to parent [%f,%f]", p, nodes_.at(p).point().x, nodes_.at(p).point().y, nodes_.at(node).point().x, nodes_.at(node).point().y);
+      PubArrow(p, nodes_.at(p).point(), nodes_.at(node).point(), 1, 0, 1);
     }
   }
 }
@@ -67,6 +64,16 @@ void Tree::Rewire(const size_t node, const std::vector<size_t>& near_points)
 std::map<size_t, rrt_planner::Node>* Tree::nodes()
 {
   return &nodes_;
+}
+
+void Tree::SetTerminal(const size_t terminal)
+{
+  terminal_ = terminal;
+}
+
+rrt_planner::Node* Tree::GetTerminal()
+{
+  return &nodes_.at(terminal_);
 }
 
 double Tree::TrajectoryCost(rrt_planner::Node* node)
@@ -92,18 +99,21 @@ std::vector<geometry_msgs::Point> Tree::GeTrajectory(rrt_planner::Node* node)
   return std::move(points);
 }
 
+
 void Tree::PubArrow(const size_t index,
-  const geometry_msgs::Point& child, const geometry_msgs::Point& parent)
+  const geometry_msgs::Point& child, const geometry_msgs::Point& parent,
+  const double r, const double g, const double b)
 {
   visualization_msgs::Marker v_trajectory;
   v_trajectory.header.frame_id = map_frame_;
   v_trajectory.header.stamp = ros::Time::now();
-  v_trajectory.color.r = 1;
-  v_trajectory.color.g = 1;
-  v_trajectory.color.b = 0;
+  v_trajectory.color.r = r;
+  v_trajectory.color.g = g;
+  v_trajectory.color.b = b;
   v_trajectory.color.a = 1;
   v_trajectory.pose.position.x = child.x;
   v_trajectory.pose.position.y = child.y;
+  v_trajectory.pose.position.z = 0;
   double yaw = atan2(parent.y-child.y, parent.x-child.x);
   v_trajectory.pose.orientation = tf::createQuaternionMsgFromYaw(yaw);
   double dist = std::hypot(parent.y-child.y, parent.x-child.x);

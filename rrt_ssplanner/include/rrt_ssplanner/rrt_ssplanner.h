@@ -76,10 +76,59 @@ class RrtStarSmartPlanner : public nav_core::BaseGlobalPlanner {
     double footprintCost(double x_i, double y_i, double theta_i);
 
     /**
-     * @brief  采样一个随机点
-     * @return geometry_msgs::Point  采样点
+     * @brief 采样器
      */
-    geometry_msgs::Point Sample();
+    class Sample
+    {
+      public:
+
+        Sample() = delete;
+        Sample(costmap_2d::Costmap2D* map, const double ratio, const double r)
+          : costmap_(map), ratio_(ratio), r_(r) {}
+        ~Sample() = default;
+
+        /**
+         * @brief  采样
+         * @return geometry_msgs::Point 
+         */
+        geometry_msgs::Point SamplePoint();
+
+        /**
+        * @brief  获取信标采样的间隔
+        * @param  n  终点采样的迭代次数
+        * @return size_t
+        */
+        void SetBiasing(const size_t n);
+
+        /**
+         * @brief  设置信标
+         * @param  beacons  信标节点
+         * @return size_t 
+         */
+        void SetBeacons(const std::vector<geometry_msgs::Point> beacons);
+
+      private:
+
+        /**
+        * @brief  采样一个随机点
+        * @return geometry_msgs::Point  采样点
+        */
+        geometry_msgs::Point RandomSample();
+
+        /**
+        * @brief  信标采样
+        * @return geometry_msgs::Point 
+        */
+        geometry_msgs::Point BeaconSample();
+
+        costmap_2d::Costmap2D* costmap_;
+        double ratio_;
+        std::vector<geometry_msgs::Point> beacons_;
+        bool reach_;
+        size_t b_;
+        size_t c_;
+        double r_;
+    };
 
     /**
      * @brief  搜索与 rand_point 最近的点
@@ -139,11 +188,13 @@ class RrtStarSmartPlanner : public nav_core::BaseGlobalPlanner {
      * @return false 
      */
     bool IsCollised(const geometry_msgs::Pose p);
-    
+
     /**
-     * @brief  移动到新节点的检测步长
+     * @brief  碰撞检测步长
+     * @param  dist  检测总距离
+     * @return double  检测步长
      */
-    void calculateCheckDeltaStep();
+    double calculateCheckDeltaStep(const double dist);
 
     /**
      * @brief  是否搜索到终点了
@@ -170,11 +221,23 @@ class RrtStarSmartPlanner : public nav_core::BaseGlobalPlanner {
 
     /**
      * @brief  可视化路径
+     * @param  pub  发布器
      * @param  points  路径点
      */
-    void PubPlan(const std::vector<geometry_msgs::PoseStamped>& points);
+    void PubPlan(const ros::Publisher pub, const std::vector<geometry_msgs::PoseStamped>& points);
 
+    /**
+     * @brief  路径优化
+     * @param  points  返回的信标
+     * @return double 优化后的路径代价
+     */
+    double PathOptimization(std::vector<geometry_msgs::Point>& beacons);
 
+    /**
+     * @brief  获取路径代价
+     * @return double 
+     */
+    double GetPlanCost();
 
     bool initialized_;
     costmap_2d::Costmap2DROS* costmap_ros_;
@@ -186,6 +249,7 @@ class RrtStarSmartPlanner : public nav_core::BaseGlobalPlanner {
     ros::Publisher nodes_pub_;
     ros::Publisher plan_pub_;
     ros::Publisher arrows_pub_;
+    ros::Publisher opt_plan_pub_;
 
     // -------------------- parameters --------------------
     int max_iterations_;
@@ -193,8 +257,8 @@ class RrtStarSmartPlanner : public nav_core::BaseGlobalPlanner {
     double step_;
     double r_gamma_;
     double goal_err_;
-
-
+    double r_beacon_;
+    double biasing_ratio_;
 
 };  // class RrtStarSmartPlanner
 
