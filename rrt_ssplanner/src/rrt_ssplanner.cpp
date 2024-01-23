@@ -76,7 +76,7 @@ bool RrtStarSmartPlanner::makePlan(const geometry_msgs::PoseStamped& start,
   geometry_msgs::Point sample, beacon;
   size_t reach_index;
   auto sampler = Sample(costmap_, biasing_ratio_, r_beacon_);
-  double opt_cost = std::numeric_limits<double>::max();
+  double opt_cost = 0.0;
 
   tree_->Insert(0, start.pose.position);
   PubNode(tree_->nodes()->at(0).point(), 0);
@@ -117,9 +117,11 @@ bool RrtStarSmartPlanner::makePlan(const geometry_msgs::PoseStamped& start,
     if (reach) {
       double cost = GetPlanCost();
       if (cost - opt_cost > fabs(0.01)) {
+        ROS_INFO("[RRT] opt plan.");
         std::vector<geometry_msgs::Point> beacons;
         opt_cost = PathOptimization(beacons);
-        sampler.SetBeacons(beacons);     
+        sampler.SetBeacons(beacons);
+        ROS_INFO("[RRT] opt plan cost %f, beacons size %lu",opt_cost, beacons.size());
       }
     }
   }
@@ -155,7 +157,8 @@ void RrtStarSmartPlanner::Sample::SetBiasing(const size_t n)
   int y_size = costmap_->getSizeInCellsY();
   int total = x_size * y_size;
   int b = n * ratio_ / total;
-  size_t b_ = std::max(1, std::min(20, b));
+  // size_t b_ = std::max(1, std::min(20, b));
+  size_t b_ = 10;
   ROS_INFO("[RRT] x %d, y %d, total %d, n %lu, ratio %f, b %d, b_ %lu",
     x_size, y_size, total, n, ratio_, b, b_);
 }
@@ -340,21 +343,28 @@ double RrtStarSmartPlanner::PathOptimization(std::vector<geometry_msgs::Point>& 
     double step = calculateCheckDeltaStep(dist);
     double orient = atan2(p->point().y-c->point().y, p->point().x-c->point().x);
     geometry_msgs::Pose pose;
-    pose.position = p->point();
+    pose.position = c->point();
     pose.orientation = tf::createQuaternionMsgFromYaw(orient);
     for (double d = 0.0; d <= dist; d += step) {
-      pose.position.x = p->point().x + d * cos(orient);
-      pose.position.y = p->point().y + d * sin(orient);
-      if (IsCollised(pose)) { collised = true; break; }
+      pose.position.x = c->point().x + d * cos(orient);
+      pose.position.y = c->point().y + d * sin(orient);
+      if (IsCollised(pose)) {
+        beacons.push_back(p->point());
+        collised = true;
+        break;
+      }
     }
+
+    if (!collised) c->set_parent(p);
+    if (p->is_root()) break;
+
     if (collised) {
-      beacons.push_back(p->point());
       c = p;
       p = c->parent();
     } else {
       p = p->parent();
     }
-  } while (!p->is_root());
+  } while (1);
   return tree_->TrajectoryCost(tree_->GetTerminal());
 }
 
