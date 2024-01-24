@@ -126,7 +126,7 @@ class RrtStarSmartPlanner : public nav_core::BaseGlobalPlanner {
         std::vector<geometry_msgs::Point> beacons_;
         bool reach_;
         size_t b_;
-        size_t c_;
+        size_t c_ = 0;
         double r_;
     };
 

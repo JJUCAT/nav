@@ -121,6 +121,8 @@ bool RrtStarSmartPlanner::makePlan(const geometry_msgs::PoseStamped& start,
         std::vector<geometry_msgs::Point> beacons;
         opt_cost = PathOptimization(beacons);
         sampler.SetBeacons(beacons);
+        GetPlan(plan);
+        PubPlan(opt_plan_pub_, plan);
         ROS_INFO("[RRT] opt plan cost %f, beacons size %lu",opt_cost, beacons.size());
       }
     }
@@ -142,6 +144,7 @@ bool RrtStarSmartPlanner::makePlan(const geometry_msgs::PoseStamped& start,
 geometry_msgs::Point RrtStarSmartPlanner::Sample::SamplePoint()
 {
   if (!reach_) return RandomSample();
+  ROS_INFO("[RRT] beacons size %lu, c %lu, b %lu", beacons_.size(), c_, b_);
   if (c_++ >= b_ && !beacons_.empty()) {
     c_ = 0;
     return BeaconSample();
@@ -157,8 +160,7 @@ void RrtStarSmartPlanner::Sample::SetBiasing(const size_t n)
   int y_size = costmap_->getSizeInCellsY();
   int total = x_size * y_size;
   int b = n * ratio_ / total;
-  // size_t b_ = std::max(1, std::min(20, b));
-  size_t b_ = 10;
+  b_ = std::max(10, std::min(50, b));
   ROS_INFO("[RRT] x %d, y %d, total %d, n %lu, ratio %f, b %d, b_ %lu",
     x_size, y_size, total, n, ratio_, b, b_);
 }
@@ -201,6 +203,8 @@ geometry_msgs::Point RrtStarSmartPlanner::Sample::BeaconSample()
   geometry_msgs::Point p;
   p.x = static_cast<double>(rand1) / RAND_MAX * r_ * 2 + beacon.x - r_;
   p.y = static_cast<double>(rand2) / RAND_MAX * r_ * 2 + beacon.y - r_;
+  ROS_INFO("[RRT] beacons size %lu, beacon [%f,%f], sample [%f,%f]",
+    beacons_.size(), beacon.x, beacon.y, p.x, p.y);
   return p;
 }
 
@@ -286,6 +290,7 @@ size_t RrtStarSmartPlanner::GetPlan(std::vector<geometry_msgs::PoseStamped>& pla
   pose.header.frame_id = costmap_ros_->getGlobalFrameID();
   pose.header.stamp = ros::Time::now();
   std::vector<geometry_msgs::Point> poses = tree_->GeTrajectory(tree_->GetTerminal());
+  plan.clear();
   plan.reserve(poses.size());
   for (auto p : poses) {
     pose.pose.position = p;
@@ -314,7 +319,7 @@ void RrtStarSmartPlanner::PubNode(const geometry_msgs::Point& point, const size_
   v_trajectory.scale.y = 0.1;
   v_trajectory.scale.z = 0.1;
   v_trajectory.ns = "rrt";
-  v_trajectory.text = std::to_string(index).c_str();
+  // v_trajectory.text = std::to_string(index).c_str();
   v_trajectory.type = visualization_msgs::Marker::SPHERE;
   v_trajectory.action = visualization_msgs::Marker::ADD;
   v_trajectory.lifetime = ros::Duration();
