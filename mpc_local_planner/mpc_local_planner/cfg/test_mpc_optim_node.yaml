@@ -103,17 +103,17 @@ controller:
 ## Solver settings
 solver:
   type: "ipopt"
-  ipopt:
-    iterations: 100
+  ipopt: # 求解器 ipopt 内点法
+    iterations: 100 # 优化迭代次数，次数越多效果越好，约费时间
     max_cpu_time: -1.0
     ipopt_numeric_options:
-      tol: 1e-4
+      tol: 1e-4 # tolerance
     ipopt_string_options:
-      linear_solver: "mumps"
-      hessian_approximation: "limited-memory" # exact or limited-memory
+      linear_solver: "mumps" # 直接线性求解，对于稀疏矩阵会浪费时间
+      hessian_approximation: "limited-memory" # exact or limited-memory # 内存限制，对于直接线性求解，会浪费内存在稀疏矩阵上
     ipopt_integer_options:
       print_level: 2
-  lsq_lm:
+  lsq_lm: # 求解器 Levenberg-Marquardt (LM or DLS) 阻尼最小二乘法
     iterations: 10
     weight_init_eq: 2
     weight_init_ineq: 2
