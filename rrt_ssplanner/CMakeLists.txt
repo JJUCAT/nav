@@ -44,8 +44,7 @@ add_dependencies(nanoflann_port
 
 add_library(rrt_ssplanner
   src/rrt_ssplanner.cpp
-  src/node.cpp
-  src/tree.cpp)
+  src/node.cpp)
 add_dependencies(rrt_ssplanner
   nanoflann_port
   ${${PROJECT_NAME}_EXPORTED_TARGETS}

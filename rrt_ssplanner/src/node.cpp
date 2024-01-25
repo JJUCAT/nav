@@ -1,6 +1,6 @@
 /**
- * @copyright Copyright (c) {2022} JUCAT
- * @author jucat (lmr2887@163.com)
+ * @copyright Copyright (c) {2022} LMRCAT
+ * @author lmrcat (lmr2887@163.com)
  * @date 2024-01-14
  * @brief 
  */

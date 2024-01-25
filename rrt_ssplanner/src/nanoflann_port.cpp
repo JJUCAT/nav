@@ -1,9 +1,16 @@
+/**
+ * @copyright Copyright (c) {2022} LMRCAT
+ * @author lmrcat (lmr2887@163.com)
+ * @date 2024-01-14
+ * @brief 
+ */
+
 #include <rrt_ssplanner/nanoflann_port.h>
 #include <ros/ros.h>
 
 namespace nanoflann_port_ns
 {
-    
+
   NanoflannPort::NanoflannPort(const std::vector<geometry_msgs::Point>& pl)
   {
     Init(pl);

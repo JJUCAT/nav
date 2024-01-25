@@ -1,6 +1,6 @@
 /**
- * @copyright Copyright (c) {2022} JUCAT
- * @author jucat (lmr2887@163.com)
+ * @copyright Copyright (c) {2022} LMRCAT
+ * @author lmrcat (lmr2887@163.com)
  * @date 2024-01-01
  * @brief 
  */
@@ -17,7 +17,7 @@
 #include <nav_msgs/Path.h>
 #include <base_local_planner/world_model.h>
 #include <base_local_planner/costmap_model.h>
-#include <rrt_ssplanner/tree.h>
+#include <rrt_ssplanner/node.h>
 #include <visualization_msgs/Marker.h>
 #include <visualization_msgs/MarkerArray.h>
 #include <tf2/convert.h>
@@ -172,6 +172,20 @@ class RrtStarSmartPlanner : public nav_core::BaseGlobalPlanner {
     size_t ChooseParent(const std::vector<size_t>& near_points, const geometry_msgs::Point new_point);
 
     /**
+     * @brief  插入节点
+     * @param  index            My Param doc
+     * @param  point            My Param doc
+     */
+    void Insert(const size_t index, const geometry_msgs::Point point);
+
+    /**
+     * @brief  重新布局
+     * @param  node             My Param doc
+     * @param  near_points      My Param doc
+     */
+    void Rewire(const size_t node, const std::vector<size_t>& near_points);
+
+    /**
      * @brief  重新布局网络
      * @param  new_point_index  新节点下标
      * @param  new_point_parent_index  新节点的父节点下标
@@ -180,6 +194,26 @@ class RrtStarSmartPlanner : public nav_core::BaseGlobalPlanner {
     void Rewire(const size_t new_point_index,
                 const size_t new_point_parent_index,
                 const std::vector<size_t>& near_points);
+
+    /**
+     * @brief  获取终点
+     * @return rrt_planner::Node* 
+     */
+    rrt_planner::Node* GetTerminal();
+
+    /**
+    * @brief  从节点向父节点一直遍历到根节点，累积节点移动代价
+    * @param  node  要遍历的起始节点
+    * @return double  总移动代价
+    */
+    double TrajectoryCost(rrt_planner::Node* node);
+
+    /**
+    * @brief  获取轨迹
+    * @param  node  轨迹的终点节点
+    * @return std::vector<geometry_msgs::Point> 
+    */
+    std::vector<geometry_msgs::Point> GeTrajectory(rrt_planner::Node* node);
 
     /**
      * @brief  是否碰撞，根据系统而定
@@ -227,6 +261,16 @@ class RrtStarSmartPlanner : public nav_core::BaseGlobalPlanner {
     void PubPlan(const ros::Publisher pub, const std::vector<geometry_msgs::PoseStamped>& points);
 
     /**
+    * @brief  发布箭头，从子节点指向父节点
+    * @param  index  子节点下标
+    * @param  child  子节点
+    * @param  parent  父节点
+    */
+    void PubArrow(const size_t index,
+      const geometry_msgs::Point& child, const geometry_msgs::Point& parent,
+      const double r, const double g, const double b);
+
+    /**
      * @brief  路径优化
      * @param  points  返回的信标
      * @return double 优化后的路径代价
@@ -243,13 +287,14 @@ class RrtStarSmartPlanner : public nav_core::BaseGlobalPlanner {
     costmap_2d::Costmap2DROS* costmap_ros_;
     costmap_2d::Costmap2D* costmap_;
     std::shared_ptr<base_local_planner::WorldModel> world_model_;
-    std::shared_ptr<rrt_planner::Tree> tree_;
     double check_dstep_;
+    size_t terminal_;
 
     ros::Publisher nodes_pub_;
     ros::Publisher plan_pub_;
     ros::Publisher arrows_pub_;
     ros::Publisher opt_plan_pub_;
+    std::map<size_t, rrt_planner::Node> nodes_;
 
     // -------------------- parameters --------------------
     int max_iterations_;

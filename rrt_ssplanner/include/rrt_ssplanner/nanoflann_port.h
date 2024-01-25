@@ -1,6 +1,6 @@
 /**
- * @copyright Copyright (c) {2022} JUCAT
- * @author jucat (lmr2887@163.com)
+ * @copyright Copyright (c) {2022} LMRCAT
+ * @author lmrcat (lmr2887@163.com)
  * @date 2024-01-14
  * @brief 
  */
@@ -13,7 +13,7 @@
 #include <nav_msgs/Path.h>
 
 
-#include <rrt_ssplanner/tree.h>
+#include <rrt_ssplanner/node.h>
 namespace nanoflann_port_ns {
 
 typedef struct
