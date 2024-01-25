@@ -228,7 +228,7 @@ class RrtStarSmartPlanner : public nav_core::BaseGlobalPlanner {
      * @param  dist  检测总距离
      * @return double  检测步长
      */
-    double calculateCheckDeltaStep(const double dist);
+    double CalculateCheckDeltaStep(const double dist);
 
     /**
      * @brief  是否搜索到终点了
@@ -269,6 +269,15 @@ class RrtStarSmartPlanner : public nav_core::BaseGlobalPlanner {
     void PubArrow(const size_t index,
       const geometry_msgs::Point& child, const geometry_msgs::Point& parent,
       const double r, const double g, const double b);
+
+    /**
+     * @brief  连接两点
+     * @param  s  起点
+     * @param  e  终点
+     * @return true
+     * @return false
+     */
+    bool Connect(const geometry_msgs::Point& s, const geometry_msgs::Point& e);
 
     /**
      * @brief  路径优化

@@ -54,7 +54,7 @@ void RrtStarSmartPlanner::initialize(std::string name, costmap_2d::Costmap2DROS*
     arrows_pub_ = private_nh.advertise<visualization_msgs::Marker>("arrows", 1);
     opt_plan_pub_ = private_nh.advertise<nav_msgs::Path>("opt_plan", 1);
 
-    check_dstep_ = calculateCheckDeltaStep(step_);
+    check_dstep_ = CalculateCheckDeltaStep(step_);
 
     initialized_ = true;
   } else {
@@ -238,7 +238,6 @@ bool RrtStarSmartPlanner::Steer(const geometry_msgs::Point nestest_point,
   return true;
 }
 
-
 void RrtStarSmartPlanner::Insert(const size_t index, const geometry_msgs::Point point)
 {
   nodes_.insert(std::make_pair(index, rrt_planner::Node(index, point)));
@@ -292,7 +291,7 @@ bool RrtStarSmartPlanner::IsCollised(const geometry_msgs::Pose p)
   return is_collised;
 }
 
-double RrtStarSmartPlanner::calculateCheckDeltaStep(const double dist)
+double RrtStarSmartPlanner::CalculateCheckDeltaStep(const double dist)
 {
   double inscribed_radius, circumscribed_radius;
   costmap_2d::calculateMinAndMaxDistances(
@@ -438,26 +437,31 @@ void RrtStarSmartPlanner::PubArrow(const size_t index,
   arrows_pub_.publish(v_trajectory);
 }
 
+bool RrtStarSmartPlanner::Connect(const geometry_msgs::Point& s, const geometry_msgs::Point& e)
+{
+  double dist = std::hypot(e.y-s.y, e.x-s.x);
+  double step = CalculateCheckDeltaStep(dist);
+  double orient = atan2(e.y-s.y, e.x-s.x);
+  geometry_msgs::Pose pose;
+  pose.position = s;
+  pose.orientation = tf::createQuaternionMsgFromYaw(orient);
+  for (double d = 0.0; d <= dist; d += step) {
+    pose.position.x = s.x + d * cos(orient);
+    pose.position.y = s.y + d * sin(orient);
+    if (IsCollised(pose)) return false;
+  }
+  return true;
+}
+
 double RrtStarSmartPlanner::PathOptimization(std::vector<geometry_msgs::Point>& beacons)
 {
   auto c = GetTerminal();
   auto p = c->parent();
   do {
     bool collised = false;
-    double dist = std::hypot(p->point().y-c->point().y, p->point().x-c->point().x);
-    double step = calculateCheckDeltaStep(dist);
-    double orient = atan2(p->point().y-c->point().y, p->point().x-c->point().x);
-    geometry_msgs::Pose pose;
-    pose.position = c->point();
-    pose.orientation = tf::createQuaternionMsgFromYaw(orient);
-    for (double d = 0.0; d <= dist; d += step) {
-      pose.position.x = c->point().x + d * cos(orient);
-      pose.position.y = c->point().y + d * sin(orient);
-      if (IsCollised(pose)) {
-        beacons.push_back(p->point());
-        collised = true;
-        break;
-      }
+    if (!Connect(c->point(), p->point())) {
+      beacons.push_back(p->point());
+      collised = true;
     }
 
     if (!collised) c->set_parent(p);
