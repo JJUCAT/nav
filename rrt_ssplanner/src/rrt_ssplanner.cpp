@@ -272,11 +272,13 @@ void RrtStarSmartPlanner::Rewire(const size_t node, const std::vector<size_t>& n
     auto pp = nodes_.at(p).point();
     double new_cost = std::hypot(pp.y-point.y, pp.x-point.x);
     if (original_cost > new_cost+cost_min) {
-      nodes_.at(p).set_parent(&nodes_.at(node));
-      nodes_.at(p).set_cost(new_cost);
-      ROS_INFO("[RRT] rewire index [%lu], child [%f,%f] to parent [%f,%f]",
-        p, nodes_.at(p).point().x, nodes_.at(p).point().y, nodes_.at(node).point().x, nodes_.at(node).point().y);
-      PubArrow(p, nodes_.at(p).point(), nodes_.at(node).point(), 1, 0, 1);
+      if (Connect(pp, point)) {
+        nodes_.at(p).set_parent(&nodes_.at(node));
+        nodes_.at(p).set_cost(new_cost);
+        ROS_INFO("[RRT] rewire index [%lu], child [%f,%f] to parent [%f,%f]",
+          p, nodes_.at(p).point().x, nodes_.at(p).point().y, nodes_.at(node).point().x, nodes_.at(node).point().y);
+        PubArrow(p, nodes_.at(p).point(), nodes_.at(node).point(), 1, 0, 1);
+      }
     }
   }
 }
