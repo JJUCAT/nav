@@ -61,10 +61,11 @@ class OptimalControlProblemInterface
 
     virtual bool initialize() { return true; }
 
-    virtual bool compute(const StateVector& x, ReferenceTrajectoryInterface& xref, ReferenceTrajectoryInterface& uref,
-                         ReferenceTrajectoryInterface* sref, const Time& t, bool new_run = true, SignalTargetInterface* signal_target = nullptr,
-                         ReferenceTrajectoryInterface* xinit = nullptr, ReferenceTrajectoryInterface* uinit = nullptr,
-                         const std::string& ns = "") = 0;
+    virtual bool compute(
+      const StateVector& x, ReferenceTrajectoryInterface& xref, ReferenceTrajectoryInterface& uref,
+      ReferenceTrajectoryInterface* sref, const Time& t, bool new_run = true, SignalTargetInterface* signal_target = nullptr,
+      ReferenceTrajectoryInterface* xinit = nullptr, ReferenceTrajectoryInterface* uinit = nullptr,
+      const std::string& ns = "") = 0;
 
     virtual bool getFirstControlInput(ControlVector& u0) const = 0;
     virtual double getFirstDt() const                          = 0;
@@ -74,7 +75,9 @@ class OptimalControlProblemInterface
     virtual double getCurrentObjectiveValue() { return -1; }
 
     // TODO(roesmann): someday we should change this to return a time-series, e.g. a std::pair<TS,TS>, because pre-allocating a shared pointer is ugly
-    virtual void getTimeSeries(TimeSeries::Ptr x_sequence, TimeSeries::Ptr u_sequence, double t_max = CORBO_INF_DBL) = 0;
+    virtual void getTimeSeries(
+      TimeSeries::Ptr x_sequence, TimeSeries::Ptr u_sequence,
+      double t_max = CORBO_INF_DBL) = 0;
     // virtual std::pair<TimeSeries::Ptr, TimeSeries::Ptr> getTimeSeries(bool states = true, bool controls = true, double t_max = CORBO_INF_DBL) = 0;
 
     virtual bool providesFutureControls() const = 0;

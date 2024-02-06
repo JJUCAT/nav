@@ -31,8 +31,9 @@ namespace corbo {
 
 PredictiveController::PredictiveController() {}
 
-bool PredictiveController::initialize(const StateVector& x, ReferenceTrajectoryInterface& expected_xref, ReferenceTrajectoryInterface& expected_uref,
-                                      const Duration& expected_dt, const Time& t, ReferenceTrajectoryInterface* sref)
+bool PredictiveController::initialize(
+  const StateVector& x, ReferenceTrajectoryInterface& expected_xref, ReferenceTrajectoryInterface& expected_uref,
+  const Duration& expected_dt, const Time& t, ReferenceTrajectoryInterface* sref)
 {
     if (!_ocp || !_ocp->initialize())
     {
@@ -43,10 +44,11 @@ bool PredictiveController::initialize(const StateVector& x, ReferenceTrajectoryI
     return true;
 }
 
-bool PredictiveController::step(const ControllerInterface::StateVector& x, ReferenceTrajectoryInterface& xref, ReferenceTrajectoryInterface& uref,
-                                const Duration& dt, const Time& t, TimeSeries::Ptr u_sequence, TimeSeries::Ptr x_sequence,
-                                SignalTargetInterface* signal_target, ReferenceTrajectoryInterface* sref, ReferenceTrajectoryInterface* xinit,
-                                ReferenceTrajectoryInterface* uinit, const std::string& ns)
+bool PredictiveController::step(
+  const ControllerInterface::StateVector& x, ReferenceTrajectoryInterface& xref, ReferenceTrajectoryInterface& uref,
+  const Duration& dt, const Time& t, TimeSeries::Ptr u_sequence, TimeSeries::Ptr x_sequence,
+  SignalTargetInterface* signal_target, ReferenceTrajectoryInterface* sref, ReferenceTrajectoryInterface* xinit,
+  ReferenceTrajectoryInterface* uinit, const std::string& ns)
 {
     if (!_initialized)
     {
@@ -63,17 +65,18 @@ bool PredictiveController::step(const ControllerInterface::StateVector& x, Refer
 
     Time t_pre = Time::now();
 
-    for (int i = 0; i < _num_ocp_iterations; ++i) success = _ocp->compute(x, xref, uref, sref, t, i == 0, signal_target, xinit, uinit, ns);
+    for (int i = 0; i < _num_ocp_iterations; ++i)
+      success = _ocp->compute(x, xref, uref, sref, t, i == 0, signal_target, xinit, uinit, ns);
 
     _statistics.step_time = Time::now() - t_pre;
 
-    success = success && _ocp->getFirstControlInput(u);
+    success = success && _ocp->getFirstControlInput(u); // 获取第一个控制序列
 
     if (_auto_update_prev_control) _ocp->setPreviousControlInput(u, dt.toSec());  // cache control input for next step call
 
     _ocp->getTimeSeries(x_sequence, u_sequence);
-    _x_ts = x_sequence;
-    _u_ts = u_sequence;
+    _x_ts = x_sequence; // 时间状态序列
+    _u_ts = u_sequence; // 控制状态序列
 
     return success;
 }

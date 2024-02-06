@@ -906,7 +906,7 @@ bool Controller::isPoseTrajectoryFeasible(
         // Checks if the distance between two poses is higher than the robot radius or the orientation diff is bigger than the specified threshold
         // and interpolates in that case.
         // (if obstacles are pushing two consecutive poses away, the center between two consecutive poses might coincide with the obstacle ;-)!
-        // TODO@LMR 为什么不用 x 和 u 来查碰撞检测，而是用时间网格来插值
+        // 获取时间网格中的状态，调整的状态就是时间网格点的状态，网格中间的空隙通过线性插值来检测碰撞
         if (i < look_ahead_idx)
         {
             double delta_rot           = normalize_theta(fd_grid->getState(i + 1)[2] - fd_grid->getState(i)[2]);
