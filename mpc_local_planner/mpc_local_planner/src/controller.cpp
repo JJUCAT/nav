@@ -99,7 +99,8 @@ bool Controller::configure(ros::NodeHandle& nh, const teb_local_planner::ObstCon
     return _grid && _dynamics && _solver && _structured_ocp;
 }
 
-bool Controller::step(const Controller::PoseSE2& start, const Controller::PoseSE2& goal, const geometry_msgs::Twist& vel, double dt, ros::Time t,
+bool Controller::step(const Controller::PoseSE2& start, const Controller::PoseSE2& goal,
+                      const geometry_msgs::Twist& vel, double dt, ros::Time t,
                       corbo::TimeSeries::Ptr u_seq, corbo::TimeSeries::Ptr x_seq)
 {
     std::vector<geometry_msgs::PoseStamped> initial_plan(2);
@@ -108,7 +109,8 @@ bool Controller::step(const Controller::PoseSE2& start, const Controller::PoseSE
     return step(initial_plan, vel, dt, t, u_seq, x_seq);
 }
 
-bool Controller::step(const std::vector<geometry_msgs::PoseStamped>& initial_plan, const geometry_msgs::Twist& vel, double dt, ros::Time t,
+bool Controller::step(const std::vector<geometry_msgs::PoseStamped>& initial_plan,
+                      const geometry_msgs::Twist& vel, double dt, ros::Time t,
                       corbo::TimeSeries::Ptr u_seq, corbo::TimeSeries::Ptr x_seq)
 {
     if (!_dynamics || !_grid || !_structured_ocp)
@@ -125,23 +127,27 @@ bool Controller::step(const std::vector<geometry_msgs::PoseStamped>& initial_pla
     PoseSE2 start(initial_plan.front().pose);
     PoseSE2 goal(initial_plan.back().pose);
 
+    // 设置终点状态
     Eigen::VectorXd xf(_dynamics->getStateDimension());
     _dynamics->getSteadyStateFromPoseSE2(goal, xf);
 
     // retrieve or estimate current state
+    // 设置起点状态
     Eigen::VectorXd x(_dynamics->getStateDimension());
     // check for new measurements
     bool new_x = false;
     {
+        // 优先从 feedback 中获取
         std::lock_guard<std::mutex> lock(_x_feedback_mutex);
         new_x = _recent_x_feedback.size() > 0 && (t - _recent_x_time).toSec() < 2.0 * dt;
         if (new_x) x = _recent_x_feedback;
     }
+    // 有之前的 mpc 控制的话尝试用之前的状态预测当前状态，否则采样输入的起点状态
     if (!new_x && (!_x_ts || _x_ts->isEmpty() || !_x_ts->getValuesInterpolate(dt, x)))  // predict with previous state sequence
     {
         _dynamics->getSteadyStateFromPoseSE2(start, x);  // otherwise initialize steady state
     }
-    if (!new_x || !_prefer_x_feedback)
+    if (!new_x || !_prefer_x_feedback) // odom 预测和输入的融合
     {
         // Merge state feedback with odometry feedback if desired.
         // Note, some models like unicycle overwrite the full state by odom feedback unless _prefer_x_measurement is set to true.
@@ -149,10 +155,11 @@ bool Controller::step(const std::vector<geometry_msgs::PoseStamped>& initial_pla
     }
 
     // now check goal
-    if (_force_reinit_num_steps > 0 && _ocp_seq % _force_reinit_num_steps == 0) _grid->clear();
+    if (_force_reinit_num_steps > 0 && _ocp_seq % _force_reinit_num_steps == 0) _grid->clear(); // 定期重置时间网格
     // 已经到达 grid 了
-    if (!_grid->isEmpty() && ((goal.position() - _last_goal.position()).norm() > _force_reinit_new_goal_dist ||
-                              std::abs(normalize_theta(goal.theta() - _last_goal.theta())) > _force_reinit_new_goal_angular))
+    if (!_grid->isEmpty() &&
+        ((goal.position() - _last_goal.position()).norm() > _force_reinit_new_goal_dist || // 新旧终点欧式距离偏离大
+         std::abs(normalize_theta(goal.theta() - _last_goal.theta())) > _force_reinit_new_goal_angular)) // 新旧终点航向角偏离大
     {
         // goal pose diverges a lot from the previous one, so force reinit
         _grid->clear();
@@ -161,16 +168,19 @@ bool Controller::step(const std::vector<geometry_msgs::PoseStamped>& initial_pla
     {
         // generate custom initialization based on initial_plan
         // check if the goal is behind the start pose (w.r.t. start orientation)
-        bool backward = _guess_backwards_motion && (goal.position() - start.position()).dot(start.orientationUnitVec()) < 0;
+        bool backward = _guess_backwards_motion &&
+                        (goal.position() - start.position()).dot(start.orientationUnitVec()) < 0;
         generateInitialStateTrajectory(x, xf, initial_plan, backward);
     }
+    // 初始化起始时间
     corbo::Time time(t.toSec());
     _x_seq_init.setTimeFromStart(time);
 
     corbo::StaticReference xref(xf);  // currently, we only support point-to-point transitions in ros
     corbo::ZeroReference uref(_dynamics->getInputDimension());
 
-    _ocp_successful = PredictiveController::step(x, xref, uref, corbo::Duration(dt), time, u_seq, x_seq, nullptr, nullptr, &_x_seq_init);
+    _ocp_successful = PredictiveController::step(
+      x, xref, uref, corbo::Duration(dt), time, u_seq, x_seq, nullptr, nullptr, &_x_seq_init);
     // publish results if desired
     if (_publish_ocp_results) publishOptimalControlResult();  // TODO(roesmann): we could also pass time t from above
     ROS_INFO_STREAM_COND(_print_cpu_time, "Cpu time: " << _statistics.step_time.toSec() * 1000.0 << " ms.");
@@ -484,9 +494,10 @@ corbo::NlpSolverInterface::Ptr Controller::configureSolver(const ros::NodeHandle
     return {};
 }
 
-corbo::StructuredOptimalControlProblem::Ptr Controller::configureOcp(const ros::NodeHandle& nh, const teb_local_planner::ObstContainer& obstacles,
-                                                                     teb_local_planner::RobotFootprintModelPtr robot_model,
-                                                                     const std::vector<teb_local_planner::PoseSE2>& via_points)
+corbo::StructuredOptimalControlProblem::Ptr Controller::configureOcp(
+  const ros::NodeHandle& nh, const teb_local_planner::ObstContainer& obstacles,
+  teb_local_planner::RobotFootprintModelPtr robot_model,
+  const std::vector<teb_local_planner::PoseSE2>& via_points)
 {
     corbo::BaseHyperGraphOptimizationProblem::Ptr hg = std::make_shared<corbo::HyperGraphOptimizationProblemEdgeBased>();
 
@@ -808,8 +819,9 @@ corbo::StructuredOptimalControlProblem::Ptr Controller::configureOcp(const ros::
     return ocp;
 }
 
-bool Controller::generateInitialStateTrajectory(const Eigen::VectorXd& x0, const Eigen::VectorXd& xf,
-                                                const std::vector<geometry_msgs::PoseStamped>& initial_plan, bool backward)
+bool Controller::generateInitialStateTrajectory(
+  const Eigen::VectorXd& x0, const Eigen::VectorXd& xf,
+  const std::vector<geometry_msgs::PoseStamped>& initial_plan, bool backward)
 {
     if (initial_plan.size() < 2 || !_dynamics) return false;
 
@@ -822,7 +834,7 @@ bool Controller::generateInitialStateTrajectory(const Eigen::VectorXd& x0, const
         ROS_ERROR("Controller::generateInitialStateTrajectory(): grid not properly initialized");
         return false;
     }
-    ts->add(0.0, x0);
+    ts->add(0.0, x0); // 时间戳从 0 开始
 
     double dt_ref = _grid->getInitialDt();
     double tf_ref = (double)(n_ref - 1) * dt_ref;
@@ -850,8 +862,8 @@ bool Controller::generateInitialStateTrajectory(const Eigen::VectorXd& x0, const
         }
         PoseSE2 intermediate_pose(initial_plan[i].pose.position.x, initial_plan[i].pose.position.y, yaw);
         _dynamics->getSteadyStateFromPoseSE2(intermediate_pose, x);
-        ts->add(t, x);
-        t += dt_init;
+        ts->add(t, x); // 时间戳 + 状态
+        t += dt_init; // 时间戳更新
     }
 
     ts->add(tf_ref, xf);
@@ -860,11 +872,12 @@ bool Controller::generateInitialStateTrajectory(const Eigen::VectorXd& x0, const
     return true;
 }
 
-bool Controller::isPoseTrajectoryFeasible(base_local_planner::CostmapModel* costmap_model, const std::vector<geometry_msgs::Point>& footprint_spec,
-                                          double inscribed_radius, double circumscribed_radius, double min_resolution_collision_check_angular,
-                                          int look_ahead_idx)
+bool Controller::isPoseTrajectoryFeasible(
+  base_local_planner::CostmapModel* costmap_model, const std::vector<geometry_msgs::Point>& footprint_spec,
+  double inscribed_radius, double circumscribed_radius, double min_resolution_collision_check_angular,
+  int look_ahead_idx)
 {
-    if (!_grid) // TODO@LMR 是时间网格吗 ?
+    if (!_grid)
     {
         ROS_ERROR("Controller must be configured before invoking step().");
         return false;

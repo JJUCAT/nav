@@ -111,7 +111,15 @@ class Controller : public corbo::PredictiveController
     corbo::StructuredOptimalControlProblem::Ptr configureOcp(const ros::NodeHandle& nh, const teb_local_planner::ObstContainer& obstacles,
                                                              teb_local_planner::RobotFootprintModelPtr robot_model,
                                                              const std::vector<teb_local_planner::PoseSE2>& via_points);
-
+    /**
+     * @brief  初始化路径（时间序列状态），中间补充的都是终点状态，只是时间戳是前进的
+     * @param  x0  起点
+     * @param  xf  终点
+     * @param  initial_plan  返回的初始路径
+     * @param  backward  是否后退，终点是否在后方
+     * @return true 
+     * @return false 
+     */
     bool generateInitialStateTrajectory(const Eigen::VectorXd& x0, const Eigen::VectorXd& xf,
                                         const std::vector<geometry_msgs::PoseStamped>& initial_plan, bool backward);
 
