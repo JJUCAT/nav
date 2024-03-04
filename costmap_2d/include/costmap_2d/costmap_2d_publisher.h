@@ -98,7 +98,7 @@ private:
   unsigned int x0_, xn_, y0_, yn_;
   double saved_origin_x_, saved_origin_y_;
   bool active_;
-  bool always_send_full_costmap_;
+  bool always_send_full_costmap_; // 是否一直按频率发布地图，只有发全图
   ros::Publisher costmap_pub_;
   ros::Publisher costmap_update_pub_;
   nav_msgs::OccupancyGrid grid_;

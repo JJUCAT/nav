@@ -101,6 +101,7 @@ void LayeredCostmap::updateMap(double robot_x, double robot_y, double robot_yaw)
 
   // if we're using a rolling buffer costmap... we need to update the origin using the robot's position
   // 机器移动局部地图跟着机器移动，这里拷贝了前后地图的重复部分，提高了点效率
+  // rolling_window 以机器人为中心更新地图起点
   if (rolling_window_)
   {
     double new_origin_x = robot_x - costmap_.getSizeInMetersX() / 2;

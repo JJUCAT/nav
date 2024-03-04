@@ -267,6 +267,7 @@ public:
 
   /**
    * @brief  Move the origin of the costmap to a new location.... keeping data when it can
+   *         移动地图起点(地图左下角)，保持地图大小不变
    * @param  new_origin_x The x coordinate of the new origin
    * @param  new_origin_y The y coordinate of the new origin
    */

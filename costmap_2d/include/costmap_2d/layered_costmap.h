@@ -158,6 +158,7 @@ private:
   Costmap2D costmap_;
   std::string global_frame_;
 
+  // rolling_window 将地图设置为以机器人为中心来更新地图
   bool rolling_window_;  /// < @brief Whether or not the costmap should roll with the robot
 
   bool current_;

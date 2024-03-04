@@ -260,7 +260,7 @@ void Costmap2D::worldToMapEnforceBounds(double wx, double wy, int& mx, int& my) 
 void Costmap2D::updateOrigin(double new_origin_x, double new_origin_y)
 {
   // project the new origin into the grid
-  int cell_ox, cell_oy;
+  int cell_ox, cell_oy; // 地图栅格偏移量
   cell_ox = int((new_origin_x - origin_x_) / resolution_);
   cell_oy = int((new_origin_y - origin_y_) / resolution_);
 
