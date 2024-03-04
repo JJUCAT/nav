@@ -218,8 +218,8 @@ public:
    * The number of outer loop iterations should be determined by considering the maximum CPU time required to match the control rate. \n
    * Optionally, the cost vector can be calculated by specifying \c compute_cost_afterwards, see computeCurrentCost().
    * @remarks This method is usually called from a plan() method
-   * @param iterations_innerloop Number of iterations for the actual solver loop
-   * @param iterations_outerloop Specifies how often the trajectory should be resized followed by the inner solver loop.
+   * @param iterations_innerloop Number of iterations for the actual solver loop 内循环次数是优化次数
+   * @param iterations_outerloop Specifies how often the trajectory should be resized followed by the inner solver loop. 外循环是重置时间网格大小
    * @param compute_cost_afterwards if \c true Calculate the cost vector according to computeCurrentCost(),
    *         the vector can be accessed afterwards using getCurrentCost().
    * @param obst_cost_scale Specify extra scaling for obstacle costs (only used if \c compute_cost_afterwards is true)

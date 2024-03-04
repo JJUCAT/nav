@@ -188,7 +188,7 @@ bool TebOptimalPlanner::optimizeTEB(int iterations_innerloop, int iterations_out
   bool success = false;
   optimized_ = false;
   
-  double weight_multiplier = 1.0;
+  double weight_multiplier = 1.0; // TODO@LMR 干嘛的
 
   // TODO(roesmann): we introduced the non-fast mode with the support of dynamic obstacles
   //                (which leads to better results in terms of x-y-t homotopy planning).
@@ -201,8 +201,8 @@ bool TebOptimalPlanner::optimizeTEB(int iterations_innerloop, int iterations_out
     if (cfg_->trajectory.teb_autosize)
     {
       //teb_.autoResize(cfg_->trajectory.dt_ref, cfg_->trajectory.dt_hysteresis, cfg_->trajectory.min_samples, cfg_->trajectory.max_samples);
-      teb_.autoResize(cfg_->trajectory.dt_ref, cfg_->trajectory.dt_hysteresis, cfg_->trajectory.min_samples, cfg_->trajectory.max_samples, fast_mode);
-
+      teb_.autoResize(cfg_->trajectory.dt_ref, cfg_->trajectory.dt_hysteresis,
+        cfg_->trajectory.min_samples, cfg_->trajectory.max_samples, fast_mode);
     }
 
     success = buildGraph(weight_multiplier);
@@ -244,12 +244,14 @@ void TebOptimalPlanner::setVelocityGoal(const geometry_msgs::Twist& vel_goal)
   vel_goal_.second = vel_goal;
 }
 
-bool TebOptimalPlanner::plan(const std::vector<geometry_msgs::PoseStamped>& initial_plan, const geometry_msgs::Twist* start_vel, bool free_goal_vel)
+bool TebOptimalPlanner::plan(const std::vector<geometry_msgs::PoseStamped>& initial_plan,
+                             const geometry_msgs::Twist* start_vel, bool free_goal_vel)
 {    
   ROS_ASSERT_MSG(initialized_, "Call initialize() first.");
   if (!teb_.isInit())
   {
-    teb_.initTrajectoryToGoal(initial_plan, cfg_->robot.max_vel_x, cfg_->robot.max_vel_theta, cfg_->trajectory.global_plan_overwrite_orientation,
+    teb_.initTrajectoryToGoal(initial_plan,
+      cfg_->robot.max_vel_x, cfg_->robot.max_vel_theta, cfg_->trajectory.global_plan_overwrite_orientation,
       cfg_->trajectory.min_samples, cfg_->trajectory.allow_init_with_backwards_motion);
   }
   else // warm start
@@ -264,7 +266,8 @@ bool TebOptimalPlanner::plan(const std::vector<geometry_msgs::PoseStamped>& init
     {
       ROS_DEBUG("New goal: distance to existing goal is higher than the specified threshold. Reinitalizing trajectories.");
       teb_.clearTimedElasticBand();
-      teb_.initTrajectoryToGoal(initial_plan, cfg_->robot.max_vel_x, cfg_->robot.max_vel_theta, cfg_->trajectory.global_plan_overwrite_orientation,
+      teb_.initTrajectoryToGoal(initial_plan,
+        cfg_->robot.max_vel_x, cfg_->robot.max_vel_theta, cfg_->trajectory.global_plan_overwrite_orientation,
         cfg_->trajectory.min_samples, cfg_->trajectory.allow_init_with_backwards_motion);
     }
   }
@@ -280,20 +283,23 @@ bool TebOptimalPlanner::plan(const std::vector<geometry_msgs::PoseStamped>& init
 }
 
 
-bool TebOptimalPlanner::plan(const tf::Pose& start, const tf::Pose& goal, const geometry_msgs::Twist* start_vel, bool free_goal_vel)
+bool TebOptimalPlanner::plan(const tf::Pose& start, const tf::Pose& goal,
+                             const geometry_msgs::Twist* start_vel, bool free_goal_vel)
 {
   PoseSE2 start_(start);
   PoseSE2 goal_(goal);
   return plan(start_, goal_, start_vel);
 }
 
-bool TebOptimalPlanner::plan(const PoseSE2& start, const PoseSE2& goal, const geometry_msgs::Twist* start_vel, bool free_goal_vel)
+bool TebOptimalPlanner::plan(const PoseSE2& start, const PoseSE2& goal,
+                             const geometry_msgs::Twist* start_vel, bool free_goal_vel)
 {	
   ROS_ASSERT_MSG(initialized_, "Call initialize() first.");
   if (!teb_.isInit())
   {
     // init trajectory
-    teb_.initTrajectoryToGoal(start, goal, 0, cfg_->robot.max_vel_x, cfg_->trajectory.min_samples, cfg_->trajectory.allow_init_with_backwards_motion); // 0 intermediate samples, but dt=1 -> autoResize will add more samples before calling first optimization
+    teb_.initTrajectoryToGoal(start, goal, 0, cfg_->robot.max_vel_x, cfg_->trajectory.min_samples,
+      cfg_->trajectory.allow_init_with_backwards_motion); // 0 intermediate samples, but dt=1 -> autoResize will add more samples before calling first optimization
   }
   else // warm start
   {
@@ -496,37 +502,38 @@ void TebOptimalPlanner::AddEdgesObstacles(double weight_multiplier)
         if(cfg_->obstacles.include_dynamic_obstacles && obst->isDynamic())
           continue;
 
-          // calculate distance to robot model
-          double dist = cfg_->robot_model->calculateDistance(teb_.Pose(i), obst.get());
-          
-          // force considering obstacle if really close to the current pose
+        // calculate distance to robot model
+        double dist = cfg_->robot_model->calculateDistance(teb_.Pose(i), obst.get());
+
+        // force considering obstacle if really close to the current pose
+        // 当距离比较近，就必须考虑该障碍物
         if (dist < cfg_->obstacles.min_obstacle_dist*cfg_->obstacles.obstacle_association_force_inclusion_factor)
-          {
-              iter_obstacle->push_back(obst);
-              continue;
-          }
-          // cut-off distance
-          if (dist > cfg_->obstacles.min_obstacle_dist*cfg_->obstacles.obstacle_association_cutoff_factor)
+        {
+            iter_obstacle->push_back(obst);
             continue;
-          
-          // determine side (left or right) and assign obstacle if closer than the previous one
-          if (cross2d(pose_orient, obst->getCentroid()) > 0) // left
-          {
-              if (dist < left_min_dist)
-              {
-                  left_min_dist = dist;
-                  left_obstacle = obst;
-              }
-          }
-          else
-          {
-              if (dist < right_min_dist)
-              {
-                  right_min_dist = dist;
-                  right_obstacle = obst;
-              }
-          }
-      }   
+        }
+        // cut-off distance 障碍物比较远，可以忽略
+        if (dist > cfg_->obstacles.min_obstacle_dist*cfg_->obstacles.obstacle_association_cutoff_factor)
+          continue;
+
+        // determine side (left or right) and assign obstacle if closer than the previous one
+        if (cross2d(pose_orient, obst->getCentroid()) > 0) // left 矢量点乘
+        {
+            if (dist < left_min_dist)
+            {
+                left_min_dist = dist;
+                left_obstacle = obst;
+            }
+        }
+        else
+        {
+            if (dist < right_min_dist)
+            {
+                right_min_dist = dist;
+                right_obstacle = obst;
+            }
+        }
+      } // for 迭代障碍物
       
       if (left_obstacle)
         iter_obstacle->push_back(left_obstacle);
@@ -544,7 +551,7 @@ void TebOptimalPlanner::AddEdgesObstacles(double weight_multiplier)
       for (const ObstaclePtr obst : *iter_obstacle)
         create_edge(i, obst.get());
       ++iter_obstacle;
-  }
+  } // for 迭代 teb 轨迹
 }
 
 
