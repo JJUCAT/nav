@@ -196,7 +196,7 @@ bool TebOptimalPlanner::optimizeTEB(int iterations_innerloop, int iterations_out
   //                 the legacy fast mode as default until we finish our tests.
   bool fast_mode = !cfg_->obstacles.include_dynamic_obstacles;
   
-  for(int i=0; i<iterations_outerloop; ++i)
+  for(int i=0; i<iterations_outerloop; ++i) // 外循环，调整时间网格数量
   {
     if (cfg_->trajectory.teb_autosize)
     {
@@ -204,14 +204,14 @@ bool TebOptimalPlanner::optimizeTEB(int iterations_innerloop, int iterations_out
       teb_.autoResize(cfg_->trajectory.dt_ref, cfg_->trajectory.dt_hysteresis,
         cfg_->trajectory.min_samples, cfg_->trajectory.max_samples, fast_mode);
     }
-
-    success = buildGraph(weight_multiplier);
+    // weight 作用 ？？？
+    success = buildGraph(weight_multiplier); // 建图
     if (!success) 
     {
         clearGraph();
         return false;
     }
-    success = optimizeGraph(iterations_innerloop, false);
+    success = optimizeGraph(iterations_innerloop, false); // 优化
     if (!success) 
     {
         clearGraph();
@@ -219,6 +219,7 @@ bool TebOptimalPlanner::optimizeTEB(int iterations_innerloop, int iterations_out
     }
     optimized_ = true;
     
+    // 最后才计算
     if (compute_cost_afterwards && i==iterations_outerloop-1) // compute cost vec only in the last iteration
       computeCurrentCost(obst_cost_scale, viapoint_cost_scale, alternative_time_cost);
       
@@ -451,20 +452,20 @@ void TebOptimalPlanner::AddEdgesObstacles(double weight_multiplier)
 {
   if (cfg_->optim.weight_obstacle==0 || weight_multiplier==0 || obstacles_==nullptr )
     return; // if weight equals zero skip adding edges!
-    
-  
+
   bool inflated = cfg_->obstacles.inflation_dist > cfg_->obstacles.min_obstacle_dist;
 
   Eigen::Matrix<double,1,1> information;
   information.fill(cfg_->optim.weight_obstacle * weight_multiplier);
-  
-  Eigen::Matrix<double,2,2> information_inflated;
+
+  Eigen::Matrix<double,2,2> information_inflated; // 协方差 ? ? ?
   information_inflated(0,0) = cfg_->optim.weight_obstacle * weight_multiplier;
   information_inflated(1,1) = cfg_->optim.weight_inflation;
   information_inflated(0,1) = information_inflated(1,0) = 0;
 
   auto iter_obstacle = obstacles_per_vertex_.begin();
 
+  // 为 teb 网格节点上的状态（单个节点状态）与障碍物（节点检测到的需要考虑的障碍物，多个）设置边
   auto create_edge = [inflated, &information, &information_inflated, this] (int index, const Obstacle* obstacle) {
     if (inflated)
     {
@@ -483,7 +484,7 @@ void TebOptimalPlanner::AddEdgesObstacles(double weight_multiplier)
       optimizer_->addEdge(dist_bandpt_obst);
     };
   };
-    
+
   // iterate all teb points, skipping the last and, if the EdgeVelocityObstacleRatio edges should not be created, the first one too
   const int first_vertex = cfg_->optim.weight_velocity_obstacle_ratio == 0 ? 1 : 0;
   for (int i = first_vertex; i < teb_.sizePoses() - 1; ++i)
@@ -517,6 +518,7 @@ void TebOptimalPlanner::AddEdgesObstacles(double weight_multiplier)
           continue;
 
         // determine side (left or right) and assign obstacle if closer than the previous one
+        // 障碍物距离不算远也不算近的时候，在遍历全部障碍物后选择一个最近的左侧或右侧障碍物
         if (cross2d(pose_orient, obst->getCentroid()) > 0) // left 矢量点乘
         {
             if (dist < left_min_dist)
@@ -548,6 +550,7 @@ void TebOptimalPlanner::AddEdgesObstacles(double weight_multiplier)
       }
 
       // create obstacle edges
+      // 为 teb 每一个节点设置该节点检测到的障碍物的边，teb 第一个节点不设置因为起点无法调整 ?
       for (const ObstaclePtr obst : *iter_obstacle)
         create_edge(i, obst.get());
       ++iter_obstacle;
@@ -1074,7 +1077,8 @@ void TebOptimalPlanner::computeCurrentCost(double obst_cost_scale, double viapoi
   
   // now we need pointers to all edges -> calculate error for each edge-type
   // since we aren't storing edge pointers, we need to check every edge
-  for (std::vector<g2o::OptimizableGraph::Edge*>::const_iterator it = optimizer_->activeEdges().begin(); it!= optimizer_->activeEdges().end(); it++)
+  for (std::vector<g2o::OptimizableGraph::Edge*>::const_iterator it = optimizer_->activeEdges().begin();
+    it!= optimizer_->activeEdges().end(); it++)
   {
     double cur_cost = (*it)->chi2();
 
