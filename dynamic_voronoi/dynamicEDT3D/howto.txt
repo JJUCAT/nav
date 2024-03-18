@@ -1,0 +1,8 @@
+=>ADAPT THE DIRECTORY OF YOUR OCTOMAP INSTALLATION! (use the latest trunk version from https://octomap.svn.sourceforge.net/svnroot/octomap/trunk this code has been tested with revision 406)
+
+cd build
+cmake -D octomap_DIR=/path/to/octomap/ ../src/
+
+=>execute:
+cd bin
+./exampleOctomap /path/to/your/octree.bt
