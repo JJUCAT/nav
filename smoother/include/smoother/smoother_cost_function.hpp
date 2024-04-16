@@ -37,7 +37,7 @@ struct SmootherParams
   double max_time = 3.0;
   double max_curvature = 1.0;
   double smooth_weight = 1000;
-  double curvature_weight = 500;
+  double curvature_weight = 30.0;
   double distance_weight = 2000;
 };
 
@@ -141,23 +141,21 @@ public:
       xi_m1 = Eigen::Vector2d(parameters[x_index - 2], parameters[y_index - 2]); // 前一个点
 
       // compute cost
-      addSmoothingResidual(_params.smooth_weight, xi, xi_p1, xi_m1, cost_raw); // 路径平滑度残差
+      // addSmoothingResidual(_params.smooth_weight, xi, xi_p1, xi_m1, cost_raw); // 路径平滑度残差
       addCurvatureResidual(_params.curvature_weight, xi, xi_p1, xi_m1, curvature_params, cost_raw); // 曲率残差
-      addDistanceResidual(_params.distance_weight, xi, _original_path->at(i), cost_raw); // 与原路径点距离残差
+      // addDistanceResidual(_params.distance_weight, xi, _original_path->at(i), cost_raw); // 与原路径点距离残差
 
       if (gradient != NULL) {
         // compute gradient
         gradient[x_index] = 0.0;
         gradient[y_index] = 0.0;
-        addSmoothingJacobian(_params.smooth_weight, xi, xi_p1, xi_m1, grad_x_raw, grad_y_raw);
+        // addSmoothingJacobian(_params.smooth_weight, xi, xi_p1, xi_m1, grad_x_raw, grad_y_raw);
         if (!use_new_curvature_jacobian_) {
           addCurvatureJacobian(_params.curvature_weight, xi, xi_p1, xi_m1, curvature_params, grad_x_raw, grad_y_raw);
         } else {
           addCurvatureJacobianNew(_params.curvature_weight, xi, xi_p1, xi_m1, curvature_params, grad_x_raw, grad_y_raw);
         }          
-        addDistanceJacobian(
-          _params.distance_weight, xi, _original_path->at(
-            i), grad_x_raw, grad_y_raw);
+        // addDistanceJacobian(_params.distance_weight, xi, _original_path->at(i), grad_x_raw, grad_y_raw);
 
         gradient[x_index] = grad_x_raw;
         gradient[y_index] = grad_y_raw;

@@ -2,6 +2,7 @@
 #include "ros/ros.h"
 #include "smoother/smoother_cost_function.hpp"
 #include "tf/tf.h"
+#include "tf/transform_datatypes.h"
 #include <memory>
 #include <nav_msgs/Path.h>
 #include <limits>
@@ -17,11 +18,18 @@ nav_msgs::Path genRandomPath()
   path.header.stamp = ros::Time::now();
   geometry_msgs::PoseStamped pose;
   pose.header = path.header;
+  pose.pose.orientation.w = 1;
+  double len = 0.1;
+  double yaw_max = 1.5;
+  path.poses.push_back(pose);
   for (int i = 0; i < 50; i++) {
     int rand0 = rand();
     srand(static_cast<unsigned int>(rand0));
-    pose.pose.position.x = i * 0.1;
-    pose.pose.position.y = static_cast<double>(rand0) / RAND_MAX * 1.0 - 0.5;
+    double yaw_step = (static_cast<double>(rand0) / RAND_MAX - 0.5) * yaw_max;
+    double cur_yaw = tf::getYaw(pose.pose.orientation);
+    pose.pose.position.x += len * cos(cur_yaw);
+    pose.pose.position.y += len * sin(cur_yaw);
+    pose.pose.orientation = tf::createQuaternionMsgFromYaw(cur_yaw + yaw_step);
     path.poses.push_back(pose);
   }
   return path;
@@ -53,6 +61,7 @@ nav_msgs::Path Smooth(const std::shared_ptr<smoother::Smoother>& smoother,
       p.pose.orientation.w = 1;
       smooth_path.poses.push_back(p);
     }
+    smooth_path.poses.pop_back();
   }
 
   return smooth_path;
@@ -69,7 +78,7 @@ int main(int argc, char** argv)
   auto smoother = std::make_shared<smoother::Smoother>();
   smoother->initialize();
 
-  double hz = 0.1f;
+  double hz = 0.3f;
   ros::Rate r(hz);
   while(ros::ok()) {
     nav_msgs::Path unsmooth_path = genRandomPath();
