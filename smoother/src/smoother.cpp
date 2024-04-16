@@ -64,18 +64,25 @@ int main(int argc, char** argv)
   ros::NodeHandle n("~");
   ros::Publisher plan_pub = n.advertise<nav_msgs::Path>("unsmoother_plan", 1);
   ros::Publisher splan_pub = n.advertise<nav_msgs::Path>("smoother_plan", 1);
+  ros::Publisher nsplan_pub = n.advertise<nav_msgs::Path>("new_smoother_plan", 1);
 
   auto smoother = std::make_shared<smoother::Smoother>();
   smoother->initialize();
 
-  double hz = 0.5f;
+  double hz = 0.1f;
   ros::Rate r(hz);
   while(ros::ok()) {
     nav_msgs::Path unsmooth_path = genRandomPath();
     plan_pub.publish(unsmooth_path);
 
+    smoother->use_new_curvature_jacobian(false);
     nav_msgs::Path smooth_path = Smooth(smoother, unsmooth_path);
     splan_pub.publish(smooth_path);
+
+    smoother->use_new_curvature_jacobian(true);
+    nav_msgs::Path new_smooth_path = Smooth(smoother, unsmooth_path);
+    nsplan_pub.publish(new_smooth_path);
+
     r.sleep();
     ros::spinOnce();
   }

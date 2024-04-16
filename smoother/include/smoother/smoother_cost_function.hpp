@@ -57,10 +57,12 @@ public:
    */
   UnconstrainedSmootherCostFunction(
     std::vector<Eigen::Vector2d> * original_path,
-    const SmootherParams & params)
+    const SmootherParams & params,
+    const bool use_new_curvature_jacobian)
   : _original_path(original_path),
     _num_params(2 * original_path->size()),
-    _params(params)
+    _params(params),
+    use_new_curvature_jacobian_(use_new_curvature_jacobian)
   {
   }
 
@@ -148,9 +150,11 @@ public:
         gradient[x_index] = 0.0;
         gradient[y_index] = 0.0;
         addSmoothingJacobian(_params.smooth_weight, xi, xi_p1, xi_m1, grad_x_raw, grad_y_raw);
-        addCurvatureJacobian(
-          _params.curvature_weight, xi, xi_p1, xi_m1, curvature_params,
-          grad_x_raw, grad_y_raw);
+        if (!use_new_curvature_jacobian_) {
+          addCurvatureJacobian(_params.curvature_weight, xi, xi_p1, xi_m1, curvature_params, grad_x_raw, grad_y_raw);
+        } else {
+          addCurvatureJacobianNew(_params.curvature_weight, xi, xi_p1, xi_m1, curvature_params, grad_x_raw, grad_y_raw);
+        }          
         addDistanceJacobian(
           _params.distance_weight, xi, _original_path->at(
             i), grad_x_raw, grad_y_raw);
@@ -333,6 +337,42 @@ protected:
     j1 += weight * jacobian[1];  // xi x component of partial-derivative
   }
 
+  // 新方法计算曲率梯度
+  inline void addCurvatureJacobianNew(
+    const double & weight,
+    const Eigen::Vector2d & pt,
+    const Eigen::Vector2d & pt_p,
+    const Eigen::Vector2d & /*pt_m*/,
+    CurvatureComputations & curvature_params,
+    double & j0,
+    double & j1) const
+  {
+    if (!curvature_params.isValid()) {
+      return;
+    }
+
+    const double & partial_delta_phi_i_wrt_cost_delta_phi_i =
+      -1 / std::sqrt(1 - std::pow(std::cos(curvature_params.delta_phi_i), 2));
+
+    // h(x) 函数的求导
+    Eigen::Vector2d p3 = derivation_hx(curvature_params.delta_xi,
+      curvature_params.delta_xi_p, curvature_params.delta_xi_norm, curvature_params.delta_xi_p_norm);
+
+    const double & u = 2 * curvature_params.ki_minus_kmax;
+    const double & common_prefix =
+      (1 / curvature_params.delta_xi_norm) * partial_delta_phi_i_wrt_cost_delta_phi_i;
+    const double & common_suffix = curvature_params.delta_phi_i /
+      (curvature_params.delta_xi_norm * curvature_params.delta_xi_norm);
+
+    const Eigen::Vector2d & d_delta_xi_d_xi = curvature_params.delta_xi /
+      curvature_params.delta_xi_norm;
+
+    const Eigen::Vector2d jacobian = u *
+      ((common_prefix * p3) - (common_suffix * d_delta_xi_d_xi));
+    j0 += weight * jacobian[0];  // xi x component of partial-derivative
+    j1 += weight * jacobian[1];  // xi x component of partial-derivative
+  }
+
   /**
    * @brief Cost function derivative term for steering away changes in pose
    * @param weight Weight to apply to function
@@ -386,9 +426,29 @@ protected:
     return (a - (a.dot(b) * b / b.squaredNorm())) / (a_norm * b_norm);
   }
 
+  /**
+   * @brief  h(x) = a.dot(b)/(a_norm*b_norm), x=[x_pt, y_pt]
+   * @param  a  向量 u
+   * @param  b  向量 v
+   * @param  a_norm  向量 u 的模
+   * @param  b_norm  向量 v 的模
+   * @return Eigen::Vector2d 
+   */
+  inline Eigen::Vector2d derivation_hx(
+    const Eigen::Vector2d & a,
+    const Eigen::Vector2d & b,
+    const double & a_norm,
+    const double & b_norm) const
+  {
+    Eigen::Vector2d prefix = (b-a)/(a_norm*b_norm);
+    Eigen::Vector2d suffix = (a.dot(b)*(-(a*a.squaredNorm()+b*b.squaredNorm())))/(a_norm*b_norm);
+    return prefix + suffix;
+  }
+
   std::vector<Eigen::Vector2d> * _original_path{nullptr};
   int _num_params;
   SmootherParams _params;
+  bool use_new_curvature_jacobian_{false};
 };
 
 }  // namespace smac_planner

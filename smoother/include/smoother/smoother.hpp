@@ -86,6 +86,11 @@ public:
     }
   }
 
+  void use_new_curvature_jacobian(bool use)
+  {
+    new_curvature_jacobian_ = use;
+  }
+
   /**
    * @brief Smoother method
    * @param path Reference to path
@@ -111,7 +116,7 @@ public:
     }
 
     ceres::GradientProblemSolver::Summary summary;
-    ceres::GradientProblem problem(new UnconstrainedSmootherCostFunction(&path, params));
+    ceres::GradientProblem problem(new UnconstrainedSmootherCostFunction(&path, params, new_curvature_jacobian_));
     ceres::Solve(_options, problem, parameters, &summary);
 
     if (_debug) {
@@ -133,6 +138,7 @@ public:
 private:
   bool _debug;
   ceres::GradientProblemSolver::Options _options;
+  bool new_curvature_jacobian_{false};
 };
 
 }  // namespace smac_planner
