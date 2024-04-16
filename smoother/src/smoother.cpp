@@ -20,7 +20,7 @@ nav_msgs::Path genRandomPath()
   pose.header = path.header;
   pose.pose.orientation.w = 1;
   double len = 0.1;
-  double yaw_max = 1.5;
+  double yaw_max = 1.4;
   path.poses.push_back(pose);
   for (int i = 0; i < 50; i++) {
     int rand0 = rand();
@@ -78,7 +78,7 @@ int main(int argc, char** argv)
   auto smoother = std::make_shared<smoother::Smoother>();
   smoother->initialize();
 
-  double hz = 0.3f;
+  double hz = 0.5f;
   ros::Rate r(hz);
   while(ros::ok()) {
     nav_msgs::Path unsmooth_path = genRandomPath();
