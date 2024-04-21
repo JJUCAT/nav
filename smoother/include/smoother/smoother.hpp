@@ -25,6 +25,7 @@
 
 #include "ceres/ceres.h"
 #include "Eigen/Core"
+#include "costmap_2d/costmap_2d.h"
 
 namespace smoother
 {
@@ -91,6 +92,11 @@ public:
     new_curvature_jacobian_ = use;
   }
 
+  void use_new_cost_jacobian(bool use)
+  {
+    new_cost_jacobian_ = use;
+  }
+
   /**
    * @brief Smoother method
    * @param path Reference to path
@@ -100,6 +106,7 @@ public:
    */
   bool smooth(
     std::vector<Eigen::Vector2d> & path,
+    costmap_2d::Costmap2D * costmap,
     const SmootherParams & params)
   {
     _options.max_solver_time_in_seconds = params.max_time;
@@ -116,7 +123,7 @@ public:
     }
 
     ceres::GradientProblemSolver::Summary summary;
-    ceres::GradientProblem problem(new UnconstrainedSmootherCostFunction(&path, params, new_curvature_jacobian_));
+    ceres::GradientProblem problem(new UnconstrainedSmootherCostFunction(&path, costmap, params, new_curvature_jacobian_, new_cost_jacobian_));
     ceres::Solve(_options, problem, parameters, &summary);
 
     if (_debug) {
@@ -139,6 +146,7 @@ private:
   bool _debug;
   ceres::GradientProblemSolver::Options _options;
   bool new_curvature_jacobian_{false};
+  bool new_cost_jacobian_{false};
 };
 
 }  // namespace smac_planner

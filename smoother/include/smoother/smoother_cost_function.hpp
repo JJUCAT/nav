@@ -22,7 +22,8 @@
 #include <memory>
 #include <queue>
 #include <utility>
-
+#include <costmap_2d/cost_values.h>
+#include <costmap_2d/costmap_2d.h>
 #include "ceres/ceres.h"
 #include "Eigen/Core"
 
@@ -39,6 +40,8 @@ struct SmootherParams
   double smooth_weight = 1000;
   double curvature_weight = 30.0;
   double distance_weight = 100;
+  double costmap_weight = 1.0;
+  double costmap_factor = 1.0;
 };
 
 
@@ -57,12 +60,16 @@ public:
    */
   UnconstrainedSmootherCostFunction(
     std::vector<Eigen::Vector2d> * original_path,
+    costmap_2d::Costmap2D * costmap,
     const SmootherParams & params,
-    const bool use_new_curvature_jacobian)
+    const bool use_new_curvature_jacobian,
+    const bool use_new_cost_jacobian)
   : _original_path(original_path),
     _num_params(2 * original_path->size()),
+    _costmap(costmap),
     _params(params),
-    use_new_curvature_jacobian_(use_new_curvature_jacobian)
+    use_new_curvature_jacobian_(use_new_curvature_jacobian),
+    use_new_cost_jacobian_(use_new_cost_jacobian)
   {
   }
 
@@ -142,20 +149,32 @@ public:
 
       // compute cost
       // addSmoothingResidual(_params.smooth_weight, xi, xi_p1, xi_m1, cost_raw); // 路径平滑度残差
-      addCurvatureResidual(_params.curvature_weight, xi, xi_p1, xi_m1, curvature_params, cost_raw); // 曲率残差
+      // addCurvatureResidual(_params.curvature_weight, xi, xi_p1, xi_m1, curvature_params, cost_raw); // 曲率残差
       addDistanceResidual(_params.distance_weight, xi, _original_path->at(i), cost_raw); // 与原路径点距离残差
+      valid_coords = _costmap->worldToMap(xi[0], xi[1], mx, my);
+      if (valid_coords) {
+        costmap_cost = _costmap->getCost(mx, my);
+        addCostResidual(_params.costmap_weight, costmap_cost, cost_raw);
+      }
 
       if (gradient != NULL) {
         // compute gradient
         gradient[x_index] = 0.0;
         gradient[y_index] = 0.0;
         // addSmoothingJacobian(_params.smooth_weight, xi, xi_p1, xi_m1, grad_x_raw, grad_y_raw);
-        if (!use_new_curvature_jacobian_) {
-          addCurvatureJacobian(_params.curvature_weight, xi, xi_p1, xi_m1, curvature_params, grad_x_raw, grad_y_raw);
-        } else {
-          addCurvatureJacobianNew(_params.curvature_weight, xi, xi_p1, xi_m1, curvature_params, grad_x_raw, grad_y_raw);
-        }          
+        // if (!use_new_curvature_jacobian_) {
+        //   addCurvatureJacobian(_params.curvature_weight, xi, xi_p1, xi_m1, curvature_params, grad_x_raw, grad_y_raw);
+        // } else {
+        //   addCurvatureJacobianNew(_params.curvature_weight, xi, xi_p1, xi_m1, curvature_params, grad_x_raw, grad_y_raw);
+        // }          
         addDistanceJacobian(_params.distance_weight, xi, _original_path->at(i), grad_x_raw, grad_y_raw);
+        if (valid_coords) {
+          if (!use_new_cost_jacobian_) {
+            addCostJacobian(_params.costmap_weight, mx, my, costmap_cost, grad_x_raw, grad_y_raw);
+          } else {
+            addCostJacobianNew(_params.costmap_weight, mx, my, costmap_cost, grad_x_raw, grad_y_raw);
+          }
+        }
 
         gradient[x_index] = grad_x_raw;
         gradient[y_index] = grad_y_raw;
@@ -443,10 +462,159 @@ protected:
     return prefix + suffix;
   }
 
+
+  /**
+   * @brief Cost function term for steering away from costs 成本项，用来避开高成本
+   * @param weight Weight to apply to function
+   * @param value Point Xi's cost'
+   * @param params computed values to reduce overhead
+   * @param r Residual (cost) of term 残差项
+   */
+  inline void addCostResidual(
+    const double & weight,
+    const double & value,
+    double & r) const
+  {
+    if (value == costmap_2d::FREE_SPACE) { // 路径点在地图自由区则没有成本
+      return;
+    }
+
+    r += weight * value * value;  // objective function value
+  }
+
+  /**
+   * @brief Cost function derivative term for steering away from costs
+   * @param weight Weight to apply to function
+   * @param mx Point Xi's x coordinate in map frame
+   * @param mx Point Xi's y coordinate in map frame
+   * @param value Point Xi's cost'
+   * @param params computed values to reduce overhead
+   * @param j0 Gradient of X term
+   * @param j1 Gradient of Y term
+   */
+  inline void addCostJacobian(
+    const double & weight,
+    const unsigned int & mx,
+    const unsigned int & my,
+    const double & value,
+    double & j0,
+    double & j1) const
+  {
+    if (value == costmap_2d::FREE_SPACE) {
+      return;
+    }
+
+    const Eigen::Vector2d grad = getCostmapGradient(mx, my);
+    const double common_prefix = -2.0 * _params.costmap_factor * weight * value * value;
+
+    j0 += common_prefix * grad[0];  // xi x component of partial-derivative
+    j1 += common_prefix * grad[1];  // xi y component of partial-derivative
+  }
+
+  /**
+   * @brief Computing the gradient of the costmap using
+   * the 2 point numerical differentiation method
+   * @param mx Point Xi's x coordinate in map frame
+   * @param mx Point Xi's y coordinate in map frame
+   * @param params Params reference to store gradients
+   */
+  inline Eigen::Vector2d getCostmapGradient(
+    const unsigned int mx,
+    const unsigned int my) const
+  {
+    // find unit vector that describes that direction
+    // via 7 point taylor series approximation for gradient at Xi
+    Eigen::Vector2d gradient;
+
+    double l_1 = 0.0;
+    double l_2 = 0.0;
+    double l_3 = 0.0;
+    double r_1 = 0.0;
+    double r_2 = 0.0;
+    double r_3 = 0.0;
+
+    if (mx < _costmap->getSizeInCellsX()) {
+      r_1 = static_cast<double>(_costmap->getCost(mx + 1, my));
+    }
+    if (mx + 1 < _costmap->getSizeInCellsX()) {
+      r_2 = static_cast<double>(_costmap->getCost(mx + 2, my));
+    }
+    if (mx + 2 < _costmap->getSizeInCellsX()) {
+      r_3 = static_cast<double>(_costmap->getCost(mx + 3, my));
+    }
+
+    if (mx > 0) {
+      l_1 = static_cast<double>(_costmap->getCost(mx - 1, my));
+    }
+    if (mx - 1 > 0) {
+      l_2 = static_cast<double>(_costmap->getCost(mx - 2, my));
+    }
+    if (mx - 2 > 0) {
+      l_3 = static_cast<double>(_costmap->getCost(mx - 3, my));
+    }
+
+    gradient[1] = (45 * r_1 - 9 * r_2 + r_3 - 45 * l_1 + 9 * l_2 - l_3) / 60;
+
+    if (my < _costmap->getSizeInCellsY()) {
+      r_1 = static_cast<double>(_costmap->getCost(mx, my + 1));
+    }
+    if (my + 1 < _costmap->getSizeInCellsY()) {
+      r_2 = static_cast<double>(_costmap->getCost(mx, my + 2));
+    }
+    if (my + 2 < _costmap->getSizeInCellsY()) {
+      r_3 = static_cast<double>(_costmap->getCost(mx, my + 3));
+    }
+
+    if (my > 0) {
+      l_1 = static_cast<double>(_costmap->getCost(mx, my - 1));
+    }
+    if (my - 1 > 0) {
+      l_2 = static_cast<double>(_costmap->getCost(mx, my - 2));
+    }
+    if (my - 2 > 0) {
+      l_3 = static_cast<double>(_costmap->getCost(mx, my - 3));
+    }
+
+    gradient[0] = (45 * r_1 - 9 * r_2 + r_3 - 45 * l_1 + 9 * l_2 - l_3) / 60;
+
+    gradient.normalize();
+    return gradient;
+  }
+
+  /**
+   * @brief  新代价地图梯度计算
+   * cost^2(x) 的梯度 = 2 * cost(x) * cost'(x) = 2 * cost(x) * 0.5 * (cost(x+1)-cost(x-1))
+   *                 = cost(x) * (cost(x+1)-cost(x-1))
+   * @param  mx  地图坐标 x
+   * @param  my  地图坐标 y
+   * @param  value  [x,y] 的地图代价值
+   * @param  j0  x 偏导梯度
+   * @param  j1  y 偏导梯度
+   */
+  inline void addCostJacobianNew(
+    const unsigned int & mx,
+    const unsigned int & my,
+    const double & value,
+    double & j0,
+    double & j1) const
+  {
+    if (value == costmap_2d::FREE_SPACE) {
+      return;
+    }
+
+    const Eigen::Vector2d grad = getCostmapGradient(mx, my);
+    const double common_prefix = 2.0 * _params.costmap_factor * value * value;
+
+    j0 += common_prefix * grad[0];  // xi x component of partial-derivative
+    j1 += common_prefix * grad[1];  // xi y component of partial-derivative
+  }
+
   std::vector<Eigen::Vector2d> * _original_path{nullptr};
   int _num_params;
+  costmap_2d::Costmap2D * _costmap{nullptr};
   SmootherParams _params;
   bool use_new_curvature_jacobian_{false};
+  bool use_new_cost_jacobian_{false};
 };
 
 }  // namespace smac_planner

@@ -1,3 +1,4 @@
+#include "costmap_2d/costmap_2d.h"
 #include "geometry_msgs/PoseStamped.h"
 #include "ros/ros.h"
 #include "smoother/smoother_cost_function.hpp"
@@ -7,6 +8,8 @@
 #include <nav_msgs/Path.h>
 #include <limits>
 #include <smoother/smoother.hpp>
+#include <costmap_2d/costmap_2d_ros.h>
+#include <tf2_ros/transform_listener.h>
 
 nav_msgs::Path genRandomPath()
 {
@@ -36,7 +39,8 @@ nav_msgs::Path genRandomPath()
 }
 
 nav_msgs::Path Smooth(const std::shared_ptr<smoother::Smoother>& smoother,
-                      const nav_msgs::Path& unsmooth_path)
+                      const nav_msgs::Path& unsmooth_path,
+                      costmap_2d::Costmap2D* costmap)
 {
   std::vector<Eigen::Vector2d> splan;
   for (auto p : unsmooth_path.poses) {
@@ -49,7 +53,7 @@ nav_msgs::Path Smooth(const std::shared_ptr<smoother::Smoother>& smoother,
 
   smoother::SmootherParams params;
   // params.distance_weight = 10;
-  if (!smoother->smooth(splan, params)) {
+  if (!smoother->smooth(splan, costmap, params)) {
     ROS_ERROR("can't smooth plan");
   } else {
     for (auto p2d : splan) {
@@ -75,6 +79,9 @@ int main(int argc, char** argv)
   ros::Publisher splan_pub = n.advertise<nav_msgs::Path>("smoother_plan", 1);
   ros::Publisher nsplan_pub = n.advertise<nav_msgs::Path>("new_smoother_plan", 1);
 
+  auto tf = std::make_shared<tf2_ros::Buffer>(); 
+  tf2_ros::TransformListener tf_listener(*tf);
+  auto costmap_ros = std::make_shared<costmap_2d::Costmap2DROS>("test_costmap", *tf);
   auto smoother = std::make_shared<smoother::Smoother>();
   smoother->initialize();
 
@@ -85,11 +92,11 @@ int main(int argc, char** argv)
     plan_pub.publish(unsmooth_path);
 
     smoother->use_new_curvature_jacobian(false);
-    nav_msgs::Path smooth_path = Smooth(smoother, unsmooth_path);
+    nav_msgs::Path smooth_path = Smooth(smoother, unsmooth_path, costmap_ros->getCostmap());
     splan_pub.publish(smooth_path);
 
     smoother->use_new_curvature_jacobian(true);
-    nav_msgs::Path new_smooth_path = Smooth(smoother, unsmooth_path);
+    nav_msgs::Path new_smooth_path = Smooth(smoother, unsmooth_path, costmap_ros->getCostmap());
     nsplan_pub.publish(new_smooth_path);
 
     r.sleep();

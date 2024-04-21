@@ -14,6 +14,8 @@ find_package(catkin REQUIRED COMPONENTS
   tf
   std_msgs
   angles
+  costmap_2d
+  tf2_ros
 )
 find_package(Ceres REQUIRED COMPONENTS SuiteSparse)
 find_package(Eigen3 REQUIRED)
@@ -109,7 +111,7 @@ find_package(Eigen3 REQUIRED)
 catkin_package(
  INCLUDE_DIRS include
 #  LIBRARIES vw_pkg
- CATKIN_DEPENDS geometry_msgs roscpp rospy std_msgs tf angles
+ CATKIN_DEPENDS geometry_msgs roscpp rospy std_msgs tf angles costmap_2d
 #  DEPENDS system_lib
 )
 
