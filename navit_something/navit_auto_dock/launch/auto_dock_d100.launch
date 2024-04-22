@@ -1,0 +1,13 @@
+<launch>
+  <node name="auto_dock" pkg="navit_auto_dock" type="navit_auto_dock_node" output="screen">
+    <rosparam file="$(find navit_auto_dock)/config/auto_dock.yaml" command="load" />
+    <rosparam file="$(find navit_auto_dock)/config/d100/approach_dock_d100.yaml" command="load" />
+    <rosparam file="$(find navit_auto_dock)/config/d100/final_dock_d100.yaml" command="load" />
+  </node>
+
+ <node name="dock_test"  pkg="navit_auto_dock"  type="dock_d100.py" output="screen" />
+ <node name="dock_test_view_dock" pkg="navit_auto_dock"   type="view_dock.py" output="screen" />
+
+  <!-- <include file="$(find navit_bt_navigator)/launch/navit_jm.launch" /> -->
+
+</launch>

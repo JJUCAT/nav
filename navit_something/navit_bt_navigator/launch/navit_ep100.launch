@@ -1,0 +1,48 @@
+<launch>
+	 <!-- <node name="map_server" pkg="map_server" type="map_server" args="/home/robot/navit/1542439380134821891/1542439380134821891.yaml" output="screen"/> -->
+
+ 	<node pkg="navit_planner" type="navit_planner_node" name="navit_planner_node" output="screen" respawn="true">
+  	  	<rosparam file="$(find navit_planner)/config/ep100/ep100.yaml" command="load" />
+  	 	<rosparam file="$(find navit_planner)/config/ep100/costmap_params.yaml" command="load"/>
+	</node> 
+
+	<node pkg="navit_controller" type="navit_controller_node" name="navit_controller_node" output="screen" respawn="true">
+  	  	<rosparam file="$(find navit_controller)/config/ep100/ep100.yaml" command="load"/>
+  	 	<rosparam file="$(find navit_controller)/config/ep100/costmap_params.yaml" command="load"/>
+		<rosparam file="$(find local_ogm_voxel_layer)/config/config.yaml" command="load"/>
+	</node>
+
+	<node pkg="navit_recovery" type="navit_recovery_node" name="navit_recovery_node" output="screen">
+  	  	<rosparam file="$(find navit_recovery)/config/ep100/ep100.yaml" command="load"/>
+	</node>
+
+	<!-- node pkg="laser_filters" type="scan_to_scan_filter_chain" output="screen" name="laser_filter_1">
+		<rosparam command="load" file="$(find navit_controller)/config/jm10/box_angular_filter_1.yaml"/>
+		<remap from="scan_filtered" to="scan_filtered_1"/>
+	</node -->
+
+	<!-- node pkg="laser_filters" type="scan_to_scan_filter_chain" output="screen" name="laser_filter_2">
+		<rosparam command="load" file="$(find navit_controller)/config/jm10/box_angular_filter_2.yaml"/>
+		<remap from="scan_filtered" to="scan_filtered_2"/>
+	</node -->
+
+	<node name="auto_dock" pkg="navit_auto_dock" type="navit_auto_dock_node" output="screen">
+		<rosparam file="$(find navit_auto_dock)/config/ep100/auto_dock.yaml" command="load" />
+		<rosparam file="$(find navit_auto_dock)/config/ep100/approach_dock_ep100.yaml" command="load" />
+		<rosparam file="$(find navit_auto_dock)/config/ep100/final_dock_ep100.yaml" command="load" />
+	</node>
+
+    <include file="$(find navit_routing)/launch/routing.launch" />
+
+    <node name="navit_map_server_node" pkg="navit_map_server" type="navit_map_server_node"
+          args="$(find navit_bt_navigator)/maps/mymap_simulation.yaml"
+          output="screen">
+        <rosparam file="$(find navit_map_server)/config/navit_map_server.yaml" command="load"/>
+    </node>
+
+    <node pkg="navit_bt_navigator" type="move_to_pose_action_server" name="move_to_pose_action_server" output="screen"/>
+    <node pkg="navit_bt_navigator" type="move_through_poses_action_server" name="move_through_poses_action_server" output="screen"/>
+
+	<!--node name="dock_test"  pkg="navit_auto_dock"  type="dock_ep100.py" output="screen" /-->
+	<!--node name="dock_test_view_dock" pkg="navit_auto_dock"   type="view_dock_ep100.py" output="screen" /-->
+</launch>

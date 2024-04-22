@@ -1,0 +1,54 @@
+ <library path="libdock_plugins">
+     <class name="PerceptionEKF"
+            type="navit_auto_dock::plugins::PerceptionEKF"
+            base_class_type="navit_auto_dock::plugins::ApproachDockFilter">
+        <description>
+            ekf based filter for approch dock action
+        </description>
+     </class>
+    <class name="AverageFilter"
+            type="navit_auto_dock::plugins::AverageFilter"
+            base_class_type="navit_auto_dock::plugins::ApproachDockFilter">
+        <description>
+                Average filter for poses
+        </description>
+     </class>
+    <class name="PerceptionLKF"
+            type="navit_auto_dock::plugins::PerceptionLKF"
+            base_class_type="navit_auto_dock::plugins::ApproachDockFilter">
+        <description>
+                LKF filter for poses
+        </description>
+     </class>
+    <class name="PerceptionLPF"
+            type="navit_auto_dock::plugins::Lpf"
+            base_class_type="navit_auto_dock::plugins::ApproachDockFilter">
+        <description>
+                low pass filter for poses
+        </description>
+     </class>
+
+     <class name="RotatePidController"
+            type="navit_auto_dock::plugins::RotatePidController" 
+            base_class_type="navit_auto_dock::plugins::RotateController">
+        <description>
+            blocking and rotate robot 180 deg
+        </description>
+        </class>
+
+     <class name="PidController"
+            type="navit_auto_dock::plugins::PidController" 
+            base_class_type="navit_auto_dock::plugins::FinalDockController">
+        <description>
+            dock the robot based on odom
+        </description>
+     </class>
+
+     <class name="CarlikePidController"
+            type="navit_auto_dock::plugins::CarlikePidController" 
+            base_class_type="navit_auto_dock::plugins::FinalDockController">
+        <description>
+            dock the carlike robot based on odom
+        </description>
+     </class>
+ </library>

@@ -1,0 +1,37 @@
+<launch>
+
+	<node pkg="navit_planner" type="navit_planner_node" name="navit_planner_node" output="screen" respawn="true">
+  	  	<rosparam file="$(find navit_planner)/config/jm10/jm.yaml" command="load" />
+  	 	<rosparam file="$(find navit_planner)/config/jm10/costmap_params.yaml" command="load"/>
+	</node> 
+
+	<node pkg="navit_controller" type="navit_controller_node" name="navit_controller_node" output="screen" respawn="true">
+  	  	<rosparam file="$(find navit_controller)/config/jm10/jm.yaml" command="load"/>
+  	 	<rosparam file="$(find navit_controller)/config/jm10/costmap_params.yaml" command="load"/>
+		<rosparam file="$(find local_ogm_voxel_layer)/config/config.yaml" command="load"/>
+	</node>
+
+	<node pkg="navit_recovery" type="navit_recovery_node" name="navit_recovery_node" output="screen">
+  	  	<rosparam file="$(find navit_recovery)/config/jm10/jm.yaml" command="load"/>
+	</node>
+
+	<node pkg="laser_filters" type="scan_to_scan_filter_chain" output="screen" name="laser_filter_1">
+		<rosparam command="load" file="$(find navit_controller)/config/jm10/box_angular_filter_1.yaml"/>
+		<remap from="scan_filtered" to="scan_filtered_1"/>
+	</node>
+
+	<node pkg="laser_filters" type="scan_to_scan_filter_chain" output="screen" name="laser_filter_2">
+		<rosparam command="load" file="$(find navit_controller)/config/jm10/box_angular_filter_2.yaml"/>
+		<remap from="scan_filtered" to="scan_filtered_2"/>
+	</node>
+
+	<node name="auto_dock" pkg="navit_auto_dock" type="navit_auto_dock_node" output="screen">
+		<rosparam file="$(find navit_auto_dock)/config/auto_dock.yaml" command="load" />
+		<rosparam file="$(find navit_auto_dock)/config/d100/approach_dock_d100.yaml" command="load" />
+		<rosparam file="$(find navit_auto_dock)/config/d100/final_dock_d100.yaml" command="load" />
+	</node>
+
+	<node name="dock_test"  pkg="navit_auto_dock"  type="dock_d100.py" output="screen" />
+	<node name="dock_test_view_dock" pkg="navit_auto_dock"   type="view_dock.py" output="screen" />
+
+</launch>

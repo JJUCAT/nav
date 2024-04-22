@@ -1,0 +1,22 @@
+<launch>
+
+    <arg name="rviz" default="true" />
+
+    <!--  ************** Global Parameters ***************  -->
+    <param name="/use_sim_time" value="true"/>
+
+    <!--  ************** Stage Simulator ***************  -->
+	<node pkg="stage_ros" type="stageros" name="stageros" args="$(find navit_auto_dock)/stage/auto_dock_d100.world"/>
+
+	<!--  **************** Visualisation ****************  -->
+	<node name="rviz" pkg="rviz" type="rviz" args="-d $(find navit_auto_dock)/rviz/dock.rviz" if="$(arg rviz)"/>
+
+    <include file="$(find navit_controller)/launch/controller.launch" />
+
+    <include file="$(find navit_auto_dock)/launch/auto_dock_d100.launch" />
+
+	<!--  **************** Dock ****************  -->
+	<node pkg="navit_bt_navigator" type="auto_dock_sub_navigator" name="auto_dock_sub_navigator" output="screen"> launch-prefix="gdb -ex run --args ">
+	</node>
+
+</launch>

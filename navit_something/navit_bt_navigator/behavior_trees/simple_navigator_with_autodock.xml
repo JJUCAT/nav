@@ -1,0 +1,27 @@
+<!--
+  This Behavior Tree follows a dynamic pose with auto dock fuction
+-->
+
+<root main_tree_to_execute="MainTree">
+  <BehaviorTree ID="MainTree">
+    <Sequence name="NavigateWithDocking">
+      <PipelineSequence name="NavigateWithReplanning">
+        <RateController hz="1.0">
+          <Sequence>
+            <GoalUpdater input_goal="0.0;map;17.0;15.0;0.0;0.0;0.0;0.0;1.0" output_goal="{updated_goal}" >
+              <ComputePathToPose goal="{updated_goal}" path="{path}" planner_id="test_1" server_name="/compute_path" server_timeout="1.0" start="false"/>
+            </GoalUpdater>
+          <TruncatePath distance="1.0" input_path="{path}" output_path="{truncated_path}"/>
+          </Sequence>
+        </RateController>
+        <Sequence name="Controlling">
+          <FollowPath path="{truncated_path}" controller_id="test_3" server_name="/follow_path"  server_timeout="1.0"/>
+        </Sequence>      
+      </PipelineSequence>
+      <Sequence name="Docking">
+        <ApproachDock expected_dock_pose="0.0;map;19.5;15.0;0.0;0.0;0.0;0.0;1.0" controller_plugin_name="GracefulController_1" perception_plugin_name="fake_perception" filter_plugin_name="ekf_1" server_name="/approach_dock"  server_timeout="1.0"/> goal_reached="{approach_reached}"/>
+        <FinalDock dock_pose="0.0;map;19.2;15.0;0.0;0.0;0.0;0.0;1.0" rotate_in_place="true" server_name="/final_dock"  server_timeout="1.0"/> dock_finished="{dock_finished}"/>
+      </Sequence>
+    </Sequence>
+  </BehaviorTree>
+</root>

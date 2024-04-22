@@ -1,0 +1,9 @@
+nav_controller:
+    - name: test_1
+      type: base_local_planner/TrajectoryPlannerROS
+
+    - name: test_2
+      type: base_local_planner/TrajectoryPlannerROS
+          
+    - name: test_3
+      type: base_local_planner/TrajectoryPlannerROS

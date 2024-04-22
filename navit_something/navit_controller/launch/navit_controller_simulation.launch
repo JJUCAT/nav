@@ -1,0 +1,29 @@
+<launch>
+    <env name="ROSCONSOLE_CONFIG_FILE"
+         value="$(find navit_controller)/config/log.config" />
+
+    <arg name="rviz" default="true" />
+
+    <!--  ************** Global Parameters ***************  -->
+    <param name="/use_sim_time" value="true"/>
+
+    <node name="map_server" pkg="map_server" type="map_server" args="$(find navit_planner)/stage/maps/willow.pgm 0.05" />
+
+    <!--  ************** Stage Simulator ***************  -->
+	<node pkg="stage_ros" type="stageros" name="stageros" args="$(find navit_planner)/stage/willow.world"/>
+
+
+    <node name="fake_localization" pkg="fake_localization" type="fake_localization" respawn="false" />
+
+	<!--  **************** Visualisation ****************  -->
+	<node name="rviz" pkg="rviz" type="rviz" args="-d $(find navit_controller)/rviz/controller.rviz" if="$(arg rviz)"/>
+
+    <include file="$(find navit_planner)/launch/navit_planner.launch" />
+
+    
+    <include file="$(find navit_controller)/launch/controller.launch" />
+
+    <node name="test_controller" pkg="navit_controller" type="test_controller.py" />
+
+    <node pkg="rosbag" type="record" name="controller_test_record" args="--lz4 -o /tmp/controller_test -a " />
+</launch>

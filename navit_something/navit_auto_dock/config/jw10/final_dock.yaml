@@ -1,0 +1,51 @@
+final_dock:
+
+    rotate_controller_name: RotatePidController
+    final_dock_controller_name: CarlikePidController
+    # 回充参考终点，坐标基于充电桩坐标系
+    ref_terminal_x: -0.84 # 车头对桩 -1.21 # 车尾对桩 0.84(sim)
+    ref_terminal_y: 0.0
+    ref_terminal_theta: 3.141593 # 车头对桩 0.0 # 车尾对桩 3.141593
+
+RotatePidController:
+    cmd_vel_topic_name: cmd_vel
+    odom_topic_name: odom
+    rotate_timeout: 45.0
+    Kp: 1.0
+    max_vel: 0.1
+    min_vel: 0.02
+    control_frequency: 20
+    yaw_tolerance: 0.01
+
+
+PidController:
+    Kp: 0.5 #1.0
+    tolerance: 0.01
+    odom_topic_name: odom
+    max_v: 0.08 #0.1
+    min_v: 0.03 #0.05
+
+
+CarlikePidController:
+  odom_topic_name: odom
+  steering_max: 1.2 # 最大转向角
+  kp_y_err: 0.5 # 横向偏差调节参数 # 0.5
+  kp_theta_err: 1.5 # 角度偏差调节参数 # 1.5
+  tolerance: 0.02 # 到点误差
+  max_v: 0.1
+  min_v: 0.06
+  target_x_offset_to_dock: -1 # 雷达反馈充电桩距离后减掉该值得到需要前进的距离，设置为负值关闭雷达反馈功能 # 1.3
+  head: 1.2 # base_link 到车头距离，设置为负值表示 base_link 跟随，否则是车头跟随
+
+  lidar:
+    topic_name: /livox/lidar_192_168_1_168
+    valid_x: 0.8 # 雷达有效范围 1.0
+    buffer_size: 5
+    x_min: 1.5
+    x_max: 5.0
+    y_min: -1.0
+    y_max: 1.0
+    z_min: 0.7
+    z_max: 1.3
+    i_min: 90
+    i_max: 255

@@ -1,0 +1,9 @@
+nav_controller:
+    - name: test_1
+      type: teb_local_planner/TebLocalPlannerROS
+
+    - name: test_2
+      type: teb_local_planner/TebLocalPlannerROS
+          
+    - name: test_3
+      type: teb_local_planner/TebLocalPlannerROS

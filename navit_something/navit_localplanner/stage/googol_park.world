@@ -1,0 +1,71 @@
+include "robots/jw10.inc"
+
+define floorplan model
+(
+  # sombre, sensible, artistic
+  color "gray30"
+
+  # most maps will need a bounding box
+  boundary 1
+
+  gui_nose 1
+  gui_grid 0
+#gui_movemask 0
+  gui_outline 0
+  gripper_return 0
+  fiducial_return 0
+  laser_return 1
+)
+
+# set the resolution of the underlying raytrace model in meters
+resolution 0.1
+
+interval_sim 50  # simulation timestep in milliseconds
+#interval_real 100  # real-time interval between simulation updates in milliseconds
+
+# load an environment bitmap
+# 导入的地图在 stage 中的大小和位姿
+floorplan
+( 
+  name "googol_park"
+  bitmap "maps/googol_park.pgm"
+  # 地图的大小, 可在 rviz 中进行测量获取
+  size [191.2 116.15 1.0] # googol_park.pgm
+
+  # 地图中心在 stage 中的坐标和朝向
+  pose [95.6 58.075 0 0]  # googol_park.pgm
+)
+
+# throw in a robot
+# 机器人在 stage 中的位置
+#FG100( pose [57.1494445801 59.7793579102 0.0 90] name "FG100" color "yellow") # fg100.pgm
+jw10
+( 
+  pose [75.0 94.0 0.0 20] 
+  name "jw10" 
+  color "yellow"  
+)
+
+define dock model
+(
+  block
+  (
+    points 6
+    point[0] [0.75 0]
+    point[1] [1 0.25]
+    point[2] [1 0.75]
+    point[3] [0.75 1]
+    point[4] [0 1]
+    point[5] [0 0]
+    z [0 1]
+  )
+  laser_return 1
+)
+
+dock
+( 
+  pose [78.5 93.2 0.0 20] 
+  name "dock" 
+  color "red"  
+  laser_return 1
+)

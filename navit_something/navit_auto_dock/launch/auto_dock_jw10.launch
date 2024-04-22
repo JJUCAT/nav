@@ -1,0 +1,7 @@
+<launch>
+  <node name="auto_dock" pkg="navit_auto_dock" type="navit_auto_dock_node" output="screen"> launch-prefix="gdb -ex run --args">
+    <rosparam file="$(find navit_auto_dock)/config/jw10/auto_dock.yaml" command="load" />
+    <rosparam file="$(find navit_auto_dock)/config/jw10/approach_dock.yaml" command="load" />
+    <rosparam file="$(find navit_auto_dock)/config/jw10/final_dock.yaml" command="load" />
+  </node>
+</launch>

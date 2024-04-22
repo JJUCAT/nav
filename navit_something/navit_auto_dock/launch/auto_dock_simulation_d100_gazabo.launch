@@ -1,0 +1,63 @@
+<launch>
+  <arg name="world_name" default="charging_pile" />
+  <arg name="robot" default="diff_car"/>
+  <arg name="debug" default="false"/>
+  <arg name="gui" default="true"/>
+  <arg name="headless" default="false"/>
+  <arg name="output" default="screen" />
+  <arg name="rviz" default="true" />
+  <arg name="record" default="true" />
+
+  <!-- Start Gazebo with a blank world -->
+  <include file="$(find gazebo_ros)/launch/empty_world.launch">
+    <arg name="debug" value="$(arg debug)" />
+    <arg name="gui" value="$(arg gui)" />
+    <arg name="paused" value="false"/>
+    <arg name="use_sim_time" value="true"/>
+    <arg name="headless" value="$(arg headless)"/>
+    <arg name="world_name" value="$(find gazebo_model)/worlds/$(arg world_name).world"/>
+  </include>
+
+  <!-- URDF and TF support -->
+  <param name="robot_description" command="$(find xacro)/xacro $(find diff_amr_description)/urdf/diff_amr_gazebo.urdf.xacro" />
+
+  <!-- Put a robot in gazebo, make it look pretty -->
+  <node name="urdf_spawner" pkg="gazebo_ros" type="spawn_model" respawn="false" output="$(arg output)" 
+        args="-urdf -x 0.25 -y 3.0 -z 0 -model diff_car -param robot_description"/>
+
+  <!-- <node name="gazebo_odometry_node" pkg="navit_auto_dock" type="gazebo_odometry.py" output="$(arg output)"  /> -->
+
+  <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
+
+  <!--  **************** Visualisation ****************  -->
+  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find navit_auto_dock)/rviz/dock_sim.rviz" if="$(arg rviz)"/>
+
+  <node name="navit_controller_node" pkg="navit_controller" type="navit_controller_node" output="$(arg output)" >
+    <rosparam file="$(find navit_auto_dock)/config/dock_simulation/test.yaml" command="load" />
+    <rosparam file="$(find navit_auto_dock)/config/dock_simulation/costmap_params.yaml" command="load" />
+  </node>
+
+
+  <node name="auto_dock" pkg="navit_auto_dock" type="navit_auto_dock_node" output="$(arg output)" >
+    <rosparam file="$(find navit_auto_dock)/config/auto_dock.yaml" command="load" />
+    <rosparam file="$(find navit_auto_dock)/config/d100/approach_dock_d100.yaml" command="load" />
+    <rosparam file="$(find navit_auto_dock)/config/d100/final_dock_d100.yaml" command="load" />
+  </node>
+
+  <node name="dock_test"  pkg="navit_auto_dock"  type="dock_d100_simulation.py" output="$(arg output)"  />
+  <node name="dock_test_view_dock"
+          pkg="navit_auto_dock"
+          type="view_dock.py"
+          output="$(arg output)"  />
+
+	<!--  ****** Recovery *****  -->
+	<node pkg="navit_recovery" type="navit_recovery_node" name="navit_recovery_node" output="$(arg output)" >
+  	  	<rosparam file="$(find navit_recovery)/config/test.yaml" command="load"/>
+	</node>
+
+
+  <node pkg="rosbag" type="record" name="auto_dock_test_record" args="--lz4 -o /tmp/auto_dock_test -a "  if="$(arg record)"/>
+ <!-- <node name="dock_pose_pub"  pkg="navit_auto_dock"  type="dock_pose_publisher_test.py" output="screen" /> -->
+
+
+</launch>

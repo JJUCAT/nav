@@ -1,0 +1,9 @@
+<launch>
+
+<node pkg="nodelet" type="nodelet" name="navit_controller_nodelet_manager" args="manager" />
+
+<node pkg="nodelet" type="nodelet" name="navit_controller_nodelet" args="load
+navit_controller/ControllerServerNodelet
+navit_controller_nodelet_manager" />
+
+</launch>

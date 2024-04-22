@@ -1,0 +1,23 @@
+final_dock:
+
+    rotate_controller_name: RotatePidController
+    final_dock_controller_name: PidController
+
+RotatePidController:
+    cmd_vel_topic_name: cmd_vel
+    odom_topic_name: odom
+    rotate_timeout: 45.0
+    Kp: 1.0
+    max_vel: 0.15
+    min_vel: 0.05
+    control_frequency: 20
+    yaw_tolerance: 0.01
+
+
+PidController:
+    Kp: 0.5 #1.0
+    tolerance: 0.01
+    odom_topic_name: odom
+    max_v: 0.08 #0.1
+    min_v: 0.03 #0.05
+

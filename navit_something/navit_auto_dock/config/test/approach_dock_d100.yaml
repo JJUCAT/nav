@@ -1,0 +1,166 @@
+approach_dock:
+    odom_topic_name: /odom
+    cmd_vel_name: /cmd_vel
+    control_frequency: 10.0
+    obstacle_blocking_timeout: 20.0
+    collision_check_forward_distance: 0.5
+    collision_check_forward_time: 0.8
+    lost_perception_timeout: 150.0
+    pre_in_percep_x: -0.7
+    pre_in_percep_y: 0.0
+    pre_in_percep_theta: 0.0
+
+    ## load available controller plugins
+    ## or the same controller with different params
+    ## the action goal msg requires controller_plugin_name
+    ## NMPC：dock_fg100_controller/FgController
+    controller:
+        - name: GracefulController
+          type: dock_diff_graceful_controller/Controller
+    
+        - name: FgController
+          type: dock_fg100_controller/FgController
+
+        - name: DiffPurepursuitController
+          type: dock_diff_purepursuit_pid_controller/Controller
+## load all useful  perception plugins, same or different
+## the action goal requres perception_plugin_name
+    perception:
+      - name: fake_perception
+        type: dock_fake_perception/FakePerception
+
+      - name: 2d_lidar
+        type: dock_perception/Perception
+
+      - name: visual_perception
+        type: dock_visual_perception/VisualPerception
+
+    filter:
+      - name: ekf_1
+        type: PerceptionEKF
+
+      - name: average
+        type: AverageFilter
+
+ekf_1:
+    sigma_w: [1.0e-3, 1.0e-3, 1.0e-3]
+    sigma_u: [1.0e-2, 1.0e-2, 1.0e-2]
+    error_cov: [10, 10, 10]
+    dt: 0.02
+
+GracefulController:
+    k1: 1.0
+    k2: 2.0
+    min_velocity: 0.02
+    max_velocity: 0.2
+    max_angular_velocity: 0.2
+    min_angular_velocity: 0.1
+    beta: 0.3
+    lambda: 2.0
+    xy_tolerance: 0.03
+    yaw_tolerance: 0.03
+    base_frame: base_link
+
+DiffPurepursuitController:
+    half_length_robot: 0.2
+    ld_: 0.1
+    k_control_: 2.0
+    min_velocity: 0.01
+    max_velocity: 0.1
+    max_angular_velocity: 0.2
+    min_angular_velocity: 0.01
+    beta: 0.3
+    lambda: 2.0
+    xy_tolerance: 0.01
+    yaw_tolerance: 0.005
+    base_frame: base_link
+
+FgController:
+    xy_goal_tolerance: 0.05
+    yaw_goal_tolerance: 0.05
+    robot:
+        type: "diff"
+        diff:
+            max_vel_x: 0.15
+            max_vel_theta: 0.1
+            acc_lim_x: 0.1
+            dec_lim_x: 0.1
+            acc_lim_theta: 0.1
+
+    grid:
+        grid_size_ref: 60 # (T = (grid_size_ref-1) * dt_ref);
+        dt_ref: 0.3 # and here the corresponding temporal resolution
+        xf_fixed: [True, True, True]
+        warm_start: True
+        collocation_method: "forward_differences"
+        cost_integration_method: "left_sum"
+
+    planning:
+        objective:
+          type: "quadratic_form" 
+          quadratic_form:
+            state_weights: [2.0, 2.0, 2]
+            control_weights: [0.1, 0.05]
+            integral_form: False
+        terminal_cost:
+          type: "quadratic" # can be "none"
+          quadratic:
+            final_state_weights: [1.0, 15.0, 10.0]
+        terminal_constraint:
+          type: "none" # can be "none"
+          l2_ball:
+            weight_matrix: [1.0, 1.0, 1.0]
+            radius: 5
+
+    controller:
+        state_feedback_topic_name: move_base_node/mpc_local_planner/state_feedback #TODO 替换为实际的topic名字
+        outer_ocp_iterations: 1
+        xy_goal_tolerance: 0.2
+        yaw_goal_tolerance: 0.1
+        prefer_x_feedback: False
+        publish_ocp_results: False
+
+    solver:
+      ipopt:
+        iterations: 100
+        max_cpu_time: -1.0
+        ipopt_numeric_options:
+          tol: 1e-4
+        ipopt_string_options:
+          linear_solver: "mumps"
+          hessian_approximation: "limited-memory" 
+
+
+fake_perception:
+    tracking_frame: odom
+
+2d_lidar:
+    tracking_frame: odom
+    use_filter: true
+    debug: true
+    max_alignment_error: 0.01
+    scan_topic_name: /hokuyo_lida/scan
+    max_icp_iterations: 10
+   
+    dock_shape: mir_shape
+    mir_shape:
+       v_shape_l: 0.15
+       v_shape_theta_deg: 120.0
+       bottom_l: 0.3
+    v_shape:
+       l: 0.28
+       theta_deg: 150.0
+
+visual_perception:
+    marker_size: 9.0
+    max_new_marker_error: 0.08
+    max_track_error: 0.2
+    max_frequency: 20
+    marker_resolution: 5
+    marker_margin: 2
+    input_id: 1
+    cam_info_topic: "/camera_01/rgb/camera_info" 
+    cam_image_topic: "/camera_01/rgb/image_raw"
+    roll: 1.57 
+    pitch: 1.57
+    yaw: 0.0

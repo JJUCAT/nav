@@ -1,0 +1,8 @@
+final_dock:
+  rotate_in_place: False
+  final_dock_controller_name: PidController
+
+PidController:
+    Kp: 0.5
+    tolerance: 0.01
+

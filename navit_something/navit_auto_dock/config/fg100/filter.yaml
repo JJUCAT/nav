@@ -1,0 +1,4 @@
+approach_dock:
+  filter:
+    - {name: ekf_1, type: PerceptionEKF}
+    - {name: ekf_2, type: PerceptionEKF}

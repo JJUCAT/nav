@@ -1,0 +1,14 @@
+<launch>
+	<node pkg="navit_planner" type="navit_planner_node" name="navit_planner_node" output="screen" respawn="true">
+  	  	<rosparam file="$(find navit_planner)/config/simulation/ep100_sim/base_planner_simulation.yaml" command="load" />
+  	 	<rosparam file="$(find navit_planner)/config/simulation/ep100_sim/costmap_params_simulation.yaml" command="load"/>
+	</node> 
+
+	<node pkg="navit_controller" type="navit_controller_node" name="navit_controller_node" output="screen" respawn="true">
+  	  	<rosparam file="$(find navit_controller)/config/simulation/ep100_sim/base_controller_simulation.yaml" command="load"/>
+  	 	<rosparam file="$(find navit_controller)/config/simulation/ep100_sim/costmap_params_simulation.yaml" command="load"/>
+      <!--remap from="cmd_vel" to="cmd_vel_raw"/-->
+	</node>
+
+  <node pkg="navit_bt_navigator" type="back_to_reference_line_action_server_node" name="back_to_reference_line_action_server_node" output="screen"/>
+</launch>

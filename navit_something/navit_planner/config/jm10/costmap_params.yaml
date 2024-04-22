@@ -1,0 +1,59 @@
+planner_costmap:
+    global_frame: map
+    robot_base_frame: base_footprint
+    update_frequency: 5
+    publish_frequency: 2
+    robot_radius: 0.5
+    width: 100
+    height: 100
+    resolution: 0.1
+     
+    transform_tolerance: 0.5
+    #rolling_window: true
+    plugins:
+      - {name: static_layer,            type: "navit_costmap::StaticLayer"}
+      - {name: obstacle_layer,          type: "navit_costmap::VoxelLayer"}
+        #- {name: prohibition_layer,        type: "costmap_prohibition_layer_namespace::CostmapProhibitionLayer"}
+      - {name: inflation_layer,         type: "navit_costmap::InflationLayer"}
+    
+
+    obstacle_layer:
+        observation_sources: lidar_1 lidar_2
+        lidar_1:
+            topic: scan_filtered_1
+            sensor_frame: laser_link
+            data_type: LaserScan
+            marking: true
+            clearing: true
+            obstacle_range: 8
+        lidar_2:
+            topic: scan_filtered_2
+            sensor_frame: laser_link
+            data_type: LaserScan
+            marking: true
+            clearing: true
+            obstacle_range: 8
+
+
+    inflation_layer:
+        inflation_radius: 0.5
+        cost_scaling_factor: 0.8
+
+    prohibition_layer:
+      prohibition_areas:
+        # point
+        - [18,12]
+
+        # line
+        - [[8,2], [8,22]]
+
+        # polygons
+        - [[10, 30],
+           [10, 10],
+           [30, 10],
+           [30, 30]]
+        - [[5, 7],
+          [5, 5],
+          [7, 5],
+          [7, 7]]
+

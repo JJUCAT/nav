@@ -1,0 +1,8 @@
+<launch>
+
+<node name="navit_controller_node" pkg="navit_controller" type="navit_controller_node" output="screen" >
+    <rosparam file="$(find navit_controller)/config/test_ccpp.yaml" command="load" />
+    <rosparam file="$(find navit_controller)/config/ccpp_following_costmap_params.yaml" command="load" />
+</node>
+
+</launch>

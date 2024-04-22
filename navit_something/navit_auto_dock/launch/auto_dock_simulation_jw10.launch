@@ -1,0 +1,25 @@
+<!-- 
+  Simulate a carlike robot with the auto_dock in stage:
+  - stage
+  - fetch_open_auto_dock
+  - rviz view
+ -->
+<launch>
+
+    <env name="ROSCONSOLE_CONFIG_FILE" value="$(find navit_auto_dock)/config/log.config" />
+    <arg name="rviz" default="true" />
+
+    <!--  ************** Global Parameters ***************  -->
+    <param name="/use_sim_time" value="true"/>
+
+    <!--  ************** Stage Simulator ***************  -->
+    <node name="map_server" pkg="map_server" type="map_server" args="$(find navit_auto_dock)/stage/maps/dock.yaml" output="screen"/>
+    <node name="fake_localization" pkg="fake_localization" type="fake_localization" respawn="false" />  
+    <node pkg="stage_ros" type="stageros" name="stageros" args="$(find navit_auto_dock)/stage/auto_dock_jw10.world"/>
+
+	<!--  **************** Visualisation ****************  -->
+	<node name="rviz" pkg="rviz" type="rviz" args="-d $(find navit_auto_dock)/rviz/dock.rviz" if="$(arg rviz)"/>
+    <include file="$(find navit_auto_dock)/launch/auto_dock_jw10.launch" />
+    <node name="dock_test" pkg="navit_auto_dock"  type="dock_jw10.py" output="screen"/> 
+    <!-- <node name="dock_test_view_dock" pkg="navit_auto_dock" type="view_dock.py" output="screen" /> -->
+</launch>

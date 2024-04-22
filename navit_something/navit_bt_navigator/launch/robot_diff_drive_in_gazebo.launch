@@ -1,0 +1,55 @@
+<launch>
+
+	<!--  ************** Global Parameters ***************  -->
+	<param name="/use_sim_time" value="true"/>
+
+	<include file="$(find diff_car_gazebo)/launch/diff_car_simulation.launch"/>
+	<!-- <include file="$(find fg100_gazebo)/launch/fg100_simulation.launch"/> -->
+
+	<!--  ****** Maps *****  -->
+	<node name="map_server" pkg="map_server" type="map_server" args="$(find navit_bt_navigator)/maps/4floor.yaml" output="screen">
+		<remap from="/scan" to="/base_scan"/>
+	</node>
+
+	<!-- AMCL -->
+  	<include file="$(find navit_bt_navigator)/launch/amcl.launch"/>
+
+	<!--  ****** Dock *****  -->
+	<node name="auto_dock" pkg="navit_auto_dock" type="navit_auto_dock_node" output="screen"> launch-prefix="gdb -ex run --args">
+		<remap from="/cmd_vel" to="/chassis_controller/cmd_vel"/>
+		<rosparam file="$(find navit_auto_dock)/config/auto_dock.yaml" command="load" />
+		<rosparam file="$(find navit_auto_dock)/config/d100/approach_dock_d100.yaml" command="load" />
+		<rosparam file="$(find navit_auto_dock)/config/d100/final_dock_d100.yaml" command="load" />		
+	</node>
+
+	<!--  ************** Navigation ***************  -->
+	<node pkg="navit_planner" type="navit_planner_node" name="navit_planner_node" output="screen" respawn="true">
+  	  	<rosparam file="$(find navit_planner)/config/test.yaml" command="load" />
+  	 	<rosparam file="$(find navit_bt_navigator)/cfg/global_costmap_params.yaml" command="load"/>
+	</node> 
+
+	<node pkg="navit_controller" type="navit_controller_node" name="navit_controller_node" output="screen" respawn="true">
+		<remap from="/cmd_vel" to="/chassis_controller/cmd_vel"/>
+  	  	<rosparam file="$(find navit_controller)/config/test.yaml" command="load"/>
+  	 	<rosparam file="$(find navit_bt_navigator)/cfg/local_costmap_params.yaml" command="load"/>	
+	</node>
+
+	<rosparam file="$(find navit_bt_navigator)/cfg/navigator_params_gazebo.yaml" command="load"/>
+	<node pkg="navit_bt_navigator" type="simple_navigator" name="simple_navigator" output="screen"> launch-prefix="xterm -e gdb -ex run --args "
+	</node>
+
+	<!--  ****** Recovery *****  -->
+	<node pkg="navit_recovery" type="navit_recovery_node" name="navit_recovery_node" output="screen">
+  	  	<rosparam file="$(find navit_recovery)/config/test.yaml" command="load"/>
+	</node>
+
+
+	<!--  **************** Visualisation ****************  -->
+	<node name="rviz" pkg="rviz" type="rviz" args="-d $(find navit_bt_navigator)/cfg/navit_bt_gazebo.rviz"/>
+
+
+
+	<remap from="/cmd_vel" to="/chassis_controller/cmd_vel"/>
+
+
+</launch>

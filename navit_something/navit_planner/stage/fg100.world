@@ -1,0 +1,95 @@
+define block model
+(
+  size [1.0 1.0 5.0]
+  gui_nose 0
+)
+
+define laser ranger
+(
+  sensor
+  (
+    range_min 0.0
+    range_max 30.0
+    fov 360.0
+    samples 2048
+  )
+  # generic model properties
+  color "green"
+  size [ 0.1 0.1 0.1 ]
+)
+
+define FG100 position
+(
+  odom_error [0.03 0.03 999999 999999 999999 0.02]
+  size [2.80 1.6 0.3]
+  origin [-0.4 0 0 0]
+  gui_nose 1
+  drive "car"   # 阿克曼模型
+  wheelbase 2   # 2 轴距
+  laser(pose [0.000 0.000 0 0.000]) # 传感器位置
+)
+
+define floorplan model
+(
+  # sombre, sensible, artistic
+  color "gray30"
+
+  # most maps will need a bounding box
+  boundary 1
+
+  gui_nose 1
+  gui_grid 0
+#gui_movemask 0
+  gui_outline 0
+  gripper_return 0
+  fiducial_return 0
+  laser_return 1
+)
+
+# set the resolution of the underlying raytrace model in meters
+resolution 0.1
+
+interval_sim 50  # simulation timestep in milliseconds
+#interval_real 100  # real-time interval between simulation updates in milliseconds
+
+# stage 窗口的大小
+window
+( 
+# size [ 745.000 448.000 ]
+#center [327.990 371.960] 
+#rotate [ 0.000 -1.560 ]
+  rotate [ 0.000 0.0 ]
+  scale 18.806
+)
+
+# load an environment bitmap
+# 导入的地图在 stage 中的大小和位姿
+floorplan
+( 
+  name "fg100"
+  bitmap "maps/fg100.pgm"
+  # 地图的大小, 可在 rviz 中进行测量获取
+  #size [330.3 368.4 1.0]  # FG_map.pgm
+  #size [357.2 424.6 1.0] # ddf.png
+  #size [267.6 154.1 1.0] # test.pgm
+  #size [305.4 414.9 1.0] # fg100.pgm
+  size [305.4 414.9 1.0] # fg100.pgm
+  # 地图中心在 stage 中的坐标和朝向
+  #pose [165.15 184.2 0 0.0]  # FG_map.pgm
+  #pose [178.6 212.3 0 0.0]  # ddf.png
+  #pose [133.8 77.05 0 0]  # test.pgm
+  pose [152.2 212.45 0 0]  # fg100.pgm
+  #pose [-78.58135566711427 -65.22724609375001 0 0.0]  # test.pgm
+)
+
+
+# throw in a robot
+# 机器人在 stage 中的位置
+#FG100( pose [76 122 0 0.0] name "FG100" color "yellow")  # FG_map.pgm
+#FG100( pose [94 140 0 0.0] name "FG100" color "yellow")  # ddf.png
+#FG100( pose [42.3655471802 62.5693283081 0.0 102.070] name "FG100" color "yellow")   # test.pgm
+#FG100( pose [54.6494445801 99.7793579102 0.0 12.849] name "FG100" color "yellow")   # test.pgm
+FG100( pose [57.1494445801 59.7793579102 0.0 90] name "FG100" color "yellow")   # fg100.pgm
+# 障碍物在 stage 中的位置
+#block( pose [42.6207847595 75.9981918335 0 0.000 ] color "red")
+#block( pose [ 0.000 0.000 0 0.000 ] color "red")

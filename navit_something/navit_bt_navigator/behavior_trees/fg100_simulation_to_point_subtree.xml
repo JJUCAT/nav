@@ -1,0 +1,55 @@
+<?xml version="1.0"?>
+<root main_tree_to_execute="BehaviorTree">
+    <!-- ////////// -->
+    <BehaviorTree ID="BehaviorTree">
+        <Control ID="PipelineSequence">
+            <Decorator ID="RateController" hz="1.0">
+                <Decorator ID="GoalUpdater" goal_updated="{is_goal_updated}" input_goal="0.0;map;17.0;15.0;0.0;0.0;0.0;0.0;1.0" is_docking="false" output_goal="{updated_goal}">
+                    <Sequence>
+                        <Action ID="ComputePathToPose" goal="{updated_goal}" path="{path}" planner_id="topoint" server_name="/compute_path" server_timeout="1.0" start="false"/>
+                        <!-- <Action ID="TruncatePath" distance="0.2" input_path="{path}" output_path="{truncated_path}"/> -->
+                    </Sequence>
+                </Decorator>
+            </Decorator>
+            <Condition ID="GoalUpdated" goal_updated="{is_goal_updated}"/>
+            <Action ID="FollowPath" controller_id="following" goal_updated="{is_goal_updated}" path="{path}" server_name="/follow_path" server_timeout="1.0"/>
+        </Control>
+    </BehaviorTree>
+    <!-- ////////// -->
+    <TreeNodesModel>
+        <Action ID="ComputePathToPose">
+            <input_port name="goal">Destination to plan to</input_port>
+            <output_port name="path">Path created by ComputePathToPose node</output_port>
+            <input_port name="planner_id" />
+            <input_port name="server_name" >Action server name</input_port>
+            <input_port name="server_timeout" />
+            <input_port name="start" >Start pose of the path if overriding current robot pose</input_port>
+        </Action>
+        <Action ID="FollowPath">
+            <input_port name="controller_id" />
+            <output_port name="goal_updated" type="bool"/>
+            <input_port name="path" >Path to follow</input_port>
+            <input_port name="server_name" >Action server name</input_port>
+            <input_port name="server_timeout" />
+        </Action>
+        <Condition ID="GoalUpdated">
+            <input_port name="goal_updated" >Indicated whether goal is updated</input_port>
+        </Condition>
+        <Decorator ID="GoalUpdater">
+            <output_port name="goal_updated" >whether goal is updated</output_port>
+            <input_port name="input_goal" >Original Goal</input_port>
+            <input_port name="is_docking" type="bool">is docking?</input_port>
+            <output_port name="output_goal" >Received Goal by subscription</output_port>
+        </Decorator>
+        <Control ID="PipelineSequence"/>
+        <Decorator ID="RateController">
+            <input_port name="hz" type="double">Rate</input_port>
+        </Decorator>
+        <Action ID="TruncatePath">
+            <input_port name="distance" type="double">distance</input_port>
+            <input_port name="input_path" >Original Path</input_port>
+            <output_port name="output_path" >Path truncated to a certain distance</output_port>
+        </Action>
+    </TreeNodesModel>
+    <!-- ////////// -->
+</root>

@@ -1,0 +1,59 @@
+<launch>
+  <!-- 参数 mode，@ctrl 直接跑 controller，@local 跑局部规划 -->
+  <arg name="mode" default="ctrl"/>
+  <!-- 参数 type，@run 跑规划控制，@table 生成表 -->
+  <arg name="type" default="run"/>
+  <!-- 参数 table 表的路径 -->
+  <arg name="table" default="lookup_table_bk.csv"/>
+  <arg name="table_path" default="$(find state_lattice_planner)/lookup_table/"/>
+
+  <!--  **************** client ****************  -->
+  <group if="$(eval arg('type') == 'run')">
+    <param name="/use_sim_time" value="true"/>
+    <arg name="rviz" default="true" />
+    <env name="ROSCONSOLE_CONFIG_FILE" value="$(find state_lattice_planner)/config/log.config"/>
+
+    <!--  ****** Maps *****  -->
+    <!-- <node name="map_server" pkg="map_server" type="map_server" args="$(find state_lattice_planner)/stage/maps/googol_park.yaml" output="screen"/> -->
+    <node name="map_server" pkg="map_server" type="map_server" args="$(find state_lattice_planner)/stage/maps/lmr.yaml" output="screen"/>
+
+    <node name="fake_localization" pkg="fake_localization" type="fake_localization" respawn="false" />  
+    <!--  ************** Stage Simulator ***************  -->
+    <!-- <node pkg="stage_ros" type="stageros" name="stageros" args="$(find state_lattice_planner)/stage/googol_park.world"/> -->
+    <node pkg="stage_ros" type="stageros" name="stageros" args="$(find state_lattice_planner)/stage/lmr.world"/>
+
+    <!--  ************** Navigation ***************  -->
+    <node pkg="navit_planner" type="navit_planner_node" name="navit_planner_node" output="screen" respawn="false">
+      <rosparam file="$(find state_lattice_planner)/config/simulation/planner.yaml" command="load" />
+      <rosparam file="$(find state_lattice_planner)/config/simulation/planner_costmap.yaml" command="load" />
+    </node> 
+
+    <node pkg="navit_controller" type="navit_controller_node" name="navit_controller_node" output="screen" respawn="false">
+      <rosparam file="$(find state_lattice_planner)/config/simulation/controller.yaml" command="load"/>
+      <rosparam file="$(find state_lattice_planner)/config/simulation/controller_costmap.yaml" command="load" />
+    </node>
+
+    <!--  **************** Visualisation ****************  -->
+    <node name="rviz" pkg="rviz" type="rviz" args="-d $(find state_lattice_planner)/rviz/navit.rviz" if="$(arg rviz)"/>
+
+    <group if="$(eval arg('mode') == 'ctrl')">
+      <node pkg="state_lattice_planner" type="simulation_lattice_node.py" name="simulation_lattice_node" output="screen" respawn="true"/>
+      <node pkg="state_lattice_planner" type="state_lattice_planner" name="state_lattice_planner" output="screen">
+        <param name="LOOKUP_TABLE_FILE_NAME" value="$(arg table_path)$(arg table)" />
+        <rosparam file="$(find state_lattice_planner)/config/simulation/state_lattice_planner.yaml" command="load"/>
+      </node>
+    </group>
+    <group unless="$(eval arg('mode') == 'ctrl')">
+      <node pkg="state_lattice_planner" type="sim_local_planning.py" name="sim_local_planning" output="screen" respawn="true"/>
+      <param name="/navit_controller_node/local_planner/LOOKUP_TABLE_FILE_NAME" value="$(arg table_path)$(arg table)" />
+      <rosparam file="$(find state_lattice_planner)/config/simulation/state_lattice_planner.yaml" command="load"
+                ns="/navit_controller_node/local_planner"/>
+    </group>
+  </group>
+  <group unless="$(eval arg('type') == 'run')">
+    <node pkg="state_lattice_planner" type="lookup_table_generator" name="lookup_table_generator" output="screen" required="true">
+      <param name="LOOKUP_TABLE_FILE_NAME" value="$(arg table_path)$(arg table)" />
+      <rosparam file="$(find state_lattice_planner)/config/simulation/state_lattice_planner.yaml" command="load"/>
+    </node>  
+  </group>
+</launch>

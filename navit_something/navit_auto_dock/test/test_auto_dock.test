@@ -1,0 +1,5 @@
+<launch>
+ 
+    <test test-name="auto_dock_nodelet" pkg="navit_auto_dock" type="test_auto_dock_nodelet" />
+
+</launch>

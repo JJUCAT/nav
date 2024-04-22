@@ -1,0 +1,42 @@
+<launch>
+
+	<!--  ************** Global Parameters ***************  -->
+	<param name="/use_sim_time" value="true"/>
+
+	<!--  ************** Stage Simulator ***************  -->
+	<node pkg="stage_ros" type="stageros" name="stageros" args="$(find navit_bt_navigator)/stage/maze_diff_drive.world"> 
+		<!-- <remap from="base_scan" to="scan"/> -->
+  	</node>
+
+	<!--  ****** Maps *****  -->
+	<node name="map_server" pkg="map_server" type="map_server" args="$(find navit_bt_navigator)/maps/maze.yaml" output="screen"/>
+
+	<node name="fake_localization" pkg="fake_localization" type="fake_localization" respawn="false" />
+
+	<!--  ************** Navigation ***************  -->
+	<node pkg="navit_controller" type="navit_controller_node" name="navit_controller_node" output="screen" respawn="true">
+  	  	<rosparam file="$(find navit_controller)/config/test.yaml" command="load"/>
+  	 	<rosparam file="$(find navit_controller)/config/costmap_params.yaml" command="load"/>
+	</node>
+
+	<rosparam file="$(find navit_bt_navigator)/cfg/via_points_navigator_params.yaml" command="load"/>
+	<node pkg="navit_bt_navigator" type="simple_navigator" name="simple_navigator" output="screen" respawn="true"> launch-prefix="xterm -e gdb -ex run --args "
+	</node>
+
+	<!--  ************** Pub Via Points ***************  -->
+	<!-- <node pkg="navit_bt_navigator" name="circle_viapoints" type="circle_viapoints.py" output="screen">
+	</node> -->
+
+	<node pkg="navit_bt_navigator" name="square_viapoints" type="square_viapoints.py" output="screen">
+	</node>
+
+	<!--  ****** Recovery *****  -->
+	<node pkg="navit_recovery" type="navit_recovery_node" name="navit_recovery_node" output="screen">
+  	  	<rosparam file="$(find navit_recovery)/config/test.yaml" command="load"/>
+	</node>
+
+	<!--  **************** Visualisation ****************  -->
+	<node name="rviz" pkg="rviz" type="rviz" args="-d $(find navit_bt_navigator)/cfg/teb_following.rviz"/>
+	
+
+</launch>

@@ -1,0 +1,9 @@
+<library path="lib/libnavit_controller_nodelet">
+	<class name="navit_controller/ControllerServerNodelet" 
+           type="navit_controller::ControllerServerNodelet" 
+		   base_class_type="nodelet::Nodelet">
+    <description>
+      Controller server nodelet
+    </description>
+</class>
+</library>

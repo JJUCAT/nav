@@ -1,0 +1,25 @@
+ <library path="libfinal_dock_controllers">
+     <class name="RotatePidController"
+         type="navit_auto_dock::plugins::RotatePidController" 
+         base_class_type="navit_auto_dock::plugins::RotateController">
+            <description>
+                blocking and rotate robot 180 deg
+            </description>
+      </class>
+
+     <class name="PidController"
+            type="navit_auto_dock::plugins::PidController" 
+            base_class_type="navit_auto_dock::plugins::FinalDockController">
+            <description>
+                dock the robot based on odom
+            </description>
+      </class>
+
+     <class name="CarlikePidController"
+            type="navit_auto_dock::plugins::CarlikePidController" 
+            base_class_type="navit_auto_dock::plugins::FinalDockController">
+            <description>
+                dock the carlike robot based on odom
+            </description>
+      </class>
+ </library>

@@ -1,0 +1,8 @@
+<library path="lib/libnavit_auto_dock_nodelet">
+    <class name="navit_auto_dock/AutoDockNodelet" type="navit_auto_dock::AutoDockNodelet" base_class_type="nodelet::Nodelet">
+    <description>
+      AutoDockNodelet
+    </description>
+</class>
+</library>
+

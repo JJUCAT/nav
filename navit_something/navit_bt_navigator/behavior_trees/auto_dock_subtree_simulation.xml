@@ -1,0 +1,33 @@
+<!--
+  Auto dock Behavior Tree   
+-->
+
+<root main_tree_to_execute="MainTree">
+  <!-- ////////// -->
+  <BehaviorTree ID="MainTree">
+    <Sequence>
+      <ApproachDock expected_dock_pose="0.0;odom;0.4;0.71;0.0;0.0;0.0;-0.693;0.72" controller_plugin_name="DiffPurepursuitController" perception_plugin_name="2d_lidar" filter_plugin_name="average" server_name="/approach_dock"  server_timeout="1.0"/> goal_reached="{approach_reached}"/>
+      <FinalDock dock_pose="0.0;base_link;0.1;0.0;0.0;0.0;0.0;0.0;1.0" rotate_in_place="false" server_name="/final_dock"  server_timeout="1.0"/> dock_finished="{dock_finished}"/>
+    </Sequence>
+  </BehaviorTree>
+  <!-- ////////// -->
+  <TreeNodesModel>
+    <Action ID="ApproachDock">
+        <input_port name="controller_plugin_name">...</input_port>
+        <input_port name="expected_dock_pose">for perception</input_port>
+        <input_port default="ekf_1" name="filter_plugin_name">...</input_port>
+        <output_port name="goal_reached">Approach DONE</output_port>
+        <input_port name="perception_plugin_name">...</input_port>
+        <input_port default="/approach_dock" name="server_name">remapped action server name</input_port>
+        <input_port name="server_timeout">...</input_port>
+    </Action>
+    <Action ID="FinalDock">
+        <output_port name="dock_finished">Dock DONE</output_port>
+        <input_port name="dock_pose">Final dock pose</input_port>
+        <input_port name="rotate_in_place">rotate_in_place</input_port>
+        <input_port default="/final_dock" name="server_name">remapped action server name</input_port>
+        <input_port name="server_timeout">...</input_port>
+    </Action>
+  </TreeNodesModel>
+  <!-- ////////// -->
+</root>

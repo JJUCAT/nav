@@ -1,0 +1,9 @@
+nav_planner:
+     - name: test_1
+       type: navfn/NavfnROS 
+     - name: test_2
+       type: global_planner/GlobalPlanner 
+     - name: test_3
+       type: smac_planner/SmacPlanner2D
+     - name: test_4
+       type: smac_planner/SmacPlanner

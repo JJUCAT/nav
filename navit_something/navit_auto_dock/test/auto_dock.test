@@ -1,0 +1,30 @@
+<launch>
+  <include file="$(find navit_auto_dock)/launch/auto_dock_simulation_d100_stage.launch">
+  <arg name="gui" value="true"/>
+  <arg name="output" value="log" />
+  <arg name="rviz" value="false" />
+  <arg name="record" value="false" />
+  </include>
+
+ <node name="dock_pose_pub"  pkg="navit_auto_dock"  type="dock_pose_publisher_test.py" output="screen" />
+
+  <test pkg="rostest"  test-name="tfHzTest" type="hztest" name="tfHzTest" >
+    <param name="topic" value="/cmd_vel" />  
+    <param name="hz" value="10" />
+    <param name="hzerror" value="2" />
+    <param name="test_duration" value="10.0" />
+  </test>
+
+  <test pkg="rostest" name="publishtest" test-name="publishtest" type="publishtest">
+    <rosparam>
+      topics:
+        - name: approach_action_succeed
+          timeout: 60
+          negative: False # Test will success if it is published within the timeout
+        - name: final_action_succeed
+          timeout: 60
+          negative: False # Test will success if it is published within the timeout
+    </rosparam>
+  </test>
+
+</launch>

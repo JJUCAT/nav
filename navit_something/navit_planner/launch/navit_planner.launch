@@ -1,0 +1,13 @@
+<launch>
+<arg name="output" default="screen" />
+<node pkg="navit_planner"
+      type="navit_planner_node"
+      name="navit_planner_node"
+      output="$(arg output)" >
+      launch-prefix="gdb -ex start -args">
+      <rosparam file="$(find navit_planner)/config/test_all_planners.yaml"
+                command="load" />
+      <rosparam file="$(find navit_planner)/config/costmap_params.yaml"
+                command="load" />
+</node>
+</launch>

@@ -1,0 +1,25 @@
+<launch>
+        <!--  ****** Maps *****  -->
+	<node name="map_server" pkg="map_server" type="map_server" args="$(find navit_bt_navigator)/maps/1026006/1026006.yaml" output="screen"/>
+	
+	<!-- ****** box filter ******-->
+        <node pkg="laser_filters" type="scan_to_scan_filter_chain" output="screen" name="laser_filter">
+               <rosparam command="load" file="$(find navit_controller)/config/jw10/postprocess/box_filter.yaml"/>
+        </node>
+
+	<node pkg="navit_planner" type="navit_planner_node" name="navit_planner_node" output="screen" respawn="true">
+  	  	<rosparam file="$(find navit_planner)/config/jw10/jw.yaml" command="load" />
+  	 	<rosparam file="$(find navit_planner)/config/jw10/costmap_params.yaml" command="load"/>
+	</node> 
+
+	<node pkg="navit_controller" type="navit_controller_node" name="navit_controller_node" output="screen" respawn="true">
+  	  	<rosparam file="$(find navit_controller)/config/jw10/jw.yaml" command="load"/>
+  	 	<rosparam file="$(find navit_controller)/config/jw10/costmap_params.yaml" command="load"/>
+	</node>
+
+	<node pkg="navit_recovery" type="navit_recovery_node" name="navit_recovery_node" output="screen">
+  	  	<rosparam file="$(find navit_recovery)/config/jw10/jw.yaml" command="load"/>
+	</node>
+
+
+</launch>

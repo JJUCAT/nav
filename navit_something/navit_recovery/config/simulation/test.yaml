@@ -1,0 +1,16 @@
+nav_recovery:
+    - name: wait
+      type: recovery_wait/RecoveryWait
+
+    - name: backup
+      type: recovery_backup/RecoveryBackUp
+
+costmap_topic_name: /navit_controller_node/controller_costmap/costmap
+footprint_topic_name: /navit_controller_node/controller_costmap/footprint
+
+test_1:
+    test_param: test_1_param
+
+test_2:
+    test_param: test_2_param
+

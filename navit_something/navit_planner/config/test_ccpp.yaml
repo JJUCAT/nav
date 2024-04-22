@@ -1,0 +1,36 @@
+coverage_planner:
+     - name: test_1
+       type: complete_coverage_planner/CompleteCoveragePlanner
+    
+     - name: test_2
+       type: complete_coverage_planner/CompleteCoveragePlanner
+
+     - name: test_3
+       type: complete_coverage_planner/CompleteCoveragePlanner
+
+smooth_path_planner:
+     - name: test_4
+       type: path_smoother/PathGslSpline
+
+test_1:
+  map_resolution: 0.05              # [m], [ default = 0.05 ]
+  coverage_resolution: 0.1          # [m], [ default = 0.10 ]
+  robot_radius: 0.2                 # [m], [ default = 0.20 ]
+  coverage_interval_distance: 0.8   # [m], coverage interval dis is  [default = robot_radius * 2 * 2]
+  error_distance: 3                 # [pixel], error distance for turn circle ccpp
+  path_eps: 1.0                     # [pixel], for downsample path,the distance between points when generating a path
+  inflation_distance: 0.25          # [m] [default = robot_radius + 0.05]
+    #test_2:
+    #    smooth_path: false
+    #    downsample_costmap: true
+    #    downsampling_factor: 4
+    #    max_iterations: 18000
+    #
+    #test_3:
+    #    smooth_path: false
+    #    downsample_costmap: true
+    #    downsampling_factor: 4
+    #    max_iterations: 15000
+test_4:
+  step_points: 5                    # interval of picking up keypoints in rough path.
+  step_s: 0.02                      # [m], default = 0.02, interval of two points in smooth path.

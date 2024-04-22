@@ -1,0 +1,7 @@
+<launch>
+    
+	<rosparam file="$(find navit_bt_navigator)/cfg/a2b.yaml" command="load"/>
+	<node pkg="navit_bt_navigator" type="simple_navigator" name="simple_navigator">
+	</node>
+
+</launch>

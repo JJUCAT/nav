@@ -1,0 +1,34 @@
+<launch>
+
+    <env name="ROSCONSOLE_CONFIG_FILE"
+         value="$(find navit_planner)/config/log.config" />
+
+    <arg name="output" default="screen" />
+    <arg name="rviz" default="true" />
+    <arg name="test" default="no_test" />
+    <arg name="record" default="true" />
+
+    <!--  ************** Global Parameters ***************  -->
+    <param name="/use_sim_time" value="true"/>
+
+    <!--node name="map_server" pkg="map_server" type="map_server" args="$(find ccpp_planner)/maps/map3.png 0.05" /-->
+
+    <node name="map_server" pkg="map_server" type="map_server" args="$(find navit_planner)/stage/maps/name.yaml" />
+
+    <!--node name="map_server" pkg="map_server" type="map_server" args="$(find navit_planner)/stage/maps/map_3.pgm 0.05" /-->
+
+    <!--  ************** Stage Simulator ***************  -->
+	<node pkg="stage_ros" type="stageros" name="stageros" args="$(find navit_planner)/stage/willow.world"/>
+
+    <node name="fake_localization" pkg="fake_localization" type="fake_localization" respawn="false" />
+
+	<!--  **************** Visualisation ****************  -->
+	<node name="rviz" pkg="rviz" type="rviz" args="-d $(find navit_planner)/rviz/coverage_path.rviz" if="$(arg rviz)"/>
+
+    <include file="$(find navit_planner)/launch/ccpp_planner.launch" />
+
+    <node pkg="navit_planner" type="client_ccpp_for_node_test.py" name="navit_planner" output="$(arg output)" if="$(eval arg('test') == 'no_test')"/>
+    <node pkg="navit_planner" type="client_ccpp_for_node_test.py" name="navit_planner" output="$(arg output)" if="$(eval arg('test') == 'test')"/>
+
+    <node pkg="rosbag" type="record" name="planner_test_record" args="--lz4 -o /tmp/planner_test -a "  if="$(arg record)"/>
+</launch>

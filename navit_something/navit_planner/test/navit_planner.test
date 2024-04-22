@@ -1,0 +1,65 @@
+<launch>
+
+  <include file="$(find navit_planner)/launch/navit_planner_simulation.launch">
+    <arg name="rviz" value="false"/>
+    <arg name="output" value="log"/>
+    <arg name="record" value="false"/>
+  </include>
+
+
+
+  <test pkg="rostest"  test-name="tfHzTest" type="hztest" name="tfHzTest" >
+    <param name="topic" value="/tf" />  
+    <param name="hz" value="80" />
+    <param name="hzerror" value="10" />
+    <param name="test_duration" value="5.0" />
+  </test>
+
+  <test pkg="rostest" test-name="odomHzTest" type="hztest" name="odomHzTest" >
+    <param name="topic" value="/odom" />  
+    <param name="hz" value="20" />
+    <param name="hzerror" value="3" />
+    <param name="test_duration" value="5.0" />
+  </test>
+
+  <test pkg="rostest" name="publishtest" test-name="publishtest" type="publishtest">
+    <rosparam>
+      topics:
+        - name: compute_path/result
+          timeout: 20
+          negative: False # Test will success if it is published within the timeout
+        - name: planned_path
+          timeout: 15
+          negative: False # Test will success if it is published within the timeout
+        - name: /navit_planner_node/test_1/plan
+          timeout: 30
+          negative: false  # Test will success if it is not published until the timeout
+        - name: /navit_planner_node/test_2/plan
+          timeout: 30
+          negative: false  # Test will success if it is not published until the timeout
+        - name: /navit_planner_node/test_3/unsmoothed_plan
+          timeout: 30
+          negative: false  # Test will success if it is not published until the timeout
+        - name: /navit_planner_node/test_4/unsmoothed_plan
+          timeout: 30
+          negative: false  # Test will success if it is not published until the timeout          
+    </rosparam>
+  </test>
+
+  <!-- Test if a specific parameter is not empty. -->
+  <test pkg="rostest" type="paramtest" name="paramtest_nonempty"  test-name="paramtest_nonempty">
+    <param name="param_name_target" value="/navit_planner_node/planner_costmap/robot_base_frame" />
+    <param name="test_duration" value="5.0" />
+    <param name="wait_time" value="20.0" />
+  </test>
+
+
+  <!-- Test if a specific parameter carries a specific value. -->
+  <test pkg="rostest" type="paramtest" name="paramtest_value_specific_correct"  test-name="paramtest_value_specific_correct">
+    <param name="param_name_target" value="/navit_planner_node/planner_costmap/obstacle_layer/enabled" />
+    <param name="param_value_expected" value="true" />
+    <param name="test_duration" value="5.0" />
+    <param name="wait_time" value="30.0" />
+  </test>
+
+</launch>

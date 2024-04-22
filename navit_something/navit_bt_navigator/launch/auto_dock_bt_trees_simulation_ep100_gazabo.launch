@@ -1,0 +1,150 @@
+<launch>
+  <arg name="world_name" default="charging_pile" />
+  <arg name="robot" default="diff_car"/>
+  <arg name="debug" default="false"/>
+  <arg name="gui" default="true"/>
+  <arg name="headless" default="false"/>
+  <arg name="output" default="screen" />
+  <arg name="rviz" default="true" />
+  <arg name="record" default="true" />
+  <arg name="use_sim_time" value="true"/>
+  <!-- Start Gazebo with a blank world -->
+  <!-- <include file="$(find gazebo_ros)/launch/empty_world.launch">
+    <arg name="debug" value="$(arg debug)" />
+    <arg name="gui" value="$(arg gui)" />
+    <arg name="paused" value="false"/>
+    <arg name="use_sim_time" value="true"/>
+    <arg name="headless" value="$(arg headless)"/>
+    <arg name="world_name" value="$(find gazebo_model)/worlds/$(arg world_name).world"/>
+  </include> -->
+
+  <!-- URDF and TF support -->
+  <!-- <param name="robot_description" command="$(find xacro)/xacro $(find diff_amr_description)/urdf/diff_amr_gazebo.urdf.xacro" /> -->
+
+  <!-- Put a robot in gazebo, make it look pretty -->
+  <!-- <node name="urdf_spawner" pkg="gazebo_ros" type="spawn_model" respawn="false" output="$(arg output)" 
+        args="-urdf -x 0.25 -y 3.0 -z 0 -model diff_car -param robot_description"/> -->
+
+  <!-- <node name="gazebo_odometry_node" pkg="navit_auto_dock" type="gazebo_odometry.py" output="$(arg output)"  /> -->
+
+  <!-- <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" /> -->
+  <include file="$(find husky_gazebo)/launch/playpen.launch" />
+  <include file="$(find husky_gazebo)/launch/spawn_husky.launch">
+  </include>
+
+   <!-- run pointcloud_to_laserscan node -->
+  <node pkg="pointcloud_to_laserscan" type="pointcloud_to_laserscan_node" name="pointcloud_to_laserscan">
+        <remap from="cloud_in" to="/velodyne_3d_points"/>
+        <remap from="scan" to="/front/scan"/>
+        <rosparam>
+            #target_frame: camera_link # Leave disabled to output scan in pointcloud frame
+            transform_tolerance: 0.01
+            min_height: 0.0
+            max_height: 1.0
+
+            angle_min: -3.1415926 # -M_PI
+            angle_max: 3.1415926 # M_PI
+            angle_increment: 0.003 # 0.17degree
+            scan_time: 0.1
+            range_min: 0.2
+            range_max: 100
+            use_inf: true
+
+            # Concurrency level, affects number of pointclouds queued for processing and number of threads used
+            # 0 : Detect number of cores
+            # 1 : Single threaded
+            # 2->inf : Parallelism level
+            concurrency_level: 2
+        </rosparam>
+  </node>
+  <!-- AMCL -->
+  <node pkg="amcl" type="amcl" name="amcl">
+    <param name="min_particles"             value="500"/>
+    <param name="max_particles"             value="3000"/>
+    <param name="kld_err"                   value="0.02"/>
+    <param name="update_min_d"              value="0.20"/>
+    <param name="update_min_a"              value="0.20"/>
+    <param name="resample_interval"         value="1"/>
+    <param name="transform_tolerance"       value="0.5"/>
+    <param name="recovery_alpha_slow"       value="0.00"/>
+    <param name="recovery_alpha_fast"       value="0.00"/>
+
+    <param name="gui_publish_rate"          value="50.0"/>
+
+    <remap from="scan"                      to="/front/scan"/>
+    <param name="laser_max_range"           value="3.5"/>
+    <param name="laser_max_beams"           value="180"/>
+    <param name="laser_z_hit"               value="0.5"/>
+    <param name="laser_z_short"             value="0.05"/>
+    <param name="laser_z_max"               value="0.05"/>
+    <param name="laser_z_rand"              value="0.5"/>
+    <param name="laser_sigma_hit"           value="0.2"/>
+    <param name="laser_lambda_short"        value="0.1"/>
+    <param name="laser_likelihood_max_dist" value="2.0"/>
+    <param name="laser_model_type"          value="likelihood_field"/>
+
+    <param name="odom_model_type"           value="diff"/>
+    <param name="odom_alpha1"               value="0.1"/>
+    <param name="odom_alpha2"               value="0.1"/>
+    <param name="odom_alpha3"               value="0.1"/>
+    <param name="odom_alpha4"               value="0.1"/>
+    <param name="odom_frame_id"             value="odom"/>
+    <param name="base_frame_id"             value="base_link"/>
+
+  </node>
+
+	<!--  ****** Maps *****  -->
+	<node name="map_server" pkg="map_server" type="map_server" args="$(find navit_bt_navigator)/maps/husky_gmapping_factory.yaml" output="screen">
+		<remap from="/scan" to="/front/scan"/>
+	</node>
+
+  <!--  **************** Visualisation ****************  -->
+  <!-- <node name="rviz" pkg="rviz" type="rviz" args="-d $(find navit_auto_dock)/rviz/ep100_dock_sim.rviz" if="$(arg rviz)"/> -->
+	<node name="rviz" pkg="rviz" type="rviz" args="-d $(find navit_auto_dock)/rviz/ep100_navit_sim.rviz" if="$(arg rviz)"/>
+  <!-- <node name="navit_controller_node" pkg="navit_controller" type="navit_controller_node" output="$(arg output)" >
+    <rosparam file="$(find navit_auto_dock)/config/ep100_sim/test.yaml" command="load" />
+    <rosparam file="$(find navit_auto_dock)/config/ep100_sim/costmap_params.yaml" command="load" />
+  </node> -->
+
+
+        <!--  ************** Navigation ***************  -->
+	<node pkg="navit_planner" type="navit_planner_node" name="navit_planner_node" output="screen" respawn="true">
+  	  	<rosparam file="$(find navit_planner)/config/simulation/ep100_sim/base_planner_simulation.yaml" command="load" />
+  	 	<rosparam file="$(find navit_planner)/config/simulation/ep100_sim/costmap_params_simulation.yaml" command="load"/>
+	</node> 
+
+	<node pkg="navit_controller" type="navit_controller_node" name="navit_controller_node" output="screen" respawn="true">
+  	  	<rosparam file="$(find navit_controller)/config/simulation/ep100_sim/base_controller_simulation.yaml" command="load"/>
+  	 	<rosparam file="$(find navit_controller)/config/simulation/ep100_sim/costmap_params_simulation.yaml" command="load"/>
+      <remap from="cmd_vel" to="cmd_vel_raw"/>
+	</node>
+
+
+  <include file="$(find navit_velocity_smoother)/launch/vel_smoother_nodelet.launch">
+  </include>
+
+
+
+  <node name="auto_dock" pkg="navit_auto_dock" type="navit_auto_dock_node" output="$(arg output)" >
+    <rosparam file="$(find navit_auto_dock)/config/ep100_sim/auto_dock.yaml" command="load" />
+    <rosparam file="$(find navit_auto_dock)/config/ep100_sim/approach_dock_ep100.yaml" command="load" />
+    <rosparam file="$(find navit_auto_dock)/config/ep100_sim/final_dock_ep100.yaml" command="load" />
+  </node>
+
+  <node name="dock_test"  pkg="navit_auto_dock"  type="dock_ep100_simulation.py" output="$(arg output)"  />
+  <node name="dock_test_view_dock"
+          pkg="navit_auto_dock"
+          type="view_dock.py"
+          output="$(arg output)"  />
+
+	<!--  ****** Recovery *****  -->
+	<node pkg="navit_recovery" type="navit_recovery_node" name="navit_recovery_node" output="$(arg output)" >
+  	  	<rosparam file="$(find navit_recovery)/config/test.yaml" command="load"/>
+	</node>
+
+
+  <!--node pkg="rosbag" type="record" name="auto_dock_test_record" args="lz4 -o /tmp/auto_dock_test -a "  if="$(arg record)"/-->
+ <!-- <node name="dock_pose_pub"  pkg="navit_auto_dock"  type="dock_pose_publisher_test.py" output="screen" /> -->
+
+
+</launch>

@@ -1,0 +1,14 @@
+nav_recovery:
+    - name: wait
+      type: recovery_wait/RecoveryWait
+
+    - name: backup
+      type: recovery_backup/RecoveryBackUp
+
+
+test_1:
+    test_param: test_1_param
+
+test_2:
+    test_param: test_2_param
+

@@ -1,0 +1,30 @@
+nav_planner:
+     - name: test_1
+       type: global_planner/GlobalPlanner
+    
+     - name: test_2
+       type: navfn/NavfnROS
+
+     - name: topoint
+       type: smac_planner/SmacPlanner2D
+
+    #- name: test_1
+    #  type: smac_planner/SmacPlanner2D
+
+    #test_1:
+    #    smooth_path: false
+    #    downsample_costmap: true
+    #    downsampling_factor: 4
+    #    max_iterations: 15000
+    #
+    #test_2:
+    #    smooth_path: false
+    #    downsample_costmap: true
+    #    downsampling_factor: 4
+    #    max_iterations: 18000
+    #
+    #test_3:
+    #    smooth_path: false
+    #    downsample_costmap: true
+    #    downsampling_factor: 4
+    #    max_iterations: 15000

@@ -1,0 +1,5 @@
+costmap_topic_name: /navit_controller_node/controller_costmap/costmap
+footprint_topic_name: /navit_controller_node/controller_costmap/footprint
+odom_frame_id: odom
+base_frame_id: base_link
+

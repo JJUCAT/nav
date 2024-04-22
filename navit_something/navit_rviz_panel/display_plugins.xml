@@ -1,0 +1,21 @@
+<library path="lib/librviz_polygon_plugin">
+  <class name="rviz_polygon_selection_tool/PolygonSelectionTool" type="rviz_polygon_selection_tool::PolygonSelectionTool" base_class_type="rviz::Tool">
+    <description>
+      A display to visualize navit_msgs::PolygonArray messages in RViz.
+    </description>
+  </class>
+</library>
+<library path="lib/librviz_line_plugin">
+  <class name="rviz_line_segment_tool/LineSegmentTool" type="rviz_line_segment_tool::LineSegmentTool" base_class_type="rviz::Tool">
+    <description>
+      A display to visualize navit_msgs::PolygonArray messages in RViz.
+    </description>
+  </class>
+</library>
+<library path="lib/librviz_point_plugin">
+  <class name="rviz_point_selection_tool/PointsSelectionTool" type="rviz_point_selection_tool::PointsSelectionTool" base_class_type="rviz::Tool">
+    <description>
+      A display to visualize navit_msgs::PolygonArray messages in RViz.
+    </description>
+  </class>
+</library>

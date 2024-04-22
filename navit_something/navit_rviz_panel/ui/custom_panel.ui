@@ -1,0 +1,463 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>OperationToolsPanel</class>
+ <widget class="QWidget" name="MainWidget">
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <widget class="QTabWidget" name="tabWidget">
+      <widget class="QWidget" name="drawMapTab">
+        <attribute name="title">
+          <string>绘图</string>
+        </attribute>
+        <layout class="QGridLayout" name="gridLayout">
+          <item row="0" column="2">
+            <widget class="QPushButton" name="polygonButton">
+              <property name="text">
+                <string>Draw Polygon</string>
+              </property>
+            </widget>
+          </item>
+          <item row="0" column="1">
+            <widget class="QComboBox" name="polygonTypeComboBox"/>
+          </item>
+          <item row="0" column="0">
+            <widget class="QLineEdit" name="polygonNameLineEdit"/>
+          </item>
+          <item row="0" column="3">
+            <widget class="QPushButton" name="savePolygonButton">
+              <property name="text">
+                <string>保存当前多边形</string>
+              </property>
+            </widget>
+          </item>
+          <item row="1" column="2">
+            <widget class="QPushButton" name="curveButton">
+              <property name="text">
+                <string>Draw Curve</string>
+              </property>
+            </widget>
+          </item>
+          <item row="1" column="1">
+            <widget class="QComboBox" name="curveTypeComboBox"/>
+          </item>
+          <item row="1" column="0">
+            <widget class="QLineEdit" name="curveNameLineEdit"/>
+          </item>
+          <item row="1" column="3">
+            <widget class="QPushButton" name="saveCurveButton">
+              <property name="text">
+                <string>保存当前曲线</string>
+              </property>
+            </widget>
+          </item>
+          <item row="2" column="2">
+            <widget class="QPushButton" name="siteButton">
+              <property name="text">
+                <string>Draw Site</string>
+              </property>
+            </widget>
+          </item>
+          <item row="2" column="1">
+            <widget class="QComboBox" name="siteTypeComboBox"/>
+          </item>
+          <item row="2" column="0">
+            <widget class="QLineEdit" name="siteNameLineEdit"/>
+          </item>
+          <item row="2" column="3">
+            <widget class="QPushButton" name="saveSiteButton">
+              <property name="text">
+                <string>保存当前点</string>
+              </property>
+            </widget>
+          </item>
+          <item row="3" column="0">
+            <widget class="QPushButton" name="pushMapButton">
+              <property name="text">
+                <string>上传地图</string>
+              </property>
+            </widget>
+          </item>
+          <item row="3" column="1">
+            <widget class="QPushButton" name="generageGridMapButton">
+              <property name="text">
+                <string>生成栅格地图</string>
+              </property>
+            </widget>
+          </item>
+          <item row="3" column="3">
+            <widget class="QPushButton" name="clearMapButton">
+              <property name="text">
+                <string>清除地图</string>
+              </property>
+            </widget>
+          </item>
+          
+        </layout>
+      </widget>
+      <widget class="QWidget" name="mapManager">
+        <attribute name="title">
+          <string>地图管理</string>
+        </attribute>
+        <layout class="QGridLayout" name="gridLayout">
+          <item row="0" column="0">
+            <widget class="QLabel" name="saveMapPathLabel">
+              <property name="text">
+                <string>保存路径</string>
+              </property>
+            </widget>
+          </item>
+          <item row="0" column="1">
+            <widget class="QLineEdit" name="savePathEdit">
+              <property name="placeholderText">
+                <string>Enter path (e.g. /home/yjh), /home/yjh is default</string>
+              </property>
+            </widget>
+          </item>
+          <item row="0" column="2">
+            <widget class="QPushButton" name="saveMapButton">
+              <property name="text">
+                <string>保存地图</string>
+              </property>
+            </widget>
+          </item>
+          <item row="1" column="0">
+            <widget class="QLabel" name="loadMapPathLabel">
+              <property name="text">
+                <string>加载地图路径</string>
+              </property>
+            </widget>
+          </item>
+          <item row="1" column="1">
+            <widget class="QLineEdit" name="loadPathEdit">
+              <property name="placeholderText">
+                <string>Enter path (e.g. /home/yjh), /home/yjh is default</string>
+              </property>
+            </widget>
+          </item>
+          <item row="1" column="2">
+            <widget class="QPushButton" name="loadMapButton">
+              <property name="text">
+                <string>加载地图</string>
+              </property>
+            </widget>
+          </item>
+          <item row="2" column="0">
+            <widget class="QLabel" name="loadKMlMapPathLabel">
+              <property name="text">
+                <string>加载kml地图路径</string>
+              </property>
+            </widget>
+          </item>
+          <item row="2" column="1">
+            <widget class="QLineEdit" name="loadKMLPathEdit">
+              <property name="placeholderText">
+                <string>Enter path (e.g. /home/yjh), /home/yjh is default</string>
+              </property>
+            </widget>
+          </item>
+          <item row="2" column="2">
+            <widget class="QPushButton" name="loadKMLMapButton">
+              <property name="text">
+                <string>加载KML地图</string>
+              </property>
+            </widget>
+          </item>
+          <item row="3" column="0">
+            <widget class="QLabel" name="exportKMlMapPathLabel">
+              <property name="text">
+                <string>导出KML地图路径</string>
+              </property>
+            </widget>
+          </item>
+          <item row="3" column="1">
+            <widget class="QLineEdit" name="exportKMLPathEdit">
+              <property name="placeholderText">
+                <string>Enter path (e.g. /home/yjh), /home/yjh is default</string>
+              </property>
+            </widget>
+          </item>
+          <item row="3" column="2">
+            <widget class="QPushButton" name="exportKMLMapButton">
+              <property name="text">
+                <string>导出KML地图</string>
+              </property>
+            </widget>
+          </item>
+        </layout>
+      </widget>
+      <widget class="QWidget" name="buildMapTab">
+        <attribute name="title">
+          <string>示教建图</string>
+        </attribute>
+        <layout class="QGridLayout" name="gridLayout">
+          <item row="0" column="0">
+            <widget class="QLabel" name="coordinateSystemLabel">
+              <property name="text">
+                <string>坐标系</string>
+              </property>
+            </widget>
+          </item>
+          <item row="0" column="1" colspan="2">
+          <widget class="QLineEdit" name="coordinateEdit">
+            <property name="placeholderText">
+              <string>Enter frame id (e.g. /odom /map), map is default</string>
+            </property>
+          </widget>
+          </item>
+
+          <item row="1" column="0">
+            <widget class="QLabel" name="areaIdRecordLabel">
+              <property name="text">
+                <string>录制区域ID</string>
+              </property>
+            </widget>
+          </item>
+          <item row="1" column="1" colspan="1">
+            <widget class="QLineEdit" name="areaIdRecordLineEdit"/>
+          </item>
+          <item row="1" column="2">
+            <widget class="QPushButton" name="startRecordAreaIdButton">
+              <property name="text">
+                <string>开始录制区域</string>
+              </property>
+            </widget>
+          </item>
+          <item row="1" column="3">
+            <widget class="QPushButton" name="saveAreaIdButton">
+              <property name="text">
+                <string>保存</string>
+              </property>
+            </widget>
+          </item>
+
+          <item row="2" column="0">
+            <widget class="QLabel" name="teachingPathRecordLabel">
+              <property name="text">
+                <string>录制示教轨迹</string>
+              </property>
+            </widget>
+          </item>
+          <item row="2" column="1" colspan="1">
+            <widget class="QLineEdit" name="teachingPathRecordLineEdit"/>
+          </item>
+          <item row="2" column="2">
+            <widget class="QPushButton" name="startTeachingPathButton">
+              <property name="text">
+                <string>开始录制轨迹</string>
+              </property>
+            </widget>
+          </item>
+          <item row="2" column="3">
+            <widget class="QPushButton" name="saveTeachingPathButton">
+              <property name="text">
+                <string>保存</string>
+              </property>
+            </widget>
+          </item>
+
+          <item row="3" column="0">
+            <widget class="QLabel" name="navigationPointRecordLabel">
+              <property name="text">
+                <string>录制导航点</string>
+              </property>
+            </widget>
+          </item>
+          <item row="3" column="1" colspan="1">
+            <widget class="QLineEdit" name="navigationPointRecordLineEdit"/>
+          </item>
+          <item row="3" column="2">
+            <widget class="QPushButton" name="saveNavigationPointButton">
+              <property name="text">
+                <string>保存</string>
+              </property>
+            </widget>
+          </item>
+        </layout>
+      </widget>
+      <widget class="QWidget" name="TaskTab">
+        <attribute name="title">
+          <string>任务</string>
+        </attribute>
+        <layout class="QGridLayout" name="gridLayout">
+          <!-- Row for Polygon -->
+          <item row="0" column="0">
+            <widget class="QLabel" name="polygonIdLabel">
+              <property name="text">
+                <string>区域ID</string>
+              </property>
+            </widget>
+          </item>
+          <item row="0" column="1">
+            <widget class="QLineEdit" name="polygonIndexLineEdit"/>
+          </item>
+           <item row="0" column="2">
+            <widget class="QLabel" name="areaExecuteCountLabel">
+              <property name="text">
+                <string>执行次数</string>
+              </property>
+            </widget>
+          </item>
+          <item row="0" column="3">
+            <widget class="QLineEdit" name="areaExecuteCountLineEdit"/>
+          </item>
+          <item row="0" column="4">
+            <widget class="QPushButton" name="selectAreaButton">
+              <property name="text">
+                <string>选择区域</string>
+              </property>
+            </widget>
+          </item>
+          <item row="0" column="5">
+            <widget class="QPushButton" name="excuteAreaButton">
+              <property name="text">
+                <string>执行全覆盖</string>
+              </property>
+            </widget>
+          </item>
+          <!-- Row for Path -->
+          <item row="1" column="0">
+            <widget class="QLabel" name="pathIdLabel">
+              <property name="text">
+                <string>路径ID</string>
+              </property>
+            </widget>
+          </item>
+          <item row="1" column="1">
+            <widget class="QLineEdit" name="pathIndexLineEdit"/>
+          </item>
+          <item row="1" column="2">
+            <widget class="QLabel" name="pathExecuteCountLabel">
+              <property name="text">
+                <string>执行次数</string>
+              </property>
+            </widget>
+          </item>
+          <item row="1" column="3">
+            <widget class="QLineEdit" name="pathExecuteCountLineEdit"/>
+          </item>
+          <item row="1" column="4">
+            <widget class="QPushButton" name="selectLineButton">
+              <property name="text">
+                <string>选择路径</string>
+              </property>
+            </widget>
+          </item>
+          <item row="1" column="5">
+            <widget class="QPushButton" name="excuteLineButton">
+              <property name="text">
+                <string>执行路径</string>
+              </property>
+            </widget>
+          </item>
+          <!-- Row for Site -->
+          <item row="2" column="0">
+            <widget class="QLabel" name="siteIdLabel">
+              <property name="text">
+                <string>站点ID</string>
+              </property>
+            </widget>
+          </item>
+          <item row="2" column="1">
+            <widget class="QLineEdit" name="pointIndexLineEdit"/>
+          </item>
+          <item row="2" column="2">
+            <widget class="QLabel" name="siteExecuteCountLabel">
+              <property name="text">
+                <string>执行次数</string>
+              </property>
+            </widget>
+          </item>
+          <item row="2" column="3">
+            <widget class="QLineEdit" name="siteExecuteCountLineEdit"/>
+          </item>
+
+          <item row="2" column="4">
+            <widget class="QPushButton" name="selectPointButton">
+              <property name="text">
+                <string>选择站点</string>
+              </property>
+            </widget>
+          </item>
+          <item row="2" column="5">
+            <widget class="QPushButton" name="excutePointButton">
+              <property name="text">
+                <string>执行站点</string>
+              </property>
+            </widget>
+          </item>
+          <item row="3" column="0">
+          <widget class="QLabel" name="returnChargeLabel">
+            <property name="text">
+              <string>回充站点ID</string>
+            </property>
+          </widget>
+        </item>
+        <item row="3" column="1">
+          <widget class="QLineEdit" name="returnChargeIndexLineEdit"/>
+        </item>
+        <item row="3" column="2">
+          <widget class="QLabel" name="returnChargeExecuteCountLabel">
+            <property name="text">
+              <string>执行次数</string>
+            </property>
+          </widget>
+        </item>
+        <item row="3" column="3">
+          <widget class="QLineEdit" name="returnChargeExecuteCountLineEdit"/>
+        </item>
+        <item row="3" column="4">
+          <widget class="QPushButton" name="executeAbortChargeButton">
+            <property name="text">
+              <string>结束回充</string>
+            </property>
+          </widget>
+        </item>
+        <item row="3" column="5">
+          <widget class="QPushButton" name="executeReturnChargeButton">
+            <property name="text">
+              <string>执行回充</string>
+            </property>
+          </widget>
+        </item>
+        </layout>
+      </widget>
+      <widget class="QWidget" name="controlTab">
+      <attribute name="title">
+          <string>控制</string>
+      </attribute>
+      <layout class="QGridLayout" name="gridLayoutControl">
+          <item row="0" column="1">
+          <widget class="QPushButton" name="forwardButton">
+              <property name="text">
+              <string>前进</string>
+              </property>
+          </widget>
+          </item>
+          <item row="1" column="0">
+          <widget class="QPushButton" name="leftButton">
+              <property name="text">
+              <string>左转</string>
+              </property>
+          </widget>
+          </item>
+          <item row="1" column="2">
+          <widget class="QPushButton" name="rightButton">
+              <property name="text">
+              <string>右转</string>
+              </property>
+          </widget>
+          </item>
+          <item row="2" column="1">
+          <widget class="QPushButton" name="backButton">
+              <property name="text">
+              <string>后退</string>
+              </property>
+          </widget>
+          </item>
+      </layout>
+      </widget>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+</ui>

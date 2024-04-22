@@ -1,0 +1,19 @@
+<launch>
+    <arg name="image_path" default="$(find navit_bt_navigator)/maps/test1.yaml"/>
+
+
+	<rosparam file="$(find navit_bt_navigator)/cfg/coverage_path_subtree_simulation.yaml" command="load"/>
+	<rosparam file="$(arg image_path)" command="load"/>
+	<node pkg="navit_bt_navigator" type="simple_navigator" name="simple_navigator" output="screen"> 
+		<param name="x_1" value= "5.0"/>
+		<param name="y_1" value= "5.0"/>
+		<param name="x_2" value="-5.0"/>
+		<param name="y_2" value= "5.0"/>
+		<param name="x_3" value="-5.0"/>
+		<param name="y_3" value="-5.0"/>
+		<param name="x_4" value= "5.0"/>
+		<param name="y_4" value="-5.0"/>
+	</node>
+
+
+</launch>

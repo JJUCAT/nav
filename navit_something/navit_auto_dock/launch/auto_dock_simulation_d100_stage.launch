@@ -1,0 +1,44 @@
+<!-- 
+  Simulate a carlike robot with the auto_dock in stage:
+  - stage
+  - fetch_open_auto_dock
+  - rviz view
+ -->
+<launch>
+
+
+
+
+    <arg name="rviz" default="true" />
+    <arg name="output" default="screen" />
+    <arg name="gui" default="true" />
+    <arg name="record" default="false" />
+
+    <!--  ************** Global Parameters ***************  -->
+    <param name="/use_sim_time" value="true"/>
+
+    <!--  ************** Stage Simulator ***************  -->
+	<node pkg="stage_ros" type="stageros" name="stageros" args="$(find navit_auto_dock)/stage/auto_dock_d100.world"/>
+
+	<!--  **************** Visualisation ****************  -->
+  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find navit_auto_dock)/rviz/dock_sim.rviz" if="$(arg rviz)"/>
+
+  <node name="navit_controller_node" pkg="navit_controller" type="navit_controller_node" output="$(arg output)">
+    <rosparam file="$(find navit_auto_dock)/config/dock_simulation/test.yaml" command="load" />
+    <rosparam file="$(find navit_auto_dock)/config/dock_simulation/costmap_params.yaml" command="load" />
+  </node>
+
+
+  <node name="auto_dock" pkg="navit_auto_dock" type="navit_auto_dock_node">
+    <rosparam file="$(find navit_auto_dock)/config/auto_dock.yaml" command="load" />
+    <rosparam file="$(find navit_auto_dock)/config/d100/approach_dock_d100.yaml" command="load" />
+    <rosparam file="$(find navit_auto_dock)/config/d100/final_dock_d100.yaml" command="load" />
+  </node>
+
+  <node name="dock_test"  pkg="navit_auto_dock"  type="dock_d100_simulation.py" output="$(arg output)" />
+  <node name="dock_test_view_dock"
+          pkg="navit_auto_dock"
+          type="view_dock.py"
+          output="$(arg output)" />
+
+</launch>

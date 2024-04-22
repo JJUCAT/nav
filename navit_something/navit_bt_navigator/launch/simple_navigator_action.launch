@@ -1,0 +1,54 @@
+<launch>
+
+	<!--  **************** Global Parameters *****************  -->
+	<param name="/use_sim_time" value="true"/>
+
+	<!--  **************** Stage Simulator *****************  -->
+	<node pkg="stage_ros" type="stageros" name="stageros" args="$(find navit_bt_navigator)/stage/maze_diff_drive.world">
+		<!-- <remap from="base_scan" to="scan"/> -->
+  	</node>
+
+	<!--  **************** Maps ****************  -->
+	<node name="map_server" pkg="map_server" type="map_server" args="$(find navit_bt_navigator)/maps/maze.yaml" output="screen"/>
+
+	<node name="fake_localization" pkg="fake_localization" type="fake_localization" respawn="false" />
+
+	<!--  **************** Dock ****************  -->
+	<node name="auto_dock" pkg="navit_auto_dock" type="navit_auto_dock_node" output="screen"> launch-prefix="gdb -ex run --args">
+		<rosparam file="$(find navit_auto_dock)/config/auto_dock.yaml" command="load" />
+		<rosparam file="$(find navit_auto_dock)/config/d100/approach_dock_d100.yaml" command="load" />
+		<rosparam file="$(find navit_auto_dock)/config/d100/final_dock_d100.yaml" command="load" />
+	</node>
+
+	<!--  **************** Navigation *****************  -->
+	<node pkg="navit_planner" type="navit_planner_node" name="navit_planner_node" output="screen" respawn="true">
+  	  	<rosparam file="$(find navit_planner)/config/test.yaml" command="load" />
+  	 	<rosparam file="$(find navit_planner)/config/costmap_params.yaml" command="load"/>
+	</node> 
+
+	<node pkg="navit_controller" type="navit_controller_node" name="navit_controller_node" output="screen" respawn="true">
+  	  	<rosparam file="$(find navit_controller)/config/test.yaml" command="load"/>
+  	 	<rosparam file="$(find navit_controller)/config/costmap_params.yaml" command="load"/>
+	</node>
+
+	<!--  **************** Navigation: BT Action Server *****************  -->
+	<rosparam file="$(find navit_bt_navigator)/cfg/simple_navigator_params.yaml" command="load"/>
+	<node pkg="navit_bt_navigator" type="simple_navigator_action_server_node" name="simple_navigator_action_server_node" 
+				output="screen"> launch-prefix="xterm -e gdb -ex run --args "
+	</node>
+
+	<!-- **************** Navigation: BT Action Client *****************  -->
+	<node pkg="navit_bt_navigator" type="simple_navigator_action_client_node" name="simple_navigator_action_client_node" output="screen">
+	</node>
+
+	<!--  **************** Recovery ****************  -->
+	<node pkg="navit_recovery" type="navit_recovery_node" name="navit_recovery_node" output="screen">
+  	  	<rosparam file="$(find navit_recovery)/config/test.yaml" command="load"/>	
+	</node>
+
+
+	<!--  **************** Visualisation ****************  -->
+	<node name="rviz" pkg="rviz" type="rviz" args="-d $(find navit_bt_navigator)/cfg/navit_bt.rviz"/> 
+	<!-- <node name="rviz" pkg="rviz" type="rviz" args="-d $(find navit_example)/config/navigation.rviz"/> -->
+
+</launch>

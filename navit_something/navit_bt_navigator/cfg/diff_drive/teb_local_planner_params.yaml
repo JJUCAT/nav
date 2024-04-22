@@ -1,0 +1,110 @@
+TebLocalPlannerROS:
+
+ odom_topic: odom
+    
+ # Trajectory
+  
+ teb_autosize: True
+ dt_ref: 0.3                                                   #Desired temporal resolution of the trajectory (the trajectory is not fixed to dt_ref since the temporal resolution is part of the optimization, but the trajectory will be resized between iterations if dt_ref +-dt_hysteresis is violated.                          
+ dt_hysteresis: 0.1                                    #Hysteresis for automatic resizing depending on the current temporal resolution, usually approx. 10% of dt_ref is recommended 
+ max_samples: 500
+ global_plan_overwrite_orientation: True       #Overwrite orientation of local subgoals provided by the global planner (since they often provide only a 2D path) 
+ allow_init_with_backwards_motion: False    #Specify if obstacles of the local costmap should be taken into account. Each cell that is marked as obstacle is considered as a point-obstacle. Therefore do not choose a very small resolution of the costmap since it increases computation time.
+ max_global_plan_lookahead_dist: 3.0            # Specify the maximum length (cumulative Euclidean distances) of the subset of the global plan taken into account for optimization. The actual length is than determined by the logical conjunction of the local costmap size and this maximum bound. Set to zero or negative in order to deactivate this limitation. 
+ global_plan_viapoint_sep: -1            #If positive, via-points are extrected from the global plan (path-following mode). The value determines the resolution of the reference path (min. separation between each two consecutive via-points along the global plan, if negative: disabled). Refer to parameter weight_viapoint for adjusting the intensity
+ global_plan_prune_distance: 1        #
+ exact_arc_length: False                       #
+ feasibility_check_no_poses: 5          #Specify up to which pose on the predicted plan the feasibility should be checked each sampling interval. 
+ publish_feedback: False                      #Publish planner feedback containing the full trajectory and a list of active obstacles (should be enabled only for evaluation or debugging)
+    
+ # Robot
+         
+ max_vel_x: 0.4
+ max_vel_x_backwards: 0.2                 #Maximum absolute translational velocity of the robot while driving backwards in meters/sec. See optimization parameter weight_kinematics_forward_drive 
+ max_vel_y: 0.0                                          #Maximum strafing velocity of the robot (should be zero for non-holonomic robots!) 
+ max_vel_theta: 0.3                                 #Maximum angular velocity of the robot in radians/sec 
+ acc_lim_x: 0.5                                           #Maximum translational acceleration of the robot in meters/sec^2 
+ acc_lim_theta: 0.5                                   #Maximum angular acceleration of the robot in radians/sec^2 
+ min_turning_radius: 0.0                       #Minimum turning radius of a carlike robot (set to zero for a diff-drive robot).         # diff-drive robot (can turn on place!)
+
+ footprint_model:                                     #Specify the robot footprint model type used for optimization. Different types are "point", "circular", "line", "two_circles" and "polygon." The type of the model significantly influences the required computation time. 
+   type: "point"
+
+ # GoalTolerance
+    
+ xy_goal_tolerance: 0.2                          #Allowed final euclidean distance to the goal position in meters 
+ yaw_goal_tolerance: 0.1                      #Allowed final orientation error in radians   
+ free_goal_vel: False                               #Remove the goal velocity constraint such that the robot can arrive at the goal with maximum speed 
+ complete_global_plan: True
+    
+ # Obstacles
+    
+ min_obstacle_dist: 0.25 # This value must also include our robot radius, since footprint_model is set to "point".
+ inflation_dist: 0.6                                                        #Buffer zone around obstacles with non-zero penalty costs (should be larger than min_obstacle_dist in order to take effect).
+ include_costmap_obstacles: True                       #If this parameter is set to true, the motion of obstacles with non-zero velocity (provided via user-supplied obstacles on topic ~/obstacles or obtained from the costmap_converter) is predicted and considered during optimization via a constant velocity model.
+ costmap_obstacles_behind_robot_dist: 1.5  #Limit the occupied local costmap obstacles taken into account for planning behind the robot (specify distance in meters). 
+ obstacle_poses_affected: 15                                 #Each obstacle position is attached to the closest pose on the trajectory in order to keep a distance. Additional neighbors can be taken into account as well. Note, this parameter might be removed in future versions, since the the obstacle association strategy has been modified in kinetic+. 
+
+ dynamic_obstacle_inflation_dist: 0.6               #
+ include_dynamic_obstacles: True
+
+ costmap_converter_plugin: ""                             #Define plugin name in order to convert costmap cells to points/lines/polygons. Set an empty string to disable the conversion such that all cells are treated as point-obstacles. 
+ costmap_converter_spin_thread: True            #If set to true, the costmap converter invokes its callback queue in a different thread. 
+ costmap_converter_rate: 5                                    #Rate that defines how often the costmap_converter plugin processes the current costmap (the value should not be much higher than the costmap update rate) [in Hz]. 
+
+ # Optimization
+    
+ no_inner_iterations: 5                                             #Number of actual solver iterations called in each outerloop iteration
+ no_outer_iterations: 4                                             #Each outerloop iteration automatically resizes the trajectory according to the desired temporal resolution dt_ref and invokes the internal optimizer (that performs no_inner_iterations). The total number of solver iterations in each planning cycle is therefore the product of both values. 
+ optimization_activate: True                                  #
+ optimization_verbose: False                                 #
+ penalty_epsilon: 0.1                                                 #Add a small safety margin to penalty functions for hard-constraint approximations 
+ obstacle_cost_exponent: 4                                    # 
+ weight_max_vel_x: 2                                                #Optimization weight for satisfying the maximum allowed translational velocity 
+ weight_max_vel_theta: 1                                        #Optimization weight for satisfying the maximum allowed angular velocity 
+ weight_acc_lim_x: 1                                                  #Optimization weight for satisfying the maximum allowed translational acceleration 
+ weight_acc_lim_theta: 1                                         #Optimization weight for satisfying the maximum allowed angular acceleration 
+ weight_kinematics_nh: 1000                                #Optimization weight for satisfying the non-holonomic kinematics (this parameter must be high since the kinematics equation constitutes an equality constraint, even a value of 1000 does not imply a bad matrix condition due to small 'raw' cost values in comparison to other costs). 
+ weight_kinematics_forward_drive: 1               #Optimization weight for forcing the robot to choose only forward directions (positive transl. velocities). A small weight (e.g. 1.0) still allows driving backwards. A value around 1000 almost prevents backward driving (but cannot be guaranteed). 
+ weight_kinematics_turning_radius: 1              #Optimization weight for enforcing a minimum turning radius (only for carlike robots). 
+ weight_optimaltime: 1 # must be > 0                #Optimization weight for contracting the trajectory w.r.t transition/execution time 
+ weight_shortest_path: 0                                         #
+ weight_obstacle: 100                                                #Optimization weight for keeping a minimum distance from obstacles 
+ weight_inflation: 0.2                                                 #Optimization weight for the inflation penalty (should be small). 
+ weight_dynamic_obstacle: 10                              #
+ weight_dynamic_obstacle_inflation: 0.2
+ weight_viapoint: 1
+ weight_adapt_factor: 2                                            #Some special weights (currently weight_obstacle) are repeatedly scaled by this factor in each outer TEB iteration (weight_new = weight_old*factor). Increasing weights iteratively instead of setting a huge value a-priori leads to better numerical conditions of the underlying optimization problem. 
+
+ # Homotopy Class Planner
+
+ enable_homotopy_class_planning: True
+ enable_multithreading: True
+ max_number_classes: 4
+ selection_cost_hysteresis: 1.0
+ selection_prefer_initial_plan: 0.9
+ selection_obst_cost_scale: 100.0
+ selection_alternative_time_cost: False
+ 
+ roadmap_graph_no_samples: 15
+ roadmap_graph_area_width: 5
+ roadmap_graph_area_length_scale: 1.0
+ h_signature_prescaler: 0.5
+ h_signature_threshold: 0.1
+ obstacle_heading_threshold: 0.45
+ switching_blocking_period: 0.0
+ viapoints_all_candidates: True
+ delete_detours_backwards: True
+ max_ratio_detours_duration_best_duration: 3.0
+ visualize_hc_graph: False
+ visualize_with_time_as_z_axis_scale: False
+
+# Recovery
+ 
+ shrink_horizon_backup: True                                        #Allows the planner to shrink the horizon temporary (50%) in case of automatically detected issues (e.g. infeasibility)
+ shrink_horizon_min_duration: 10
+ oscillation_recovery: True
+ oscillation_v_eps: 0.1
+ oscillation_omega_eps: 0.1
+ oscillation_recovery_min_duration: 10
+ oscillation_filter_duration: 10

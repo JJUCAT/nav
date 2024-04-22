@@ -1,0 +1,184 @@
+nav_controller:
+    - {name: tracking, type: teb_local_planner/TebLocalPlannerROS}
+    - {name: avoidance, type: teb_local_planner/TebLocalPlannerROS}
+    - {name: tracking_purepursuit, type: PurePursuitController}
+
+control_frequency: 10
+enable_local_planning: true
+local_plan_frequency: 5
+
+# should be tuned for tracking only
+tracking:
+  odom_topic: odom
+
+  # Trajectory
+
+  teb_autosize: True
+  dt_ref: 0.3
+  dt_hysteresis: 0.1
+  max_samples: 500
+  global_plan_overwrite_orientation: True
+  allow_init_with_backwards_motion: False
+  max_global_plan_lookahead_dist: 3.0
+  global_plan_viapoint_sep: 0.1
+  global_plan_prune_distance: 0.3
+  exact_arc_length: False
+  feasibility_check_no_poses: 5
+  publish_feedback: False
+
+  # Robot
+  max_vel_x: 0.2
+  max_vel_x_backwards: 0.2
+  max_vel_y: 0.0
+  max_vel_theta: 0.3
+  acc_lim_x: 0.5
+  acc_lim_theta: 0.5
+  min_turning_radius: 0.0 # diff-drive robot (can turn on place!)
+
+  footprint_model:
+    type: "point"
+
+  # GoalTolerance
+
+  xy_goal_tolerance: 0.2
+  yaw_goal_tolerance: 0.2
+  free_goal_vel: True
+  complete_global_plan: True
+
+  # Obstacles
+
+  min_obstacle_dist: 0.25 # This value must also include our robot radius, since footprint_model is set to "point".
+  inflation_dist: 0.6
+  include_costmap_obstacles: True
+  costmap_obstacles_behind_robot_dist: 1.5
+  obstacle_poses_affected: 15
+
+  dynamic_obstacle_inflation_dist: 0.6
+  include_dynamic_obstacles: False
+
+  # Optimization
+  no_inner_iterations: 5
+  no_outer_iterations: 4
+  optimization_activate: True
+  optimization_verbose: False
+  penalty_epsilon: 0.1
+  obstacle_cost_exponent: 4
+  weight_max_vel_x: 2
+  weight_max_vel_theta: 1
+  weight_acc_lim_x: 1
+  weight_acc_lim_theta: 1
+  weight_kinematics_nh: 1000
+  weight_kinematics_forward_drive: 1000
+  weight_kinematics_turning_radius: 1
+  weight_optimaltime: 10 # must be > 0
+  weight_shortest_path: 0
+  weight_obstacle: 1
+  weight_inflation: 0.2
+  weight_dynamic_obstacle: 0
+  weight_dynamic_obstacle_inflation: 0
+  weight_viapoint: 100
+  weight_adapt_factor: 2
+
+  # Homotopy Class Planner
+  enable_homotopy_class_planning: False
+
+#  Recovery
+  shrink_horizon_backup: True
+  shrink_horizon_min_duration: 10
+  oscillation_recovery: True
+  oscillation_v_eps: 0.1
+  oscillation_omega_eps: 0.1
+  oscillation_recovery_min_duration: 10
+  oscillation_filter_duration: 10
+
+avoidance:
+  odom_topic: odom
+
+  # Trajectory
+  teb_autosize: True
+  dt_ref: 0.3 # 轨迹控制点时间间距，时域解析度， [s]
+  dt_hysteresis: 0.03 # 轨迹控制点时间间隔调整值，[s]
+  max_samples: 500 
+  global_plan_overwrite_orientation: True # 允许修改全局路径朝向
+  allow_init_with_backwards_motion: False # 允许开始启动时候执行后退
+  max_global_plan_lookahead_dist: 4.0 # 优化的长度 [m]
+  global_plan_viapoint_sep: 0.5 # 需要通过的点的最小间隔，对路径的跟随度
+  global_plan_prune_distance: 0.3 # 在机器后面开始裁剪路径的距离
+  exact_arc_length: False # 是否使用精确弧度
+  # force_reinit_new_goal_dist: 1.0 
+  # force_reinit_new_goal_angular: 0.78
+  feasibility_check_no_poses: 3 # 检测位姿可达的时间间隔
+  publish_feedback: False
+
+  # Robot
+  max_vel_x: 1.0
+  max_vel_x_backwards: 0.2
+  max_vel_y: 0.0
+  max_vel_theta: 2.165674
+  acc_lim_x: 0.25
+  acc_lim_theta: 0.3
+  min_turning_radius: 0.3694 # diff-drive robot (can turn on place!)
+
+  # Carlike
+  min_turning_radius: 0.3694
+  wheelbase: 0.95
+  cmd_angle_instead_rotvel: true
+
+  # footprint
+  # types: "point", "circular", "two_circles", "line", "polygon"
+  footprint_model:
+    # type: "point"
+    # radius: 0.5
+    type: "polygon"
+    vertices: [[1.7, 0.85], [1.169, 0.85], [1.169, 0.567], [-0.54, 0.567], [-0.54, -0.567], [1.169, -0.567], [1.169, -0.85], [1.7, -0.85]]
+
+  # GoalTolerance
+  xy_goal_tolerance: 0.2
+  yaw_goal_tolerance: 0.5236
+  free_goal_vel: False # @true：允许以最大速度抵达目的地，@false：以 0 速抵达终点
+  complete_global_plan: True
+
+  # Obstacles
+  min_obstacle_dist: 0.55
+  inflation_dist: 0.3
+  include_costmap_obstacles: True
+  costmap_obstacles_behind_robot_dist: 1.5
+  obstacle_poses_affected: 15 # [0,30]
+  dynamic_obstacle_inflation_dist: 0.6
+  include_dynamic_obstacles: False
+
+  # Optimization
+  no_inner_iterations: 5 # 内循环优化次数
+  no_outer_iterations: 4 # 外循环优化次数
+  optimization_activate: True # 激活优化
+  optimization_verbose: False # 打印优化信息
+  penalty_epsilon: 0.1 # 硬约束近似，在惩罚函数中添加安全范围
+  obstacle_cost_exponent: 3.0
+  weight_max_vel_x: 0 # 最大 x 速度权重 [0,2]
+  weight_max_vel_theta: 0 # 最大角速度权重 [0,1]
+  weight_acc_lim_x: 1 # 加速度权重 [0,1]
+  weight_acc_lim_theta: 1 # 角速度权重 [0,1]
+  weight_kinematics_nh: 1000 # 非完整运动学优化权重
+  weight_kinematics_forward_drive: 1000 # 优化中，迫使机器只选择前进方向的权重
+  weight_kinematics_turning_radius: 1 # 优化中，最小转弯半径的权重
+  weight_optimaltime: 10 # must be > 0 # 优化中，轨迹时间上的权重
+  weight_shortest_path: 0
+  weight_obstacle: 640 # 与障碍物最小距离权重 [0,50]
+  weight_inflation: 0.2 # 膨胀区权重
+  weight_dynamic_obstacle: 0 # 动态障碍物距离权重
+  weight_dynamic_obstacle_inflation: 0 # 动态障碍物膨胀权重
+  weight_viapoint: 300 # 参考路径采样点距离的权重，影响路径跟随效果
+  weight_adapt_factor: 2
+
+
+  # Homotopy Class Planner
+  enable_homotopy_class_planning: False
+
+  # Recovery
+  shrink_horizon_backup: True # 当规划器检测到系统异常，允许缩小时域规划范围,TEB将以更近的点作为规划目标，尝试重新规划出可行路径
+  shrink_horizon_min_duration: 10
+  oscillation_recovery: True # 尝试检测和解决振荡
+  oscillation_v_eps: 0.1
+  oscillation_omega_eps: 0.1
+  oscillation_recovery_min_duration: 10
+  oscillation_filter_duration: 10

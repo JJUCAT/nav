@@ -1,0 +1,33 @@
+<launch>
+    <param name="/use_sim_time" value="true"/>
+
+    <arg name="rviz" default="true" />
+        <!--  ****** Maps *****  -->
+	<node name="map_server" pkg="map_server" type="map_server" args="$(find navit_bt_navigator)/maps/empty_box.yaml" output="screen"/>
+
+	<node name="fake_localization" pkg="fake_localization" type="fake_localization" respawn="false" />
+
+    <!--  ************** Stage Simulator ***************  -->
+	<node pkg="stage_ros" type="stageros" name="stageros" args="$(find navit_move_base)/worlds/test.world"/>
+
+
+        <!--  ************** Navigation ***************  -->
+	<node pkg="navit_planner" type="navit_planner_node" name="navit_planner_node" output="screen" respawn="true">
+  	  	<rosparam file="$(find navit_planner)/config/simulation/base_planner_simulation.yaml" command="load" />
+  	 	<rosparam file="$(find navit_planner)/config/simulation/costmap_params_simulation.yaml" command="load"/>
+	</node> 
+
+	<node pkg="navit_controller" type="navit_controller_node" name="navit_controller_node" output="screen" respawn="true" launch-prefix="gdb -ex run --args">
+  	  	<rosparam file="$(find navit_controller)/config/simulation/base_controller_simulation.yaml" command="load"/>
+  	 	<rosparam file="$(find navit_controller)/config/simulation/costmap_params_simulation.yaml" command="load"/>
+	</node>
+
+
+	<!--  ****** Recovery *****  -->
+	<node pkg="navit_recovery" type="navit_recovery_node" name="navit_recovery_node" output="screen">
+  	  	<rosparam file="$(find navit_recovery)/config/simulation/test.yaml" command="load"/>
+	</node>
+	<!--  **************** Visualisation ****************  -->
+	<node name="rviz" pkg="rviz" type="rviz" args="-d $(find navit_bt_navigator)/rviz/navit.rviz" if="$(arg rviz)"/>
+
+</launch>

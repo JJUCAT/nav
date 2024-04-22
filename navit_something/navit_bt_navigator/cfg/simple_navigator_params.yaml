@@ -1,0 +1,3 @@
+#tree_file: 'cleaning_tree_with_autodock_subtree.xml'
+tree_file: 'cleaning_tree.xml'
+#tree_file: 'simple_navigator_with_autodock_recovery_subtree.xml'

@@ -1,0 +1,13 @@
+approach_dock:
+## load all useful  perception plugins, same or different
+## the action goal requres perception_plugin_name
+  perception:
+        - {name: fake_perception, type: dock_fake_perception/FakePerception}
+        - {name: 2d_lidar, type: dock_perception/Perception}
+    
+  fake_perception:
+        tracking_frame: odom
+
+  2d_lidar:
+        debug: true
+        tracking_frame: odom

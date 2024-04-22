@@ -1,0 +1,74 @@
+approach_dock:
+    odom_topic_name: odom
+    cmd_vel_name: cmd_vel
+    control_frequency: 5.0
+    
+    ## load available controller plugins
+    ## or the same controller with different params
+    ## the action goal msg requires controller_plugin_name
+    controller:
+        - {name: FgController, type: dock_fg100_controller/FgController}
+        - {name: test_controller_1, type: dock_fg100_controller/FgController}
+    
+    FgController:
+        xy_goal_tolerance: 0.05
+        yaw_goal_tolerance: 0.05
+        robot:
+            #type: "diff"
+            #diff:
+    
+            type: "simple_car"
+            simple_car:
+                wheelbase: 2.0
+                max_vel_x: 0.2
+                max_vel_x_backwards: 0.2
+                max_steering_angle: 0.6
+                acc_lim_x: 0.5 # deactive bounds with zero
+                dec_lim_x: 0.5 # deactive bounds with zero
+                max_steering_rate: 0.2 # deactive bounds with zero
+    
+            ##TODO 由于无法仿真验证，只能上车实测
+            #type: "fg_robot"
+            #fg_robot:
+            #    wheelbase: 2.0
+            #    tau_steer: 0.5
+            #    tau_v: 0.1
+            #    max_vel_x: 0.2
+            #    max_vel_x_backwards: 0.2
+            #    max_steering_angle: 0.6
+            #    acc_lim_x: 0.5 # deactive bounds with zero
+            #    dec_lim_x: 0.5 # deactive bounds with zero
+            #    max_steering_rate: 0.2 # deactive bounds with zero
+    
+        grid:
+            grid_size_ref: 60 # (T = (grid_size_ref-1) * dt_ref);
+            dt_ref: 0.3 # and here the corresponding temporal resolution
+            xf_fixed: [True, True, True]
+            warm_start: True
+            collocation_method: "forward_differences"
+            cost_integration_method: "left_sum"
+    
+        planning:
+            objective:
+              type: "quadratic_form" 
+              quadratic_form:
+                state_weights: [2.0, 2.0, 25]
+                control_weights: [0.1, 0.05]
+                integral_form: False
+            terminal_cost:
+              type: "quadratic" # can be "none"
+              quadratic:
+                final_state_weights: [1.0, 15.0, 10.0]
+            terminal_constraint:
+              type: "none" # can be "none"
+              l2_ball:
+                weight_matrix: [1.0, 1.0, 1.0]
+                radius: 5
+    
+        controller:
+            state_feedback_topic_name: move_base_node/mpc_local_planner/state_feedback #TODO 替换为实际的topic名字
+            outer_ocp_iterations: 1
+            xy_goal_tolerance: 0.2
+            yaw_goal_tolerance: 0.1
+            prefer_x_feedback: False
+            publish_ocp_results: False

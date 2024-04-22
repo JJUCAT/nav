@@ -1,0 +1,19 @@
+<library path="lib/libnavit_rviz_panel">
+  <class type="navit_rviz_panel::OperationToolsPanel" base_class_type="rviz::Panel" name = "NavitRvizPanel">
+    <description>
+      A simple panel widget with two buttons.
+    </description>
+  </class>
+</library>
+
+<library path="lib/libnavit_rviz_point_with_line_plugin">
+  <class name="rviz_combined_tool/CombinedSelectionTool" type="rviz_combined_tool::CombinedSelectionTool" base_class_type="rviz::Tool">
+    <description>
+      A display to visualize navit_msgs::PolygonArray messages in RViz.
+    </description>
+  </class>
+</library>
+
+
+
+

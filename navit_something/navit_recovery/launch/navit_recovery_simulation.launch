@@ -1,0 +1,36 @@
+<launch>
+    <param name="/use_sim_time" value="true"/>
+
+    <node name="map_server" pkg="map_server" type="map_server" args="$(find navit_planner)/stage/maps/willow-empty.pgm 0.025" />
+
+    <!--  ************** Stage Simulator ***************  -->
+	<node pkg="stage_ros" type="stageros" name="stageros" args="$(find navit_planner)/stage/willow.world"/>
+
+
+    <node name="fake_localization" pkg="fake_localization" type="fake_localization" respawn="false" />
+
+	<!--  **************** Visualisation ****************  -->
+	<node name="rviz" pkg="rviz" type="rviz" args="-d $(find navit_controller)/rviz/controller.rviz" />
+
+    <include file="$(find navit_planner)/launch/navit_planner.launch" />
+
+    
+    <include file="$(find navit_controller)/launch/controller.launch" />
+
+
+<node name="navit_recovery_server"
+      type="navit_recovery_node"
+      pkg="navit_recovery" 
+      output="screen">
+      launch-prefix="gdb -ex start --args"
+      <rosparam file="$(find navit_recovery)/config/test.yaml"
+                command="load" />
+</node> 
+
+<node name="action_test_script"
+      type="test_recovery.py"
+      pkg="navit_recovery"/>
+
+<node pkg="rosbag" type="record" name="recovery_test_rosbag" 
+      args="--lz4 -o /tmp/recovery_test -a" />
+</launch>

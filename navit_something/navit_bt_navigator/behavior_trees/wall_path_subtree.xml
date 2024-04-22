@@ -1,0 +1,77 @@
+<?xml version="1.0"?>
+<root main_tree_to_execute="BehaviorTree">
+    <!-- ////////// -->
+    <BehaviorTree ID="BehaviorTree">
+        <Fallback>
+            <Sequence>
+                <Condition ID="NeedPlan" need_plan="{need_plan}"/>
+                <Action ID="WallPath" ipa_path="{ipa_path}" need_plan="{need_plan}"/>
+            </Sequence>
+            <Control ID="RecoveryNode" number_of_retries="5">
+                <Action ID="FollowPath" controller_id="tracking" path="{ipa_path}" server_name="/follow_path" server_timeout="1.0"/>
+                <SubTree ID="RecoveryBehaviorsSequence" __shared_blackboard="true"/>
+            </Control>
+        </Fallback>
+    </BehaviorTree>
+    <!-- ////////// -->
+    <BehaviorTree ID="RecoveryBehaviors">
+        <ReactiveFallback>
+            <Action ID="ClearEntireCostmap" service_name="clear_planner_costmap"/>
+            <Action ID="Wait" server_name="/wait" server_timeout="" wait_duration="1"/>
+            <Action ID="BackUp" backup_dist="0.25" backup_speed="0.05" server_name="/backup" server_timeout=""/>
+        </ReactiveFallback>
+    </BehaviorTree>
+    <!-- ////////// -->
+    <BehaviorTree ID="RecoveryBehaviorsSequence">
+        <ReactiveSequence>
+            <Action ID="ClearEntireCostmap" service_name="clear_planner_costmap"/>
+            <Action ID="Wait" server_name="/wait" server_timeout="" wait_duration="1"/>
+            <Action ID="BackUp" backup_dist="0.25" backup_speed="0.05" server_name="/backup" server_timeout=""/>
+        </ReactiveSequence>
+    </BehaviorTree>
+    <!-- ////////// -->
+    <TreeNodesModel>
+        <Action ID="BackUp">
+            <input_port default="0.25" name="backup_dist">Distance to backup</input_port>
+            <input_port default="0.05" name="backup_speed">Speed at which to backup</input_port>
+            <input_port default="/backup" name="server_name">remapped action server name</input_port>
+            <input_port name="server_timeout">...</input_port>
+        </Action>
+        <Action ID="ClearEntireCostmap">
+            <input_port default="clear_planner_costmap" name="service_name">Service name</input_port>
+        </Action>
+        <Action ID="FollowPath">
+            <input_port name="controller_id"/>
+            <input_port name="path">Path to follow</input_port>
+            <input_port default="/follow_path" name="server_name">remapped action server name</input_port>
+            <input_port name="server_timeout">...</input_port>
+        </Action>
+        <Condition ID="NeedPlan">
+            <input_port default="true" name="need_plan"/>
+        </Condition>
+        <Control ID="PipelineSequence"/>
+        <Decorator ID="RateController">
+            <input_port name="hz">Rate</input_port>
+        </Decorator>
+        <SubTree ID="RecoveryBehaviors">
+            <input_port default="true" name="__shared_blackboard">If false (default), the Subtree has an isolated blackboard and needs port remapping</input_port>
+        </SubTree>
+        <SubTree ID="RecoveryBehaviorsSequence">
+            <input_port default="true" name="__shared_blackboard">If false (default), the Subtree has an isolated blackboard and needs port remapping</input_port>
+        </SubTree>
+        <Control ID="RecoveryNode">
+            <input_port name="number_of_retries">Number of retries</input_port>
+        </Control>
+        <Action ID="RoomExploration">
+            <output_port name="ipa_path"/>
+            <output_port name="need_plan"/>
+        </Action>
+        <Action ID="Wait">
+            <input_port default="/wait" name="server_name">remapped action server name</input_port>
+            <input_port name="server_timeout">...</input_port>
+            <input_port name="wait_duration">Wait time</input_port>
+        </Action>
+    </TreeNodesModel>
+    <!-- ////////// -->
+</root>
+

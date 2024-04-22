@@ -1,0 +1,4 @@
+<launch>
+	<rosparam file="$(find navit_bt_navigator)/cfg/to_point_subtree.yaml" command="load" />
+	<node pkg="navit_bt_navigator" type="simple_navigator" name="simple_navigator" output="screen" launch-prefix="gdb -ex run --args" />
+</launch>

@@ -1,0 +1,126 @@
+<?xml version="1.0"?>
+<root main_tree_to_execute="MainTree">
+    <!-- ////////// -->
+    <BehaviorTree ID="MainTree">
+        <Repeat num_cycles="10">
+            <Decorator ID="ViaPoints" output_path="{following_path}" topic_name="/via_points">
+                <Control ID="RecoveryNode" number_of_retries="5">
+                    <Action ID="FollowPath" controller_id="following" path="{following_path}" server_name="/follow_path" server_timeout="1.0"/>
+                    <SubTree ID="RecoveryBehaviors" __shared_blackboard="true"/>
+                </Control>
+            </Decorator>
+        </Repeat>
+    </BehaviorTree>
+    <!-- ////////// -->
+    <BehaviorTree ID="RecoveryBehaviors">
+        <ReactiveFallback>
+            <Action ID="ClearEntireCostmap" service_name="clear_planner_costmap"/>
+            <Action ID="Wait" server_name="/wait" server_timeout="" wait_duration="5"/>
+        </ReactiveFallback>
+    </BehaviorTree>
+    <!-- ////////// -->
+    <BehaviorTree ID="RecoveryBehaviorsSequence">
+        <ReactiveSequence>
+            <Action ID="ClearEntireCostmap" service_name="clear_planner_costmap"/>
+            <Action ID="Wait" server_name="/wait" server_timeout="" wait_duration="5"/>
+            <Action ID="BackUp" backup_dist="0.25" backup_speed="0.05" server_name="/backup" server_timeout=""/>
+        </ReactiveSequence>
+    </BehaviorTree>
+    <!-- ////////// -->
+    <TreeNodesModel>
+        <Action ID="ApproachDock">
+            <input_port name="controller_plugin_name">...</input_port>
+            <input_port name="expected_dock_pose">for perception</input_port>
+            <input_port default="ekf_1" name="filter_plugin_name">...</input_port>
+            <output_port name="goal_reached">Approach DONE</output_port>
+            <input_port name="perception_plugin_name">...</input_port>
+            <input_port default="/approach_dock" name="server_name">remapped action server name</input_port>
+            <input_port name="server_timeout">...</input_port>
+        </Action>
+        <Action ID="BackUp">
+            <input_port default="0.25" name="backup_dist">Distance to backup</input_port>
+            <input_port default="0.05" name="backup_speed">Speed at which to backup</input_port>
+            <input_port default="/backup" name="server_name">remapped action server name</input_port>
+            <input_port name="server_timeout">...</input_port>
+        </Action>
+        <Action ID="ClearEntireCostmap">
+            <input_port default="clear_planner_costmap" name="service_name">Service name</input_port>
+        </Action>
+        <Action ID="ComputePathToPose">
+            <input_port name="goal">Destination to plan to</input_port>
+            <output_port name="path">Path created by ComputePathToPose node</output_port>
+            <input_port name="planner_id"/>
+            <input_port default="/compute_path" name="server_name">remapped action server name.</input_port>
+            <input_port name="server_timeout">...</input_port>
+            <input_port name="start">Start pose of the path if overriding current robot pose</input_port>
+        </Action>
+        <Action ID="FinalDock">
+            <output_port name="dock_finished">Dock DONE</output_port>
+            <input_port name="dock_pose">Final dock pose</input_port>
+            <input_port name="rotate_in_place">rotate_in_place</input_port>
+            <input_port default="/final_dock" name="server_name">remapped action server name</input_port>
+            <input_port name="server_timeout">...</input_port>
+        </Action>
+        <Action ID="FollowPath">
+            <input_port name="controller_id"/>
+            <input_port name="path">Path to follow</input_port>
+            <input_port default="/follow_path" name="server_name">remapped action server name</input_port>
+            <input_port name="server_timeout">...</input_port>
+        </Action>
+        <Decorator ID="GoalUpdater">
+            <input_port name="input_goal">Original goal in</input_port>
+            <output_port name="output_goal">Output goal set by subscription</output_port>
+        </Decorator>
+        <Condition ID="IsBatteryLow">
+            <input_port name="battery_topic">Topic for battery info</input_port>
+            <input_port name="is_voltage">Bool if check based on voltage or total %</input_port>
+            <input_port name="min_battery">Min battery % or voltage before triggering</input_port>
+        </Condition>
+        <Control ID="PipelineSequence"/>
+        <Decorator ID="RateController">
+            <input_port name="hz">Rate</input_port>
+        </Decorator>
+        <SubTree ID="RecoveryBehaviors">
+            <input_port default="true" name="__shared_blackboard">If false (default), the Subtree has an isolated blackboard and needs port remapping</input_port>
+        </SubTree>
+        <SubTree ID="RecoveryBehaviorsSequence">
+            <input_port default="true" name="__shared_blackboard">If false (default), the Subtree has an isolated blackboard and needs port remapping</input_port>
+        </SubTree>
+        <Control ID="RecoveryNode">
+            <input_port name="number_of_retries">Number of retries</input_port>
+        </Control>
+        <Action ID="RemovePassedGoals">
+            <input_port name="input_goals">Original goals to remove viapoints from</input_port>
+            <input_port name="input_path">Original Global Planner Path</input_port>
+            <output_port name="output_goals">Goals with passed viapoints removed(truncated goals)</output_port>
+            <input_port default="0.2" name="radius">radius to goal for it to be considered for removal</input_port>
+        </Action>
+        <Action ID="TruncatePath">
+            <input_port name="distance">Distance before goal to truncate</input_port>
+            <input_port name="input_path">Path to truncate</input_port>
+            <output_port name="output_path">Truncated path to utilize</output_port>
+        </Action>
+        <Decorator ID="ViaPoints">
+            <output_port name="output_path">following via points path</output_port>
+            <input_port default="/via_points" name="topic_name">via points topic name</input_port>
+        </Decorator>
+        <Action ID="Wait">
+            <input_port default="/wait" name="server_name">remapped action server name</input_port>
+            <input_port name="server_timeout">...</input_port>
+            <input_port name="wait_duration">Wait time</input_port>
+        </Action>
+        <Decorator ID="WayPoints">
+            <input_port default="true" name="accept_new_goal">True for new goal receive</input_port>
+            <input_port default="false" name="goal_without_loop">True for new goal to stop all way-points LOOP; false for restart remain loop</input_port>
+            <input_port name="input_goal">Original goal in</input_port>
+            <input_port default="false" name="jump_goal">True for new received simple goal will replace current goal in loop; false for following current goal in loop after arrived simple goal</input_port>
+            <input_port default="0" name="max_loop">max loop number, zero or negative means inf.</input_port>
+            <output_port name="output_goal">Output goal set by subscription</output_port>
+            <input_port default="{path}" name="path">Global path</input_port>
+            <input_port default="move_base_simple/goal" name="simple_goal_topic">simple goal name</input_port>
+            <input_port default="way_points" name="way_points_topic">way points topic name</input_port>
+        </Decorator>
+    </TreeNodesModel>
+    <!-- ////////// -->
+</root>
+

@@ -1,0 +1,23 @@
+nav_recovery:
+    - name: wait
+      type: recovery_wait/RecoveryWait
+
+    - name: backup
+      type: recovery_backup/RecoveryBackUp
+
+    - name: spin
+      type: recovery_spin/RecoverySpin
+wait:
+    test_param: test_1_param
+
+backup:
+    Kp: 1.0
+    abs_max_speed: 0.2
+    control_frequency: 10 
+    cmd_vel_topic: /cmd_vel
+spin:
+    Kp: 1.0
+    abs_max_speed: 0.2
+    control_frequency: 10 
+    cmd_vel_topic: /cmd_vel
+

@@ -1,0 +1,37 @@
+<launch>
+
+    <env name="ROSCONSOLE_CONFIG_FILE"
+         value="$(find navit_planner)/config/log.config" />
+
+    <arg name="rviz" default="true" />
+    <arg name="output" default="screen" />
+    <arg name="record" default="true" />
+    <arg name="test" default="no_test" />
+
+    <!--  ************** Global Parameters ***************  -->
+    <param name="/use_sim_time" value="true"/>
+
+    <node name="map_server" pkg="map_server" type="map_server" args="$(find navit_planner)/stage/maps/fg100.yaml" />
+
+    <!--  ************** Stage Simulator ***************  -->
+	<node pkg="stage_ros" type="stageros" name="stageros" args="$(find navit_planner)/stage/fg100.world"/>
+
+
+    <node name="fake_localization" pkg="fake_localization" type="fake_localization" respawn="false" />
+
+	<!--  **************** Visualisation ****************  -->
+	<node name="rviz" pkg="rviz" type="rviz" args="-d $(find navit_planner)/rviz/planner.rviz" if="$(arg rviz)"/>
+
+    <include file="$(find navit_planner)/launch/navit_planner.launch">
+       <arg name="output" value="$(arg output)"/>
+    </include>
+
+    <!--  TODO: 自动化测试需要重新写一份launch文件
+    <node pkg="navit_planner" type="client_to_test_all_planners.py" name="client_to_test_all_planners" output="$(arg output)" if="$(eval arg('test') == 'test')"/>
+
+    <node pkg="navit_planner" type="client_to_test_all_planners.py" name="client_to_test_all_planners" output="$(arg output)" if="$(eval arg('test') == 'no_test')"/>
+    -->
+
+    <node pkg="navit_planner" type="test_planner.py" name="simple_test" output="screen" />
+    <node pkg="rosbag" type="record" name="planner_test_record" args="--lz4 -o /tmp/planner_test -a " if="$(arg record)"/>
+</launch>

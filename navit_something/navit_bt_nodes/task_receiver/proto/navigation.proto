@@ -1,0 +1,53 @@
+syntax = "proto3";
+
+package navigation;
+
+message CmdCommonResponse {
+  bool succeed = 1;
+}
+
+message CmdGoPoseRequest {
+  float x = 1;
+  float y = 2;
+  float theta = 3;
+}
+
+message CmdGoPathRequest {
+  repeated string stations = 1;
+}
+
+message CmdGoCoverageRequest {
+  repeated string areas = 1;
+}
+
+message CmdGoTranslateRequest {
+  float dist = 1;   // 直线运动距离, 单位: m
+  float vx = 2;     // 机器人坐标系下 X 方向运动的速度, 单位: m/s
+  float vy = 3;     // 机器人坐标系下 Y 方向运动的速度, 单位: m/s
+  float mode = 4;   // 0 = 里程模式(根据里程进行运动), 1 = 定位模式, 若缺省则默认为里程模式
+}
+
+message CmdGoSpinRequest {
+  float angle = 1;    // 转动的角度(机器人坐标系), 绝对值, 单位 rad, 可以大于 2π
+  float vw = 2;       // 转动的角速度(机器人坐标系), 正为逆时针转, 负为顺时针转 单位 rad/s
+  float mode = 3;     // 0 = 里程模式(根据里程进行运动), 1 = 定位模式, 若缺省则默认为里程模式
+}
+
+service NavigationService {
+  rpc GoPose(CmdGoPoseRequest) returns (CmdCommonResponse) {}
+  rpc GoPath(CmdGoPathRequest) returns (CmdCommonResponse) {}
+  rpc GoCoverage(CmdGoCoverageRequest) returns (CmdCommonResponse) {}
+  rpc GoTranslate(CmdGoTranslateRequest) returns (CmdCommonResponse) {}
+  rpc GoSpin(CmdGoSpinRequest) returns (CmdCommonResponse) {}
+}
+
+message TaskControl {
+  string cmd = 1; // go_pose go_path go_coverage go_translate go_spin
+  oneof param {
+    CmdGoPoseRequest cmd_param_go_pose = 11;
+    CmdGoPathRequest cmd_param_go_path = 12;
+    CmdGoCoverageRequest cmd_param_go_coverage = 13;
+    CmdGoTranslateRequest cmd_param_go_translate = 14;
+    CmdGoSpinRequest cmd_param_go_spin = 15;
+  }
+}

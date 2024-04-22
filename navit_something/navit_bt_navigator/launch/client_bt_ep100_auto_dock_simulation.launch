@@ -1,0 +1,6 @@
+<launch>
+
+	<rosparam file="$(find navit_bt_navigator)/cfg/ep100_auto_dock_subtree.yaml" command="load"/>
+		<node pkg="navit_bt_navigator" type="auto_dock_sub_navigator" name="auto_dock_sub_navigator"/>
+
+</launch>

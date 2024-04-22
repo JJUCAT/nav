@@ -1,0 +1,85 @@
+<?xml version="1.0"?>
+<root main_tree_to_execute="MainTree">
+    <!-- ////////// -->
+    <BehaviorTree ID="MainTree">
+        <Sequence name="NavigateWithDocking">
+            <Control ID="PipelineSequence" name="NavigateWithReplanning">
+                <Decorator ID="RateController" hz="1.0">
+                    <Sequence>
+                        <Fallback>
+                            <ReactiveSequence>
+                                <Inverter>
+                                    <Condition ID="IsBatteryLow" battery_topic="/battery" is_voltage="false" min_battery="20"/>
+                                </Inverter>
+                                <Decorator ID="GoalUpdater" input_goal="0.0;map;17.0;15.0;0.0;0.0;0.0;0.0;1.0" output_goal="{updated_goal}">
+                                    <Action ID="ComputePathToPose" goal="{updated_goal}" path="{path}" planner_id="test_1" start="false"/>
+                                </Decorator>
+                            </ReactiveSequence>
+                            <Decorator ID="GoalUpdater" input_goal="0.0;map;17.0;15.0;0.0;0.0;0.0;0.0;1.0" output_goal="{updated_goal}">
+                                <Action ID="ComputePathToPose" goal="{updated_goal}" path="{path}" planner_id="test_1" start="false"/>
+                            </Decorator>
+                        </Fallback>
+                        <Action ID="TruncatePath" distance="1.0" input_path="{path}" output_path="{truncated_path}"/>
+                    </Sequence>
+                </Decorator>
+                <Sequence name="Controlling">
+                    <Action ID="FollowPath" controller_id="test_3" goal_checker_id="GoalChecker" path="{truncated_path}"/>
+                </Sequence>
+            </Control>
+            <Sequence name="Docking">
+                <Action ID="ApproachDock" controller_plugin_name="GracefulController_1" expected_dock_pose="0.0;map;19.5;15.0;0.0;0.0;0.0;0.0;1.0" filter_plugin_name="ekf_1" goal_reached="" perception_plugin_name="fake_perception" server_name="/approach_dock" server_timeout="1.0"/>
+                <Action ID="FinalDock" dock_finished="" dock_pose="0.0;map;19.2;15.0;0.0;0.0;0.0;0.0;1.0" rotate_in_place="true" server_name="/final_dock" server_timeout="1.0"/>
+            </Sequence>
+        </Sequence>
+    </BehaviorTree>
+    <!-- ////////// -->
+    <TreeNodesModel>
+        <Action ID="ApproachDock">
+            <input_port name="controller_plugin_name">...</input_port>
+            <input_port name="expected_dock_pose">for perception</input_port>
+            <input_port name="filter_plugin_name">...</input_port>
+            <output_port name="goal_reached">Approach DONE</output_port>
+            <input_port name="perception_plugin_name">...</input_port>
+            <input_port name="server_name">...</input_port>
+            <input_port name="server_timeout">...</input_port>
+        </Action>
+        <Action ID="ComputePathToPose">
+            <input_port name="goal">Destination to plan to</input_port>
+            <output_port name="path">Path created by ComputePathToPose node</output_port>
+            <input_port name="planner_id"/>
+            <input_port name="start">Start pose of the path if overriding current robot pose</input_port>
+        </Action>
+        <Action ID="FinalDock">
+            <output_port name="dock_finished">Dock DONE</output_port>
+            <input_port name="dock_pose">Final dock pose</input_port>
+            <input_port name="rotate_in_place">rotate_in_place</input_port>
+            <input_port name="server_name">...</input_port>
+            <input_port name="server_timeout">...</input_port>
+        </Action>
+        <Action ID="FollowPath">
+            <input_port default="FollowPath" name="controller_id"/>
+            <input_port default="GoalChecker" name="goal_checker_id">Goal checker</input_port>
+            <input_port name="path">Path to follow</input_port>
+        </Action>
+        <Decorator ID="GoalUpdater">
+            <input_port name="input_goal">Original goal in</input_port>
+            <output_port name="output_goal">Output goal set by subscription</output_port>
+        </Decorator>
+        <Condition ID="IsBatteryLow">
+            <input_port name="battery_topic">Topic for battery info</input_port>
+            <input_port name="is_voltage">Bool if check based on voltage or total %</input_port>
+            <input_port name="min_battery">Min battery % or voltage before triggering</input_port>
+        </Condition>
+        <Control ID="PipelineSequence"/>
+        <Decorator ID="RateController">
+            <input_port name="hz">Rate</input_port>
+        </Decorator>
+        <Action ID="TruncatePath">
+            <input_port name="distance">Distance before goal to truncate</input_port>
+            <input_port name="input_path">Path to truncate</input_port>
+            <output_port name="output_path">Truncated path to utilize</output_port>
+        </Action>
+    </TreeNodesModel>
+    <!-- ////////// -->
+</root>
+

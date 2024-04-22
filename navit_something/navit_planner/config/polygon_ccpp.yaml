@@ -1,0 +1,26 @@
+coverage_planner:
+     - name: ccpp
+       type: polygon_coverage_planning/PolygonCoveragePlanner
+
+
+nav_planner:
+     - {name: topoint, type: global_planner/GlobalPlanner}
+     - {name: topoint1, type: smac_planner/SmacPlanner2D}
+
+ccpp:
+  map_resolution: 0.05              # [m], default = 0.05
+  coverage_resolution: 0.1          # [m], default = 0.1
+  robot_radius: 0.6                 # [m], default = 0.2
+  coverage_interval_distance: 2.4   # [m], coverage interval dis is robot_radius * 2 * 2
+  error_distance: 3                 # [pixel], error distance for turn circle ccpp
+  path_eps: 1.0                     #[pixel],for downsample path,the distance between points when generating a path
+  inflation_distance: 1.2
+  # polygon coverage params
+  decomposition_type: 1 # [0: Boustrophedon, 1: Trapezoidal]
+  wall_distance: 0.8
+  lateral_footprint: 1.1 # Only for line sensor model
+  lateral_overlap: 0.0 # [0, 1), sweep_distance = (1.0 - lateral_overlap) * lateral_footprint;
+  turn_type: 0 #// 0: Boustrophedon, 1: Snake, 2: Spiral(6), 3: Spiral(4)
+  route_type: 0 #// 0: DubinsCurves, 1: DubinsCurvesCC, 2: ReedsSheppCurves, 3: ReedsSheppCurvesHC
+  turn_radius: 0.4
+  robot_width: 1.16

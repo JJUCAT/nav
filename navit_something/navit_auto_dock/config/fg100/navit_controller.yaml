@@ -1,0 +1,301 @@
+nav_controller:
+    - {name: tracking, type: teb_local_planner/TebLocalPlannerROS}
+    - {name: avoidance, type: teb_local_planner/TebLocalPlannerROS}
+    - {name: tracking_mpc, type: fg100_mpc_local_planner/MpcLocalPlannerROS}
+    - {name: tracking_purepursuit, type: PurePursuitController}
+
+# should be tuned for tracking only
+tracking:
+  odom_topic: odom
+
+  # Trajectory
+
+  teb_autosize: True
+  dt_ref: 0.3
+  dt_hysteresis: 0.1
+  max_samples: 500
+  global_plan_overwrite_orientation: True
+  allow_init_with_backwards_motion: False
+  max_global_plan_lookahead_dist: 3.0
+  global_plan_viapoint_sep: 0.1
+  global_plan_prune_distance: 0.3
+  exact_arc_length: False
+  feasibility_check_no_poses: 5
+  publish_feedback: False
+
+  # Robot
+  max_vel_x: 0.2
+  max_vel_x_backwards: 0.2
+  max_vel_y: 0.0
+  max_vel_theta: 0.3
+  acc_lim_x: 0.5
+  acc_lim_theta: 0.5
+  min_turning_radius: 0.0 # diff-drive robot (can turn on place!)
+
+  footprint_model:
+    type: "point"
+
+  # GoalTolerance
+
+  xy_goal_tolerance: 0.2
+  yaw_goal_tolerance: 0.2
+  free_goal_vel: True
+  complete_global_plan: True
+
+  # Obstacles
+
+  min_obstacle_dist: 0.25 # This value must also include our robot radius, since footprint_model is set to "point".
+  inflation_dist: 0.6
+  include_costmap_obstacles: True
+  costmap_obstacles_behind_robot_dist: 1.5
+  obstacle_poses_affected: 15
+
+  dynamic_obstacle_inflation_dist: 0.6
+  include_dynamic_obstacles: False
+
+  # Optimization
+  no_inner_iterations: 5
+  no_outer_iterations: 4
+  optimization_activate: True
+  optimization_verbose: False
+  penalty_epsilon: 0.1
+  obstacle_cost_exponent: 4
+  weight_max_vel_x: 2
+  weight_max_vel_theta: 1
+  weight_acc_lim_x: 1
+  weight_acc_lim_theta: 1
+  weight_kinematics_nh: 1000
+  weight_kinematics_forward_drive: 1000
+  weight_kinematics_turning_radius: 1
+  weight_optimaltime: 10 # must be > 0
+  weight_shortest_path: 0
+  weight_obstacle: 1
+  weight_inflation: 0.2
+  weight_dynamic_obstacle: 0
+  weight_dynamic_obstacle_inflation: 0
+  weight_viapoint: 100
+  weight_adapt_factor: 2
+
+  # Homotopy Class Planner
+  enable_homotopy_class_planning: False
+
+#  Recovery
+  shrink_horizon_backup: True
+  shrink_horizon_min_duration: 10
+  oscillation_recovery: True
+  oscillation_v_eps: 0.1
+  oscillation_omega_eps: 0.1
+  oscillation_recovery_min_duration: 10
+  oscillation_filter_duration: 10
+
+avoidance:
+  odom_topic: odom
+
+  # Trajectory
+
+  teb_autosize: True
+  dt_ref: 0.3
+  dt_hysteresis: 0.1
+  max_samples: 500
+  global_plan_overwrite_orientation: True
+  allow_init_with_backwards_motion: False
+  max_global_plan_lookahead_dist: 3.0
+  global_plan_viapoint_sep: 0.1
+  global_plan_prune_distance: 0.3
+  exact_arc_length: False
+  force_reinit_new_goal_dist: 1.0
+  force_reinit_new_goal_angular: 0.78
+  feasibility_check_no_poses: 2
+  publish_feedback: False
+
+  # Robot
+  max_vel_x: 0.2
+  max_vel_x_backwards: 0.2
+  max_vel_y: 0.0
+  max_vel_theta: 0.3
+  acc_lim_x: 0.5
+  acc_lim_theta: 0.5
+  min_turning_radius: 0.0 # diff-drive robot (can turn on place!)
+
+  footprint_model:
+    # type: "circular"
+    radius: 0.5
+    type: "point"
+
+  # GoalTolerance
+
+  xy_goal_tolerance: 0.2
+  yaw_goal_tolerance: 0.2
+  free_goal_vel: True
+  complete_global_plan: True
+
+  # Obstacles
+
+  min_obstacle_dist: 0.55 # This value must also include our robot radius, since footprint_model is set to "point".
+  inflation_dist: 0.8
+  include_costmap_obstacles: True
+  costmap_obstacles_behind_robot_dist: 1.5
+  obstacle_poses_affected: 15
+
+  dynamic_obstacle_inflation_dist: 0.6
+  include_dynamic_obstacles: False
+
+  # Optimization
+  no_inner_iterations: 5
+  no_outer_iterations: 4
+  optimization_activate: True
+  optimization_verbose: False
+  penalty_epsilon: 0.1
+  weight_max_vel_x: 2
+  weight_max_vel_theta: 1
+  weight_acc_lim_x: 1
+  weight_acc_lim_theta: 1
+  weight_kinematics_nh: 1000
+  weight_kinematics_forward_drive: 1000
+  weight_kinematics_turning_radius: 1
+  weight_optimaltime: 10 # must be > 0
+  weight_shortest_path: 0
+  weight_obstacle: 640
+  weight_inflation: 0.2
+  weight_dynamic_obstacle: 0
+  weight_dynamic_obstacle_inflation: 0
+  weight_viapoint: 10
+  weight_adapt_factor: 2
+  obstacle_cost_exponent: 3.0
+
+  # Homotopy Class Planner
+  enable_homotopy_class_planning: False
+
+#  Recovery
+  shrink_horizon_backup: True
+  shrink_horizon_min_duration: 10
+  oscillation_recovery: True
+  oscillation_v_eps: 0.1
+  oscillation_omega_eps: 0.1
+  oscillation_recovery_min_duration: 10
+  oscillation_filter_duration: 10
+
+tracking_mpc:
+
+  ## Robot settings
+  robot:
+    type: "unicycle"
+    unicycle:
+      max_vel_x: 0.4
+      max_vel_x_backwards: 0.2
+      max_vel_theta: 0.3
+      acc_lim_x: 0.0 # deactive bounds with zero
+      dec_lim_x: 0.0 # deactive bounds with zero
+      acc_lim_theta: 0.0 # deactivate bounds with zero
+    simple_car:
+      wheelbase: 0.4
+      front_wheel_driving: False
+      max_vel_x: 0.4
+      max_vel_x_backwards: 0.2
+      max_steering_angle: 1.4
+      acc_lim_x: 0.0 # deactive bounds with zero
+      dec_lim_x: 0.0 # deactive bounds with zero
+      max_steering_rate: 0.5 # deactive bounds with zero
+    kinematic_bicycle_vel_input:
+      length_rear: 1.0
+      length_front: 1.0
+      max_vel_x: 0.4
+      max_vel_x_backwards: 0.2
+      max_steering_angle: 1.4
+      acc_lim_x: 0.0 # deactive bounds with zero
+      dec_lim_x: 0.0 # deactive bounds with zero
+      max_steering_rate: 0.5 # deactive bounds with zero
+
+  ## Footprint model for collision avoidance
+  footprint_model:
+    type: "point"
+
+  collision_avoidance:
+    min_obstacle_dist: 0.5 # Note, this parameter must be chosen w.r.t. the footprint_model
+    enable_dynamic_obstacles: False
+    force_inclusion_dist: 0.5
+    cutoff_dist: 2.5 
+    collision_check_no_poses: 5
+
+  ## Planning grid 
+  grid:
+    type: "fd_grid"
+    grid_size_ref: 20
+    dt_ref: 0.3
+    xf_fixed: [True, True, True] # E.g., set last one to False in order to unfix the final orientation
+    warm_start: True
+    collocation_method: "forward_differences"
+    cost_integration_method: "left_sum"
+    variable_grid:
+      enable: True  
+      min_dt: 0.0;
+      max_dt: 10.0;
+      grid_adaptation:
+        enable: True
+        dt_hyst_ratio: 0.1
+        min_grid_size: 2
+        max_grid_size: 50
+  
+
+  ## Planning options
+  planning:
+    objective:
+      type: "minimum_time" # minimum_time requires grid/variable_grid/enable=True and grid/xf_fixed set properly
+      quadratic_form:
+        state_weights: [2.0, 2.0, 2.0]
+        control_weights: [1.0, 1.0]
+        integral_form: False
+        hybrid_cost_minimum_time: False
+      minimum_time_via_points:
+        position_weight: 8.0
+        orientation_weight: 0.0
+        via_points_ordered: False
+    terminal_cost:
+      type: "quadratic" # can be "none"
+      quadratic:
+        final_state_weights: [2.0, 2.0, 2.0]
+    terminal_constraint:
+      type: "none" # can be "none"
+      l2_ball:
+        weight_matrix: [1.0, 1.0, 1.0]
+        radius: 5
+        
+
+  ## Controller options
+  controller:
+    outer_ocp_iterations: 1
+    xy_goal_tolerance: 0.2
+    yaw_goal_tolerance: 0.1
+    force_reinit_new_goal_dist: 1.0
+    force_reinit_new_goal_angular: 1.57
+    force_reinit_num_steps: 0
+    global_plan_overwrite_orientation: True
+    global_plan_viapoint_sep: -1
+    allow_init_with_backward_motion: True
+    publish_ocp_results: True
+    print_cpu_time: False
+    
+  ## Solver settings
+  solver:
+    type: "ipopt"
+    ipopt:
+      iterations: 100
+      max_cpu_time: -1.0
+      ipopt_numeric_options:
+        tol: 1e-4
+      ipopt_string_options:
+        linear_solver: "mumps"
+        hessian_approximation: "limited-memory" # exact or limited-memory
+      ipopt_integer_options:
+        print_level: 2
+    lsq_lm:
+      iterations: 10
+      weight_init_eq: 2
+      weight_init_ineq: 2
+      weight_init_bounds: 2
+      weight_adapt_factor_eq: 1.5
+      weight_adapt_factor_ineq: 1.5
+      weight_adapt_factor_bounds: 1.5
+      weight_adapt_max_eq: 500
+      weight_adapt_max_ineq: 500
+      weight_adapt_max_bounds: 500

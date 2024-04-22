@@ -1,0 +1,14 @@
+image: fg100.png
+resolution: 0.1
+  #origin: [-152.7, -207.45, 0]
+origin: [0,0,0]
+occupied_thresh: 0.51
+free_thresh: 0.49
+negate: 0
+left: -152.7
+right: 152.7
+top: 207.45
+bottom: -207.45
+start_posx: 0
+start_posy: 0
+start_posr: 0

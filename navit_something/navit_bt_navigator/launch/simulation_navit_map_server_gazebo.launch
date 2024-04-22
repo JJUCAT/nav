@@ -1,0 +1,111 @@
+<launch>
+    <param name="/use_sim_time" value="true"/>
+
+    <arg name="rviz" default="true"/>
+
+
+    <arg name="world_name" value="factory"/>
+    <arg name="debug" default="false"/>
+    <arg name="gui" default="true"/>
+    <arg name="headless" default="false"/>
+
+    <!-- Start Gazebo with a blank world -->
+    <include file="$(find gazebo_ros)/launch/empty_world.launch">
+        <arg name="debug" value="$(arg debug)"/>
+        <arg name="gui" value="$(arg gui)"/>
+        <arg name="paused" value="false"/>
+        <arg name="use_sim_time" value="true"/>
+        <arg name="headless" value="$(arg headless)"/>
+        <arg name="world_name" value="$(find gazebo_model)/worlds/$(arg world_name).world"/>
+    </include>
+
+    <!-- URDF and TF support -->
+    <param name="robot_description"
+           command="$(find xacro)/xacro $(find diff_amr_description)/urdf/diff_amr_gazebo.urdf.xacro"/>
+
+    <!-- Put a robot in gazebo, make it look pretty -->
+    <node name="urdf_spawner" pkg="gazebo_ros" type="spawn_model" respawn="false" output="screen"
+          args="-urdf -x 0.0 -y 0.0 -z 0 -model diff_car -param robot_description"/>
+
+    <!-- <node name="gazebo_odometry_node" pkg="navit_auto_dock" type="gazebo_odometry.py" output="screen" /> -->
+
+    <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher"/>
+
+
+    <!--  ****** Maps *****  -->
+    <!--	<node name="map_server" pkg="map_server" type="map_server" args="$(find navit_bt_navigator)/maps/mymap_simulation.yaml" output="screen"/>-->
+    <node name="navit_map_server_node" pkg="navit_map_server" type="navit_map_server_node"
+          args="$(find navit_bt_navigator)/maps/mymap_simulation.yaml"
+          output="screen">
+        <rosparam file="$(find navit_map_server)/config/navit_map_server.yaml" command="load"/>
+    </node>
+
+    <!-- <node name="fake_localization" pkg="fake_localization" type="fake_localization" respawn="true" /> -->
+
+
+    <!-- AMCL -->
+    <node pkg="amcl" type="amcl" name="amcl">
+
+        <param name="min_particles" value="500"/>
+        <param name="max_particles" value="3000"/>
+        <param name="kld_err" value="0.02"/>
+        <param name="update_min_d" value="0.20"/>
+        <param name="update_min_a" value="0.20"/>
+        <param name="resample_interval" value="1"/>
+        <param name="transform_tolerance" value="0.5"/>
+        <param name="recovery_alpha_slow" value="0.00"/>
+        <param name="recovery_alpha_fast" value="0.00"/>
+
+        <param name="gui_publish_rate" value="50.0"/>
+
+        <remap from="scan" to="/hokuyo_lida/scan"/>
+        <param name="laser_max_range" value="3.5"/>
+        <param name="laser_max_beams" value="180"/>
+        <param name="laser_z_hit" value="0.5"/>
+        <param name="laser_z_short" value="0.05"/>
+        <param name="laser_z_max" value="0.05"/>
+        <param name="laser_z_rand" value="0.5"/>
+        <param name="laser_sigma_hit" value="0.2"/>
+        <param name="laser_lambda_short" value="0.1"/>
+        <param name="laser_likelihood_max_dist" value="2.0"/>
+        <param name="laser_model_type" value="likelihood_field"/>
+
+        <param name="odom_model_type" value="diff"/>
+        <param name="odom_alpha1" value="0.1"/>
+        <param name="odom_alpha2" value="0.1"/>
+        <param name="odom_alpha3" value="0.1"/>
+        <param name="odom_alpha4" value="0.1"/>
+        <param name="odom_frame_id" value="odom"/>
+        <param name="base_frame_id" value="base_link"/>
+
+    </node>
+
+
+    <!--  ************** Navigation ***************  -->
+    <node pkg="navit_planner" type="navit_planner_node" name="navit_planner_node" output="screen" respawn="true">
+        <rosparam file="$(find navit_planner)/config/simulation/base_planner_simulation.yaml" command="load"/>
+        <rosparam file="$(find navit_planner)/config/simulation/costmap_params_simulation.yaml" command="load"/>
+    </node>
+
+    <node pkg="navit_controller" type="navit_controller_node" name="navit_controller_node" output="screen"
+          respawn="true">
+        <rosparam file="$(find navit_controller)/config/simulation/base_controller_simulation.yaml" command="load"/>
+        <rosparam file="$(find navit_controller)/config/simulation/costmap_params_simulation.yaml" command="load"/>
+        <remap from="cmd_vel" to="cmd_vel_raw"/>
+    </node>
+
+    <node pkg="navit_bt_navigator" type="move_to_pose_action_server" name="move_to_pose_action_server"
+          args="$(find navit_bt_navigator)/behavior_trees/move_to_pose.xml" output="screen"/>
+    <node pkg="navit_bt_navigator" type="move_through_poses_action_server" name="move_through_poses_action_server"
+          args="$(find navit_bt_navigator)/behavior_trees/move_through_poses.xml" output="screen"/>
+
+    <include file="$(find navit_velocity_smoother)/launch/vel_smoother_nodelet.launch">
+    </include>
+    <!--  ****** Recovery *****  -->
+    <node pkg="navit_recovery" type="navit_recovery_node" name="navit_recovery_node" output="screen">
+        <rosparam file="$(find navit_recovery)/config/simulation/test.yaml" command="load"/>
+    </node>
+    <!--  **************** Visualisation ****************  -->
+    <node name="rviz" pkg="rviz" type="rviz" args="-d $(find navit_bt_navigator)/rviz/navit.rviz" if="$(arg rviz)"/>
+
+</launch>

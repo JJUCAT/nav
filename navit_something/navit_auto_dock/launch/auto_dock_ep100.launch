@@ -1,0 +1,17 @@
+<launch>
+
+  <node name="navit_controller_node" pkg="navit_controller" type="navit_controller_node" output="screen" >
+    <rosparam file="$(find navit_auto_dock)/config/ep100/navit_controller.yaml" command="load" />
+  </node>
+
+  <node name="auto_dock" pkg="navit_auto_dock" type="navit_auto_dock_node" output="screen">
+    <rosparam file="$(find navit_auto_dock)/config/ep100/auto_dock.yaml" command="load" />
+    <rosparam file="$(find navit_auto_dock)/config/ep100/approach_dock_ep100.yaml" command="load" />
+    <rosparam file="$(find navit_auto_dock)/config/ep100/final_dock_ep100.yaml" command="load" />
+  </node>
+
+ <node name="dock_test"  pkg="navit_auto_dock"  type="dock_ep100.py" output="screen" />
+ <node name="dock_test_view_dock" pkg="navit_auto_dock"   type="view_dock_ep100.py" output="screen" />
+
+
+</launch>
