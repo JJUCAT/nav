@@ -39,7 +39,7 @@ struct SmootherParams
   double max_curvature = 0.7;
   double smooth_weight = 1000;
   double curvature_weight = 30.0;
-  double distance_weight = 3000; // 100
+  double distance_weight = 10000; // 100
   double costmap_weight = 1.0;
   double costmap_factor = 1.0;
 };
