@@ -1,0 +1,9 @@
+<launch>
+  <node name="auto_dock" pkg="navit_auto_dock" type="navit_auto_dock_node" output="screen">
+    launch-prefix="gdb -ex start --args"
+    <rosparam file="$(find j110_bringup)/config/auto_dock/auto_dock.yaml" command="load" />
+    <rosparam file="$(find j110_bringup)/config/auto_dock/approach_dock.yaml" command="load" />
+    <rosparam file="$(find j110_bringup)/config/auto_dock/final_dock.yaml" command="load" />
+    <param name="approach_dock_path" type="string" value="$(find j110_bringup)/config/auto_dock/approach_dock.yaml" />
+  </node>
+</launch>

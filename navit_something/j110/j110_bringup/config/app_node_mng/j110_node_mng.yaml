@@ -1,0 +1,80 @@
+node_define:
+  prefix: j110       # 服务名前缀，每个节点将做成一个服务。
+  local_vars: # 配置一些变量在节点定义时简化。
+    - name: SETUP
+      value: "/opt/yjh/j110/navit/setup.bash"
+#      value: "/home/robot/navit/devel/setup.bash"
+    - name: SCRIPTS_DIR
+      value: "/home/robot/cleanrobot/framework/install/lib/yjh_bringup/scripts"
+    - name: INSTALL_DIR
+      value: "/home/robot/cleanrobot/framework/install"
+    - name: USER
+      value: "robot"
+
+  executable_item_ros:
+    - name: foxglove        # 名称: 唯一
+      setup: ${SETUP}               # default: source /opt/ros/$(rosdistro)/devel/setup.bash
+      command: "roslaunch foxglove_bridge foxglove_bridge.launch --wait"
+    - name: app_bringup               # 名称: 唯一
+      user: ${USER}                   # 以指定用户启动，默认root
+      setup: ${SETUP}               # default: source /opt/ros/$(rosdistro)/devel/setup.bash
+      command: "roslaunch app_bringup app_bringup.launch --wait"
+    - name: app_chassis_control               # 名称: 唯一
+      setup: ${SETUP}               # default: source /opt/ros/$(rosdistro)/devel/setup.bash
+      command: "roslaunch app_chassis_control app_chassis_control_with_imu.launch --wait"
+    - name: integrated_navigation               # 名称: 唯一
+      setup: ${SETUP}               # default: source /opt/ros/$(rosdistro)/devel/setup.bash
+      command: "roslaunch weite_rtk novatel_gps_driver.launch --wait"
+    - name: sensors_driver               # 名称: 唯一
+      setup: ${SETUP}               # default: source /opt/ros/$(rosdistro)/devel/setup.bash
+      command: "sleep 15 && roslaunch j110_bringup sensor_drivers.launch --wait"
+    - name: j110_description
+      setup: ${SETUP}
+      command: "roslaunch j110_description j110_description.launch --wait"
+    # - name: j110_lidar_localization
+    #   setup: ${SETUP}
+    #   command: "roslaunch hdl_localization online_mid360_hdl_localization.launch --wait"
+    # - name: j110_fusion_localization
+    #   setup: ${SETUP}
+    #   command: "roslaunch navit_localization online_localization_server.launch --wait"
+    - name: j110_ms_mapping
+      setup: ${SETUP}
+      command: "roslaunch ms_lams online.launch --wait"
+    - name: navigation
+      user: ${USER}                   # 以指定用户启动，默认root
+      setup: ${SETUP}
+      command: "roslaunch j110_bringup navigation.launch --wait"
+
+  executable_item_cmdline: [ ]
+#    - name: yjh_time_sync
+#      dir: ${SCRIPTS_DIR}
+#      cmdline: "./yjh_time_sync.sh ${INSTALL_DIR}"
+
+
+# env_define: 配置进程环境
+# startup: 程序启动后使用哪个环境配置
+# name: 进程环境名
+# expect_on: 环境要启动哪些节点  *代表所有
+# expect_off: 环境要关闭哪些节点  *代表所有 ^只在expect_off中定义，代表expect_on列表之外节点全部关闭
+env_define:
+  startup: all                  # 程序启动后使用哪个环境配置
+  robot_envs:
+    - name: default
+      expect_on: [ ]            # 环境要启动哪些节点  *代表所有
+      expect_off: [ ]           # 环境要关闭哪些节点  *代表所有
+
+    - name: idle
+      expect_on: [ ]            # 环境要启动哪些节点  *代表所有
+      expect_off: [ "*" ]       # 环境要关闭哪些节点  *代表所有
+
+    - name: all
+      expect_on: [ "*" ]        # 环境要启动哪些节点  *代表所有
+      expect_off: [ ]           # 环境要关闭哪些节点  *代表所有
+
+    - name: location
+      expect_on: [ "*" ]
+      expect_off: [ ]           # 环境要关闭哪些节点  ^只在expect_off中定义，代表expect_on列表之外节点全部关闭
+
+    - name: mapping
+      expect_on: [ "*" ]
+      expect_off: [ ]

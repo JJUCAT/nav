@@ -1,0 +1,54 @@
+<launch>
+    <env name="ROSCONSOLE_CONFIG_FILE" value="$(find j110_bringup)/config/log/sim_log.config" />
+    <!-- sim time -->
+    <param name="/use_sim_time" value="true"/>
+    <!-- j110 urdf -->
+    <include file="$(find j110_description)/launch/j110_description.launch"/>
+    <!-- stage -->
+    <node pkg="stage_ros" type="stageros" name="stageros" args="$(find j110_bringup)/stage/j110_google_park.world">
+        <!-- <remap from="base_scan" to="scan"/> -->
+    </node>
+
+    <!--fale localization-->
+    <node pkg="fake_localization" type="fake_localization" name="fakelocalization">
+        <param name="delta_x" value="11.265"/>
+        <param name="delta_y" value="-23.153"/>
+        <param name="delta_yaw" value="0.0"/>
+    </node>
+
+    <!-- routing -->
+    <include file="$(find j110_bringup)/launch/inner/routing.launch"/>
+
+    <!-- map server -->
+    <include file="$(find j110_bringup)/launch/inner/navit_map_server.launch"/>
+
+    <!-- planner -->
+    <include file="$(find j110_bringup)/launch/inner/planner.launch"/>
+
+    <!-- controller -->
+    <include file="$(find j110_bringup)/launch/inner/controller.launch"/>
+
+    <!-- velocity smoother -->
+    <include file="$(find j110_bringup)/launch/inner/velocity_smoother.launch"/>
+
+    <include file="$(find j110_bringup)/launch/inner/collision_monitor.launch"/>
+
+    <!-- recovery -->
+    <include file="$(find j110_bringup)/launch/inner/recovery.launch"/>
+
+    <node name = "navit_utils_geometry_recoorder_node" type = "navit_utils_geometry_recoorder_node" pkg = "navit_utils" output = "screen">
+        launch-prefix="gdb -ex start --args"
+        <param name="area_expand_dis" value="0.5"/>
+        <param name="smooth_step" value="0.1"/>
+        <param name="is_smooth" value="true"/>
+    </node>
+     <!-- rviz -->
+    <!-- <node name="rviz" pkg="rviz" type="rviz" args="-d $(find j110_bringup)/config/rviz/j110.rviz" /> -->
+
+    <!-- select task -->
+    <arg name="task" default="idle"/>
+    <group if="$(eval arg('task') == 'navigate_through_path_task')">
+        <node name="navigate_through_path_task" pkg="j110_bringup" type="navigate_through_path_sim.py"/>
+    </group>
+
+</launch>

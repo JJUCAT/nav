@@ -1,0 +1,9 @@
+<launch>
+    <arg name="tree_file" default="$(find j110_bringup)/behavior_trees/j110_task.xml"/>
+    <arg name="output" default="screen"/>
+    <node pkg="navit_bt_navigator" type="simple_navigator" name="simple_navigator" args="$(arg tree_file)" output="screen" />
+    <node pkg="navit_bt_navigator" type="navigate_through_path_action_server_node" name="navigate_through_path_action_server_node" output="$(arg output)" />
+    <node pkg="navit_bt_navigator" type="navigate_to_pose_node" name="navigate_to_pose_node" output="$(arg output)" />
+    <node pkg="navit_bt_navigator" type="navigate_compute_coverage_path_action_server_node" name="navigate_compute_coverage_path_action_server_node" output="$(arg output)" />
+    launch-prefix="gdb -ex start --args"
+</launch>

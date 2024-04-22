@@ -1,0 +1,25 @@
+<launch>
+
+    # 安装robot_upstart
+    sudo apt install ros-noetic-robot-upstart
+
+    # 将本节点添加到服务
+    rosrun robot_upstart install j110_bringup/launch/j110_node_mng.launch --job j110_node_mng --symlink --wait --setup
+    /opt/yjh/j110/navit/setup.bash --user root
+
+    # 重新加载服务
+    sudo systemctl daemon-reload
+
+    # 启动本节点服务
+    sudo systemctl start j110_node_mng
+
+    # 开机启动本服务
+    sudo systemctl enable j110_node_mng
+
+    <node pkg="app_node_mng" type="app_node_mng_node" name="app_node_mng_node"
+          output="screen">
+        <param name="config_file" type="str" value="$(find j110_bringup)/config/app_node_mng/j110_node_mng.yaml"/>
+        <param name="rosconsole_config_file" type="str"
+               value="$(find j110_bringup)/config/app_node_mng/rosconsole.config"/>
+    </node>
+</launch>

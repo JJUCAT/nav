@@ -1,0 +1,26 @@
+twist:
+    # mandatory parameters
+    speed_lim_vx: 1.0
+    speed_lim_vy: 0.0
+    speed_lim_w: 1.26
+
+    accel_lim_vx: 0.5
+    accel_lim_vy: 0.0
+    accel_lim_w: 0.5
+
+    # optional parameters
+    frequency: 10.0
+    decel_factor: 3.0
+    decel_factor_safety: 1.0
+
+    # robot velocity feedback type:
+    #  0 - none
+    #  1 - odometry
+    #  2 - end robot commands
+    robot_feedback: 0
+
+    topic_names:
+        odometry: odom
+        robot_cmd_vel: none
+        raw_cmd_vel: collision_monitor_cmd_vel
+        smooth_cmd_vel: cmd_vel

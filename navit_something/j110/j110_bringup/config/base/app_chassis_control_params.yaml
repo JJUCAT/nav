@@ -1,0 +1,25 @@
+#app_chassis_control params
+device_url: serial:/dev/ttyS9:460800 #串口通信
+#device_url: udpm:239.255.76.67:7667 #网络UDP多播通信
+
+wheel_rotate_limit: 65    # 方向轮限位 单位：°
+wheel_radius: 0.185       # 轮径
+wheel_distance: 0.995     # 轮距 J110三轮车模型为前后轮轮距
+reduction_ratio: 35.0     # 减速比
+
+# odom yaw from imu
+imu_topic_name: /imu_data
+imu_odom_tf_rpy: [ 1, 0.0, 0.5 ] # 实际值会乘以π，[1,0,0.5] --> [ 3.1415926, 0.0, 1.5708 ]
+
+plugins:
+  - { name: "agv", type: "app_chassis_control::DeviceAgv" }
+  - { name: "alarm", type: "app_chassis_control::DeviceAlarm" }
+  - { name: "battery", type: "app_chassis_control::DeviceBattery" }
+  - { name: "chassis", type: "app_chassis_control::DeviceChassis" }
+  - { name: "clean", type: "app_chassis_control::DeviceClean" }
+  - { name: "debug", type: "app_chassis_control::DeviceDebug" }
+  - { name: "io", type: "app_chassis_control::DeviceIO" }
+  - { name: "more", type: "app_chassis_control::DeviceMore" }
+  - { name: "odom", type: "app_chassis_control::DeviceOdom" }
+  - { name: "test", type: "app_chassis_control::DeviceTest" }
+  - { name: "logic_odom", type: "app_chassis_control::LogicDeviceOdom" }

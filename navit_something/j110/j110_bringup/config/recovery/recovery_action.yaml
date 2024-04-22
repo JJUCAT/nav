@@ -1,0 +1,17 @@
+nav_recovery:
+  - {name: backup,  type: recovery_backup/RecoveryBackUp}
+  - {name: excape,  type: recovery_excape/RecoveryExcape}
+
+backup:
+  Kp: 1.0
+  abs_max_speed: 0.2
+  control_frequency: 10
+  cmd_vel_topic: /cmd_vel
+
+excape:
+  cmd_vel_topic: /cmd_vel
+  loop: 5
+  wheel_base: 1.2
+  head: 1.7
+  base_free: 200
+  head_free: 130

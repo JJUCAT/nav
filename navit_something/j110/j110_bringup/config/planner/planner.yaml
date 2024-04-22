@@ -1,0 +1,144 @@
+nav_planner:
+  #- {name: topoint, type: navfn/NavfnROS}
+  #- {name: smac2d,  type: nav2_smac_planner/SmacPlanner2D}
+  - {name: SmallMapSmacHybrid,  type: nav2_smac_planner/SmacPlannerHybrid}
+  - {name: HugeMapSmacHybrid,  type: nav2_smac_planner/SmacPlannerHybrid}
+  #- {name: SmacLattice,  type: nav2_smac_planner/SmacPlannerLattice}
+coverage_planner:
+  # - name: boustrophedon
+  #   type: ipa_boustrophedon_explorator/BoustrophedonExploratorRos
+  # - name: fcpp
+  #   type: fcpp_ros/FcppAction
+
+  - name: ccpp
+    type: polygon_coverage_planning/PolygonCoveragePlanner
+
+  - name: contour_ccpp
+    type: slic3r/Slic3rCoveragePlanner
+
+  - name: zigzag_ccpp
+    type: slic3r/Slic3rCoveragePlanner
+
+smooth_path_planner:
+  - name: smooth_planner
+    type: path_smoother/PathGslSpline
+
+boustrophedon:
+  boustrophedon_exploration_algorithm: 2
+  robot_radius: 0.2
+  coverage_radius: 0.2
+  map_correction_closing_neighborhood_size: 3
+  min_cell_area: 200.0                       #10.0
+  path_eps: 6.0
+  grid_obstacle_offset: 0                    #0.101 #0.251
+  max_deviation_from_track: -1
+  cell_visiting_order: 1
+
+smooth_planner:
+  step_points: 5                    # interval of picking up keypoints in rough path.
+  step_s: 0.02                      # [m], default = 0.02, interval of two points in smooth path.
+
+fcpp:
+  plan_type: 0                      # [0, 1, 2], default = 0
+  sweep_step: 1.4                   # [m], default = 0.8, the step length of the sweep line.
+
+### fcpp server ###
+expand_boundary: 0.0              # [m], default = 0.0, expand the boundary of the coverage area. positive value means expand, negative value means shrink.
+contract_boundary: 0.0            # [m], default = 0.1, contract the boundary of the coverage area. positive value means shrink, negative value means expand.
+simplification_dis: 0.15          # [m], default = 0.0, simplify the coverage area. always positive value.
+use_dubins: false                 # [bool] default = false, use dubins curve to connect the keypoints.
+max_angle_threshold: 150          # [degree], default = 150, the threshold of the angle between two adjacent keypoints.
+num_points_before_after: 15       # [int], default = 15, the number of keypoints before and after the current keypoint.
+min_turning_radius: 1.2
+##############################
+
+topoint:
+  tolerence: 0.1
+  downsample_costmap: true
+  downsampling_factor: 3
+  angle_quantization_bins: 68
+  allow_unknown: false
+  max_iterations: -1
+  smooth_path: false
+  minimum_turning_radius: 0.8
+  reverse_penalty: 2.0
+  change_penalty: 0.06
+  non_straight_penalty: 2.3
+  cost_penalty: 1.7
+  analytic_expansion_ratio: 2.0
+  max_planning_time: 5.0
+  timeout: 10.0
+  simplification_dis: 0.3           # [m], default = 0.0, simplify the coverage area. always positive value.
+
+SmallMapSmacHybrid:
+  angle_quantization_bins: 70
+  tolerance: 0.25
+  minimum_turning_radius: 0.578
+  reverse_penalty: 2.0
+  retrospective_penalty: 0.015
+  analytic_expansion_max_length: 3.0
+  max_planning_time: 5.0
+  change_penalty: 0
+  non_straight_penalty: 5.0
+  cost_penalty: 2.0
+  analytic_expansion_ratio: 3.5
+  max_iterations: 1000000
+  max_on_approach_iterations: 1000
+  lookup_table_size: 20.0
+
+HugeMapSmacHybrid:
+  downsample_costmap: true            #对地图进行降采样
+  downsampling_factor: 10             #降采样系数
+  angle_quantization_bins: 72         #用于搜索的角度数
+  tolerance: 0.25                     #精确位置容差，单位/m
+  minimum_turning_radius: 0.59         #最小转弯半径
+  retrospective_penalty: 0.015
+  analytic_expansion_max_length: 3.0  #搜索的最大长度，单位为/m
+  max_planning_time: 10.0             #最大规划时间，单位/s
+  change_penalty: 0                   #运动改变方向时的惩罚值，必须>=0
+  non_straight_penalty: 1.2           #非直线运动时的惩罚值
+  cost_penalty: 2.0                   #高代价区域的惩罚值，合理范围：1.3-3.5
+  analytic_expansion_ratio: 3.5       #尝试分析扩展的比率
+  max_iterations: 10000000            #最大迭代次数
+  max_on_approach_iterations: 1000    #尝试达到目标的最大迭代次数
+  lookup_table_size: 20.0             #距离杜宾斯窗口的大小
+
+
+SmacLattice:
+  tolerance: 0.25                     #精确位置容差，单位/m
+  change_penalty: 0.05                #运动改变方向时的惩罚值，必须>=0
+  non_straight_penalty: 1.05          #非直线运动时的惩罚值
+  cost_penalty: 2.0                   #对代价高的区域进行惩罚，合理值：1.3-3.5
+  analytic_expansion_ratio: 3.5       #尝试分析扩展的比率
+  max_planning_time: 5.0              #最大规划时间，单位/s
+  rotation_penalty: 5.0               #原地旋转惩罚
+  max_iterations: 1000000             #最大迭代次数
+  max_on_approach_iterations: 1000    #尝试达到目标的最大迭代次数
+  retrospective_penalty: 0.015
+  analytic_expansion_max_length: 3.0  #搜索的最大长度，单位为/m
+  lookup_table_size: 20.0             #距离杜宾斯窗口的大小
+
+ccpp:
+  # polygon coverage params
+  decomposition_type: 1 # [0: Boustrophedon, 1: Trapezoidal]
+  wall_distance: 1.8
+  lateral_footprint: 1.2 # Only for line sensor model
+  lateral_overlap: 0.1 # [0, 1), sweep_distance = (1.0 - lateral_overlap) * lateral_footprint;
+  turn_type: 0 #// 0: Boustrophedon, 1: Snake, 2: Spiral(6), 3: Spiral(4)
+  route_type: 0 #// 0: DubinsCurves, 1: DubinsCurvesCC, 2: ReedsSheppCurves, 3: ReedsSheppCurvesHC
+  turn_radius: 0.5
+  robot_width: 1.50
+  use_start_end_point: false
+  shrink_factor: 1.8
+
+contour_ccpp:
+  is_contour: true # 选择回字形覆盖
+  outer_offset: 0.8 # 外轮廓往内收缩0.8米
+  distance: 1.0 # 间隔0.5米
+  angle: 0.0 # 路径角度，默认0度
+
+zigzag_ccpp:
+  is_contour: false # 选择弓字形全覆盖
+  outer_offset: 0.8 # 外轮廓往内收缩0.8米
+  distance: 0.5 # 间隔0.5米
+  angle: 0.0 # 路径角度，默认0度

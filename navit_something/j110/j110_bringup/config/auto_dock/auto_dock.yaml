@@ -1,0 +1,30 @@
+auto_dock_costmap:
+  global_frame: odom
+  robot_base_frame: base_link
+  update_frequency: 5.0
+  publish_frequency: 2.5
+  footprint: [[1.7, 0.85], [1.169, 0.85], [1.169, 0.567], [-0.54, 0.567], [-0.54, -0.567], [1.169, -0.567], [1.169, -0.85], [1.7, -0.85]]
+
+  width: 10
+  height: 10
+  resolution: 0.1
+
+  transform_tolerance: 0.5
+  rolling_window: true
+  always_send_full_costmap: false
+
+  plugins:
+    - { name: obstacle_layer,          type: "navit_costmap::ObstacleLayer"}
+  obstacle_layer:
+    observation_sources: laser_scan
+    laser_scan:
+        topic: /scan
+        sensor_frame: base_laser_link
+        data_type: LaserScan
+        marking: true
+        clearing: true
+        obstacle_range: 8
+
+  inflation_layer:
+    inflation_radius: 0.1
+    cost_scaling_factor: 1.5

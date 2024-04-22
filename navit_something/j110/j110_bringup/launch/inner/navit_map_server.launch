@@ -1,0 +1,8 @@
+<launch>
+    <!--  **************** Maps ****************  -->
+    <node name="navit_map_server_node" pkg="navit_map_server" type="navit_map_server_node"
+          args="$(find navit_map_server)/maps/default.json"
+          output="screen">
+          <param name="map_dir" value="/tmp"/>
+    </node>
+</launch>

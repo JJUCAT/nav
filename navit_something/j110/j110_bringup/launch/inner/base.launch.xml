@@ -1,0 +1,21 @@
+<launch>
+
+    <node pkg="nodelet" type="nodelet" name="nodelet_base" args="manager" output="screen"/>
+
+    <node pkg="nodelet" type="nodelet" name="app_chassis_control_node"
+          args="load nodelet_app_chassis_control/WinnieBase nodelet_base"
+          output="screen">
+        <rosparam file="$(find j110_bringup)/config/base/app_chassis_control_params.yaml" command="load"/>
+    </node>
+
+    <node pkg="nodelet" type="nodelet" name="bdf07_imu_node"
+          args="load nodelet_bdf07_imu/Bdf07Imu nodelet_base"
+          required="true" output="screen">
+        <param name="port" value="/dev/ttyS5"/>
+        <param name="baudrate" value="115200"/>
+        <param name="frame_id" value="imu_link"/>
+        <param name="topic" value="/imu_data"/>
+        <param name="yaw_change_threshold_param" value="0.1"/>
+    </node>
+
+</launch>

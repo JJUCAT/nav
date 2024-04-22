@@ -1,0 +1,206 @@
+<launch>
+<!--TODO(薛)：整理好配置文件，放到j110_bringup/config
+暂时这样include，后续应该单独写好launch文件，加入到自启动中 -->
+
+<arg name="manager_name" default="sensors_nodelet" />
+<node pkg="nodelet" type="nodelet" name="$(arg manager_name)" args="manager" output="screen"/>
+
+<!-- livox lidars -->
+	<arg name="lvx_file_path" default="livox_test.lvx"/>
+	<arg name="bd_list" default="100000000000000"/>
+	<arg name="xfer_format" default="0"/>
+	<arg name="multi_topic" default="1"/>
+	<arg name="data_src" default="0"/>
+	<arg name="publish_freq" default="10.0"/>
+	<arg name="output_type" default="0"/>
+	<arg name="rviz_enable" default="false"/>
+	<arg name="rosbag_enable" default="false"/>
+	<arg name="cmdline_arg" default="$(arg bd_list)"/>
+	<arg name="msg_frame_id" default="livox_frame"/>
+	<arg name="lidar_bag" default="true"/>
+	<arg name="imu_bag" default="true"/>
+
+    <param name="xfer_format" value="$(arg xfer_format)"/>
+    <param name="multi_topic" value="$(arg multi_topic)"/>
+    <param name="data_src" value="$(arg data_src)"/>
+    <param name="publish_freq" type="double" value="$(arg publish_freq)"/>
+    <param name="output_data_type" value="$(arg output_type)"/>
+    <param name="cmdline_str" type="string" value="$(arg bd_list)"/>
+    <param name="cmdline_file_path" type="string" value="$(arg lvx_file_path)"/>
+    <param name="user_config_path" type="string" value="$(find livox_ros_driver2)/config/mixed_2_MID360_config.json"/>
+    <param name="frame_id" type="string" value="$(arg msg_frame_id)"/>
+    <param name="enable_lidar_bag" type="bool" value="$(arg lidar_bag)"/>
+    <param name="enable_imu_bag" type="bool" value="$(arg imu_bag)"/>
+
+    <node pkg="nodelet" type="nodelet" name="livox_lidar_nodelet"
+          args="load livox_driver/LivoxDriverNodelet $(arg manager_name)" >
+    </node>
+<!-- wit-motion 4g RTK, 注意端口可能要重新绑定到/dev/rtk -->
+<!-- <include file="$(find weite_rtk)/launch/novatel_gps_driver.launch" /> -->
+    <!-- <arg name="manager_name" default="nodelet_manager" /> -->
+    <!-- <node pkg="nodelet" type="nodelet" name="NovatelDriverNodelet" args="manager" output="screen"/>
+
+    <rosparam file="$(find weite_rtk)/config/sensor/sensor.yaml" command="load" /> -->
+    <!-- <node pkg="nodelet" type="nodelet" name="InsDriverNodelet"
+          args="load weite/InsDriverNodelet $(arg manager_name)" output="screen">
+    </node> -->
+
+<!-- pointcloud3d_to_laserscan -->
+<!-- <include file= "$(find j110_bringup)/launch/inner/pointcloud3d_to_scan_nodelet.launch"/> -->
+
+    <node pkg="nodelet" type="nodelet" name="pointcloud_to_laserscan_front" args="load pointcloud_to_laserscan/PointCloudToLaserScanNodelet $(arg manager_name)" >
+
+        <remap from="cloud_in" to="/livox/lidar_192_168_1_168"/>
+        <remap from="scan" to="/scan_front"/>
+        <rosparam>
+            target_frame: base_link # Leave disabled to output scan in pointcloud frame
+            transform_tolerance: 0.02
+            min_height:   0.0
+            max_height:   1.5
+
+            angle_min: -1.57 # -M_PI/2
+            angle_max: 3.14 # M_PI/2
+            angle_increment: 0.0049 # M_PI/360.0
+            scan_time: 0.03
+            range_min: 0.05
+            range_max: 100.0
+            use_inf: true
+            use_cliff_detect: false
+            cliff_detect_min_pts: 5
+            cliff_detect_block_length: 0.1
+            cliff_detect_x_min: 1.8
+            cliff_detect_x_max: 3.0
+            cliff_detect_y_min: -0.5
+            cliff_detect_y_max: 0.5
+            use_brush_range_filter: true
+            brush_x_min: 1.25
+            brush_x_max: 1.8
+            brush_y_min: -1.05
+            brush_y_max: 1.05
+            brush_z_min: -0.15
+            brush_z_max: 0.2
+            use_ground_filter: true
+            pub_ground_and_nonground: false
+            dynamic_height_range_start: 2.5
+            dynamic_height_gap_per_half_mile: 0.02
+            use_radiu_filter: true
+            radiu_threshold: 0.1
+            min_neighbors: 3
+
+            # Concurrency level, affects number of pointclouds queued for processing and number of threads used
+            # 0 : Detect number of cores
+            # 1 : Single threaded
+            # 2->inf : Parallelism level
+            concurrency_level: 1
+        </rosparam>
+		<rosparam command="load" file="$(find j110_bringup)/config/pointcloud3d_to_laserscan/params.yaml" />
+
+    </node>
+
+    <node pkg="nodelet" type="nodelet" name="pointcloud_to_laserscan_rear" args="load pointcloud_to_laserscan/PointCloudToLaserScanNodelet $(arg manager_name)" >
+        <remap from="cloud_in" to="/livox/lidar_192_168_1_164"/>
+        <remap from="scan" to="/scan_back"/>
+        <rosparam>
+            target_frame: base_link # Leave disabled to output scan in pointcloud frame
+            transform_tolerance: 0.02
+            min_height: 0.0
+            max_height: 1.5
+
+            angle_min: -3.14 # -M_PI/2
+            angle_max: 3.14 # M_PI/2
+            angle_increment: 0.0049 # M_PI/360.0
+            scan_time: 0.03
+            range_min: 0.65
+            range_max: 100.0
+            use_inf: true
+            use_cliff_detect: false
+            use_brush_range_filter: false
+            brush_x_min: 1.25
+            brush_x_max: 1.8
+            brush_y_min: -1.05
+            brush_y_max: 1.05
+            brush_z_min: -0.15
+            brush_z_max: 0.2
+            use_ground_filter: false
+            pub_ground_and_nonground: false
+            dynamic_height_range_start: 2.5
+            dynamic_height_gap_per_half_mile: 0.02
+            use_radiu_filter: true
+            radiu_threshold: 0.1
+            min_neighbors: 3
+
+            # Concurrency level, affects number of pointclouds queued for processing and number of threads used
+            # 0 : Detect number of cores
+            # 1 : Single threaded
+            # 2->inf : Parallelism level
+            concurrency_level: 1
+        </rosparam>
+		<rosparam command="load" file="$(find j110_bringup)/config/pointcloud3d_to_laserscan/params.yaml" />
+    </node>
+
+    <node pkg="nodelet" type="nodelet" name="pointcloud_to_laserscan_middle" args="load pointcloud_to_laserscan/PointCloudToLaserScanNodelet $(arg manager_name)    " >
+        <remap from="cloud_in" to="/rslidar_points"/>
+        <remap from="scan" to="/scan_middle"/>
+        <rosparam>
+            target_frame: base_link # Leave disabled to output scan in pointcloud frame
+            transform_tolerance: 0.02
+            min_height: 0.0
+            max_height: 1.5
+
+            angle_min: -3.14 # -M_PI/2
+            angle_max: 3.14 # M_PI/2
+            angle_increment: 0.0049 # M_PI/360.0
+            scan_time: 0.03
+            range_min: 0.65
+            range_max: 15.0
+            use_inf: true
+            use_cliff_detect: false
+            use_brush_range_filter: false
+            use_ground_filter: false
+            is_middle_lidar: false
+            dynamic_height_range_start: 2.5
+            dynamic_height_gap_per_half_mile: 0.02
+            use_radiu_filter: true
+            radiu_threshold: 0.1
+            min_neighbors: 3
+
+
+            # Concurrency level, affects number of pointclouds queued for processing and number of threads used
+            # 0 : Detect number of cores
+            # 1 : Single threaded
+            # 2->inf : Parallelism level
+            concurrency_level: 1
+        </rosparam>
+		<rosparam command="load" file="$(find j110_bringup)/config/pointcloud3d_to_laserscan/params.yaml" />
+    </node>
+
+    <node pkg="nodelet" type="nodelet" name="lidar_topic_simplify_node"
+          args="load nodelet_app_topic_simplify/AppTopicSimplify $(arg manager_name)"
+          output="screen">
+        <rosparam>
+            topic_bindings:
+            - {"/scan_back": "/scan_back_state"}
+            - {"/scan_front": "/scan_front_state"}
+            - {"/scan_middle": "/scan_top_state"}
+        </rosparam>
+    </node>
+
+<!-- bdf07_imu -->
+<!-- <include file= "$(find bdf07_imu)/launch/nodelet_bdf07_imu.launch"/> -->
+
+    <!-- <node pkg="nodelet" type="nodelet" name="bdf07_imu_node"
+          args="load nodelet_bdf07_imu/Bdf07Imu $(arg manager_name)"
+          required="true" output="screen">
+        <param name="port" value="/dev/ttyS5"/>
+        <param name="baudrate" value="115200"/>
+        <param name="frame_id" value="imu_link"/>
+        <param name="topic" value="/imu_data"/>
+        <param name="yaw_change_threshold_param" value="0.1"/>
+    </node> -->
+    <!-- vanjee lidar-->
+    <include file = "$(find vanjee_lidar)/launch/vanjee.launch" />
+
+    <!-- bluesea2-->
+    <include file = "$(find bluesea2)/launch/Double-LDS-50C-C30E.launch" />
+</launch>
+

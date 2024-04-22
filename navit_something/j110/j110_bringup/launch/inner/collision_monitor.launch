@@ -1,0 +1,10 @@
+
+<launch>
+    <node pkg="navit_collision_monitor"
+          type="collision_monitor_node"
+          name="collision_monitor_node"
+          output="screen">
+        <rosparam file="$(find j110_bringup)/config/collision_monitor/collision_monitor_params.yaml"
+                  command="load"/>
+    </node>
+</launch>

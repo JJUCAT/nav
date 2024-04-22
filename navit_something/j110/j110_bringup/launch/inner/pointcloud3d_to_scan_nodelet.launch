@@ -1,0 +1,77 @@
+<?xml version="1.0"?>
+<launch>
+    <!-- load livox_driver/LivoxDriverNodelet -->
+    <include file="$(find livox_ros_driver2)/launch_ROS1/livox_driver_nodelet.launch" />
+
+    <!-- run pointcloud_to_laserscan node -->
+    <node pkg="nodelet" type="nodelet" name="pointcloud_to_laserscan_front" args="load pointcloud_to_laserscan/PointCloudToLaserScanNodelet livox_driver_nodelet" >
+
+        <remap from="cloud_in" to="/livox/lidar_192_168_1_168"/>
+        <remap from="scan" to="/scan_front"/>
+        <rosparam>
+            target_frame: base_link # Leave disabled to output scan in pointcloud frame
+            transform_tolerance: 0.02
+            min_height:   0.0
+            max_height:   1.5
+
+            angle_min: -1.57 # -M_PI/2
+            angle_max: 3.14 # M_PI/2
+            angle_increment: 0.0049 # M_PI/360.0
+            scan_time: 0.03
+            range_min: 0.05
+            range_max: 10.0
+            use_inf: true
+            use_cliff_detect: true
+            cliff_detect_min_pts: 5
+            cliff_detect_block_length: 0.1
+            cliff_detect_x_min: 1.8
+            cliff_detect_x_max: 3.0
+            cliff_detect_y_min: -0.5
+            cliff_detect_y_max: 0.5
+            use_brush_range_filter_: true
+            brush_x_min: 1.4
+            brush_x_max: 1.8
+            brush_y_min: -0.9
+            brush_y_max: 0.9
+            brush_z_min: -0.15
+            brush_z_max: 0.2
+
+            # Concurrency level, affects number of pointclouds queued for processing and number of threads used
+            # 0 : Detect number of cores
+            # 1 : Single threaded
+            # 2->inf : Parallelism level
+            concurrency_level: 1
+        </rosparam>
+		<rosparam command="load" file="$(find j110_bringup)/config/pointcloud3d_to_laserscan/params.yaml" />
+
+    </node>
+
+    <node pkg="nodelet" type="nodelet" name="pointcloud_to_laserscan_rear" args="load pointcloud_to_laserscan/PointCloudToLaserScanNodelet livox_driver_nodelet" >
+        <remap from="cloud_in" to="/livox/lidar_192_168_1_164"/>
+        <remap from="scan" to="/scan_back"/>
+        <rosparam>
+            target_frame: base_link # Leave disabled to output scan in pointcloud frame
+            transform_tolerance: 0.02
+            min_height: 0.0
+            max_height: 1.5
+
+            angle_min: -3.14 # -M_PI/2
+            angle_max: 1.57 # M_PI/2
+            angle_increment: 0.0049 # M_PI/360.0
+            scan_time: 0.03
+            range_min: 0.65
+            range_max: 10.0
+            use_inf: true
+            use_cliff_detect: false
+            use_brush_range_filter_: false
+        
+
+            # Concurrency level, affects number of pointclouds queued for processing and number of threads used
+            # 0 : Detect number of cores
+            # 1 : Single threaded
+            # 2->inf : Parallelism level
+            concurrency_level: 1
+        </rosparam>
+		<rosparam command="load" file="$(find j110_bringup)/config/pointcloud3d_to_laserscan/params.yaml" />
+    </node>
+</launch>

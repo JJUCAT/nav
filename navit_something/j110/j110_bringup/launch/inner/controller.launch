@@ -1,0 +1,15 @@
+<launch>
+    <node name="navit_controller_node" pkg="navit_controller" type="navit_controller_node" output="screen">
+    launch-prefix="gdb -ex start --args"
+        <rosparam file="$(find j110_bringup)/config/controller/controller.yaml" command="load"/>
+        <rosparam file="$(find j110_bringup)/config/controller/costmap_params.yaml" command="load"/>
+        <remap from="cmd_vel" to="/controller_cmd_vel"/>
+    </node>
+
+    <!-- local planner -->
+    <param name="/navit_controller_node/local_planner/LOOKUP_TABLE_FILE_NAME"
+           value="$(find navit_localplanner)/lookup_table/x1_6x6_05_v01_p19_42k.csv" />
+           <!-- value="$(find j110_bringup)/config/slp_table/x1_6x6_05_p19_43k.csv" />     -->
+    <rosparam file="$(find j110_bringup)/config/controller/local_planner.yaml" command="load"
+              ns="/navit_controller_node/local_planner"/>
+</launch>

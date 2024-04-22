@@ -1,0 +1,41 @@
+<launch>
+    <env name="ROSCONSOLE_CONFIG_FILE" value="$(find j110_bringup)/config/log/log.config" />
+
+    <!-- <include file="$(find j110_description)/launch/j110_description.launch"/> -->
+
+    <!-- routing -->
+    <include file="$(find j110_bringup)/launch/inner/routing.launch"/>
+
+    <!--include file= "$(find j110_bringup)/launch/inner/pointcloud3d_to_scan_nodelet.launch"/-->
+
+    <include file="$(find j110_bringup)/launch/inner/navit_map_server.launch"/>
+
+    <!-- planner -->
+    <include file="$(find j110_bringup)/launch/inner/planner.launch"/>
+
+    <!-- controller -->
+    <include file="$(find j110_bringup)/launch/inner/controller.launch"/>
+
+    <!-- recovery -->
+    <include file="$(find j110_bringup)/launch/inner/recovery.launch"/>
+
+    <!-- auto_dock -->
+    <include file="$(find j110_bringup)/launch/inner/auto_dock.launch"/>
+    <!-- <include file="$(find j110_bringup)/launch/inner/auto_dock_calibrate.launch"/> -->
+
+    <!-- behavior trees -->
+    <include file="$(find j110_bringup)/launch/inner/bt.launch"/>
+
+    <!-- velocity smoother -->
+    <include file="$(find j110_bringup)/launch/inner/velocity_smoother.launch"/>
+
+    <!-- collision monitor -->
+    <include file="$(find j110_bringup)/launch/inner/collision_monitor.launch"/>
+
+    <!-- record node -->
+    <node name = "navit_utils_geometry_recoorder_node" type = "navit_utils_geometry_recoorder_node" pkg = "navit_utils" output = "screen">
+        <param name="area_expand_dis" value="1.0"/>
+        <param name="smooth_step" value="0.1"/>
+        <param name="is_smooth" value="true"/>
+    </node>
+</launch>

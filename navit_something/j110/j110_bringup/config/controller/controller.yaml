@@ -1,0 +1,285 @@
+nav_controller:
+    - {name: tracking,  type: teb_local_planner/TebLocalPlannerROS}
+    - {name: avoidance, type: teb_local_planner/TebLocalPlannerROS}
+    - {name: ControllerPathFollow, type: control/ControllerPathFollow}
+
+
+# navit_ccpp_controller:
+#     - {name: tracking,  type: teb_local_planner/TebLocalPlannerROS}
+#     - {name: avoidance, type: teb_local_planner/TebLocalPlannerROS}
+#     - {name: ControllerPathFollow, type: control/ControllerPathFollow}
+
+control_frequency: 10
+control_wait_timeout: 0.5
+blocked_timeout: 10
+enable_local_planning: false
+local_plan_frequency: 5
+global_frame: odom
+robot_frame: base_link
+extract_length: 10.0           #[m]
+min_step_distance: 0.03      #[m]最小步长
+forward_distance: 1.5        #[m]最远查找距离
+dt: 2.0                      #[s]检查框个数 2.0/0.1 = 20.0
+padding_footprint: 0.1       #[%]膨胀
+
+# @0: 沿线全覆盖或者手绘的沿线轨迹
+# @1: 沿墙用于录制的地图边界
+# @2: 无避障沿线（停障），用于一些窄道、小径等场景
+working_scene: 0
+
+# should be tuned for tracking only
+tracking:
+  odom_topic: odom
+
+  # Trajectory
+
+  teb_autosize: True  #优化期间允许改变轨迹的时域长度
+  dt_ref: 0.5 #局部路径规划的解析度
+  dt_hysteresis: 0.05 #允许改变的时域解析度的浮动范围，一般为10%
+  max_samples: 500
+  global_plan_overwrite_orientation: True  #覆盖全局路径中局部路径点的朝向
+  allow_init_with_backwards_motion: True  #允许在开始时想后退来执行轨迹
+  max_global_plan_lookahead_dist: 1.0  #考虑优化的全局路径子集的最大长度
+  global_plan_viapoint_sep: 0.05  #从全局路径中提取的每两个连续通过点之间的最小间隔[如果为负：禁用]
+  global_plan_prune_distance: 0.6 #机器人在全局规划中用于剪枝的 via_points 之间的距离
+  exact_arc_length: True  #如果为真，规划器在速度、加速度和转弯率计算中使用精确的弧长[->增加的CPU时间]，否则使用欧几里德近似。
+  feasibility_check_no_poses: 2 #检测位姿可到达的时间间隔
+  publish_feedback: True #发布包含完整轨迹和活动障碍物列表的规划器反馈
+  control_look_ahead_poses: 2
+
+  # Robot
+  max_vel_x: 0.4 #最大x前向速度
+  max_vel_x_backwards: 0.08 #最大x后退速度
+  max_vel_y: 0.0 #最大y前向速度
+  max_vel_theta: 1.5 #最大转向角速度,一般为0.3
+  acc_lim_x: 0.4 #最大x加速度
+  acc_lim_theta: 0.4 #最大角加速度
+
+  # carlike robot
+  # The turning radius can be calculated by dividing the wheelbase of the vehicle (the distance between the front and rear axles) by the tangent of the angle of the turn. The formula is: R = (WB) / tan (Θ), where R is the turning radius, WB is the wheelbase, and Θ is the angle of the turn
+  min_turning_radius: 0.59 #最小转弯半径
+  wheelbase: 1.0 #驱动轴和转向轴之间的距离
+  cmd_angle_instead_rotvel: true #将收到的角速度消息转换为操作上的角度变化
+
+  footprint_model:
+    type: "two_circles"
+    front_offset: 0.0
+    front_radius: 0.85
+    rear_offset: 1.0
+    rear_radius: 0.65
+  # GoalTolerance
+
+  xy_goal_tolerance: 0.3 #目标xy偏移容忍度
+  yaw_goal_tolerance: 0.2 #目标角度偏移容忍度
+  free_goal_vel: False #允许机器人以最大速度驶向目的地
+  complete_global_plan: True
+
+  # Obstacles
+
+  min_obstacle_dist: 0.8              # this value must also include our robot radius, since footprint_model is set to "point".
+  inflation_dist: 0.6
+  include_costmap_obstacles: True
+  costmap_obstacles_behind_robot_dist: 1.5
+  obstacle_poses_affected: 15
+
+  dynamic_obstacle_inflation_dist: 0.6 #动态障碍物的膨胀范围
+  include_dynamic_obstacles: False #是否将动态障碍物预测为速度模型
+
+  # Optimization
+  no_inner_iterations: 5
+  no_outer_iterations: 4
+  optimization_activate: True
+  optimization_verbose: False
+  penalty_epsilon: 0.06
+  obstacle_cost_exponent: 4
+  weight_max_vel_x: 2 #最大x速度权重
+  weight_max_vel_theta: 1 #最大角速度权重
+  weight_acc_lim_x: 1 #最大x加速度权重
+  weight_acc_lim_theta: 2 #最大角速度权重
+  weight_kinematics_nh: 1000
+  weight_kinematics_forward_drive: 10 #优化过程中，迫使机器人只选择前进方向，差速轮适用
+  weight_kinematics_turning_radius: 1000 #优化过程中，车型机器人的最小转弯半径的权重
+  weight_optimaltime: 10 # must be > 0，优化过程中，基于轨迹的时间上的权重
+  weight_shortest_path: 0
+  weight_obstacle: 1 #优化过程中，和障碍物最小距离的权重
+  weight_inflation: 0.2 #优化过程中， 膨胀区的权重
+  weight_dynamic_obstacle: 0 #优化过程中，和动态障碍物最小距离的权重
+  weight_dynamic_obstacle_inflation: 0 #优化过程中，和动态障碍物膨胀区的权重
+  weight_viapoint: 100 #优化过程中，和全局路径采样点距离的权重
+  weight_adapt_factor: 2
+
+# Homotopy Class Planner
+  enable_homotopy_class_planning: False
+
+#  Recovery
+  shrink_horizon_backup: True #当规划器检测到系统异常，允许缩小时域规划范围
+  shrink_horizon_min_duration: 10
+  oscillation_recovery: True #尝试检测和解决振荡
+  oscillation_v_eps: 0.05
+  oscillation_omega_eps: 0.1
+  oscillation_recovery_min_duration: 5
+  oscillation_filter_duration: 6
+  divergence_detection_enable: false
+
+  # should be tuned for avoidance only
+avoidance:
+  odom_topic: odom
+
+  # Trajectory
+
+  teb_autosize: True
+  dt_ref: 0.2
+  dt_hysteresis: 0.1
+  max_samples: 500
+  global_plan_overwrite_orientation: True
+  allow_init_with_backwards_motion: False
+  max_global_plan_lookahead_dist: 3.0
+  global_plan_viapoint_sep: 0.1
+  global_plan_prune_distance: 0.3
+  exact_arc_length: False
+  force_reinit_new_goal_dist: 1.0
+  force_reinit_new_goal_angular: 0.78
+  feasibility_check_no_poses: 2
+  publish_feedback: False
+
+  # Robot
+  max_vel_x: 0.2
+  max_vel_x_backwards: 0.2
+  max_vel_y: 0.0
+  max_vel_theta: 0.3
+  acc_lim_x: 0.5
+  acc_lim_theta: 0.5
+  min_turning_radius: 0.578 # diff-drive robot (can turn on place!)
+
+  footprint_model:
+    type: "two_circles"
+    front_offset: 0.0
+    front_radius: 0.85
+    rear_offset: 1.0
+    rear_radius: 0.65
+
+  # GoalTolerance
+
+  xy_goal_tolerance: 0.4
+  yaw_goal_tolerance: 3.14
+  free_goal_vel: True
+  complete_global_plan: True
+
+  # Obstacles
+
+  min_obstacle_dist: 0.8                 # This value must also include our robot radius, since footprint_model is set to "point".
+  inflation_dist: 0.8
+  include_costmap_obstacles: True
+  costmap_obstacles_behind_robot_dist: 1.5
+  obstacle_poses_affected: 15
+
+  dynamic_obstacle_inflation_dist: 0.6
+  include_dynamic_obstacles: False
+
+  # Optimization
+  no_inner_iterations: 5
+  no_outer_iterations: 4
+  optimization_activate: True
+  optimization_verbose: False
+  penalty_epsilon: 0.06
+  weight_max_vel_x: 2
+  weight_max_vel_theta: 1
+  weight_acc_lim_x: 1
+  weight_acc_lim_theta: 1
+  weight_kinematics_nh: 1000
+  weight_kinematics_forward_drive: 1000
+  weight_kinematics_turning_radius: 1
+  weight_optimaltime: 10 # must be > 0
+  weight_shortest_path: 0
+  weight_obstacle: 640
+  weight_inflation: 0.2
+  weight_dynamic_obstacle: 0
+  weight_dynamic_obstacle_inflation: 0
+  weight_viapoint: 10
+  weight_adapt_factor: 2
+  obstacle_cost_exponent: 3.0
+
+  # Homotopy Class Planner
+  enable_homotopy_class_planning: False
+
+#  Recovery
+  shrink_horizon_backup: True
+  shrink_horizon_min_duration: 10
+  oscillation_recovery: True
+  oscillation_v_eps: 0.05
+  oscillation_omega_eps: 0.01
+  oscillation_recovery_min_duration: 10
+  oscillation_filter_duration: 10
+
+ControllerPathFollow:
+  robot:
+    global_frame: odom
+    robot_frame: base_link
+    type: simple_car
+    diff:
+      max_vel_x: 1.0 # 1.5
+      min_vel_x: 0.15
+      max_vel_x_backwards: 0.2
+      max_vel_theta: 0.3
+      acc_lim_x: 0.0
+      dec_lim_x: 0.0
+      acc_lim_theta: 0.0
+
+    simple_car:
+      use_angular_vel: false
+      wheelbase: 0.6
+      max_vel_x: 0.8
+      max_vel_x_backwards: 0.2
+      max_steering_angle: 1.4
+      acc_lim_x: 0.0
+      dec_lim_x: 0.0
+      max_steering_rate: 0.5
+
+    dis_tolerance: 0.1
+    theta_tolerance: 0.2
+    robot_box:
+      front_left_x: 1.7
+      front_left_y: 0.7
+
+      front_right_x: 1.7
+      front_right_y: -0.7
+
+      rear_right_x: -0.2
+      rear_right_y: -0.7
+
+      rear_left_x: -0.2
+      rear_left_y:  0.7
+    use_avoidance: false
+    look_path_ahead: 600
+    min_look_ahead_index: 30
+    look_ahea_dis_ratio: 180
+    extend_path_dis: 0.1
+    padding_footprint: 0.1
+  controller:
+    use_backup: false
+  astar_search:
+    path_frame: "map"
+    angle_size: 20
+    minimum_turning_radius: 0.6
+    obstacle_threshold: 15
+    goal_radius: 0.3
+    goal_angle: 180
+    use_back: false
+    robot_length: 2.2  #沿x轴方向
+    robot_width: 2.0
+    base2back: 0.5
+    curve_weight: 50
+    reverse_weight: 50
+    use_wavefront_heuristic: false
+    boundingbox_size: 3
+  avoidance:
+    max_allowed_time_to_collision: 2
+    collision_check_box_sizes: 7   # 定义前视 check box 参数,该参数 > 5
+    box_interval: 70               # 0.02 * box_interval (m)
+    use_clear_costmap: true        # 控制器内部是否清除局部障碍物点云（如果不自动清除可以考虑在其他的node中清除）
+    clear_costmap_wait_time: 5.0   # [second], 用于清除障碍物点云
+    use_recovery: false            # 使用内部的脱困功能
+    use_eliminate_shocks: false    # 该功能主要用于消除局部地图更新/误差带来的抖动
+    dt: 2.0                        # 检查的碰撞点个数为 2.0/0.1(控制频率) = 20个
+    forward_distance: 1.5
+    min_step_distance: 0.03        # 如果20个点那检测的最远距离为 0.05 * 20 = 1.0m

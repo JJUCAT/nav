@@ -1,0 +1,14 @@
+<launch>
+  <!-- <node pkg="nodelet"
+        type="nodelet"
+        name="navit_vel_smoother"
+        args="standalone navit_velocity_smoother/AckermannVelocitySmoother"
+        output="screen">
+    <rosparam command="load" file="$(find j110_bringup)/config/velocity_smoother/twist_nodelet_j110.yaml"/>
+  </node> -->
+  <node pkg="nodelet" type="nodelet" name="vel_smoother" args="manager" output="screen"/>
+                                     
+  <node pkg="nodelet" type="nodelet" name="TwistVelocitySmoother" args="load navit_velocity_smoother/TwistVelocitySmoother vel_smoother" output="screen" >
+    <rosparam command="load" file="$(find j110_bringup)/config/velocity_smoother/twist_nodelet_j110.yaml"/>
+  </node>
+</launch>

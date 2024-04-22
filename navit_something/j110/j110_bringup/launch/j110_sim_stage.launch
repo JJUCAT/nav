@@ -1,0 +1,37 @@
+<launch>
+    <!-- sim time -->
+    <param name="/use_sim_time" value="true"/>
+    <!-- j110 urdf -->
+    <include file="$(find j110_description)/launch/j110_display.launch"/>
+    <!-- stage -->
+    <node pkg="stage_ros" type="stageros" name="stageros" args="$(find j110_bringup)/stage/j110_google_park.world">
+        <remap from="base_scan" to="scan"/>
+    </node>
+
+    <!--fale localization-->
+    <node pkg="fake_localization" type="fake_localization" name="fakelocalization">
+        <param name="delta_x" value="11.265"/>
+        <param name="delta_y" value="-23.153"/>
+        <param name="delta_yaw" value="0.0"/>
+    </node>
+    
+    <!-- map server -->
+    <include file="$(find j110_bringup)/launch/inner/map_server.launch"/>
+    
+    <!-- planner -->
+    <include file="$(find j110_bringup)/launch/inner/planner.launch"/>
+    
+    <!-- controller -->
+    <include file="$(find j110_bringup)/launch/inner/controller.launch"/>
+    
+    <!-- auto_dock -->
+    <include file="$(find j110_bringup)/launch/inner/auto_dock.launch"/>
+    
+    <!-- behavior trees -->
+    <include file="$(find j110_bringup)/launch/inner/bt.launch"/>
+
+    <!-- <node name="navit_rviz_test" type="navit_rviz_panel_with_panel_test_node" pkg="navit_rviz_panel" output="screen"/> -->
+
+     <!-- rviz -->
+    <node name="rviz" pkg="rviz" type="rviz" args="-d $(find j110_bringup)/config/rviz/j110.rviz" />
+</launch>

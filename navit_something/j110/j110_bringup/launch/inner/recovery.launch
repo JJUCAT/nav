@@ -1,0 +1,6 @@
+<launch>
+    <node name="navit_recovery_node" pkg="navit_recovery" type="navit_recovery_node" output="screen">
+        <rosparam file="$(find j110_bringup)/config/recovery/costmap_params.yaml" command="load"/>
+        <rosparam file="$(find j110_bringup)/config/recovery/recovery_action.yaml" command="load" />
+    </node>
+</launch>

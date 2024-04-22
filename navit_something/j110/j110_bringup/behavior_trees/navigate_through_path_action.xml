@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root BTCPP_format="3"
+      main_tree_to_execute="Untitled">
+  <BehaviorTree ID="Untitled">
+    <FinalSucceedLoop timeout="-1">
+      <TaskPlanEditorAction task_plan="{task_plan}"
+                            recorder="{recorder}"
+                            jump="0"
+                            ref_plan="{ref_plan}"/>
+      <CtrlObstacleLayerAction map_name="/navit_planner_node/planner_costmap"
+                               enable="true"/>
+      <ClearMapAction map_name="controller_costmap"/>
+      <ForceSuccess>
+        <PlanSecurityCheckingAction start="0"
+                                    server_name="/plan_security_checking"
+                                    server_timeout="3.0"
+                                    plan="{ref_plan}"
+                                    check_distance="6.0"
+                                    collised="{ref_plan_collised}"
+                                    collised_indexes="{ref_plan_collised_indexes}"/>
+      </ForceSuccess>
+      <SelectStartOnPlanAction ref_plan="{ref_plan}"
+                               collised_indexes="{ref_plan_collised_indexes}"
+                               jump="2.0"
+                               start="{start2select}"/>
+      <FinalSucceedLoop timeout="-1">
+        <SelectGoalOnPlanAction ref_plan="{ref_plan}"
+                                distance="10"
+                                jump="1.8"
+                                timeout="120"
+                                goal="{goal}"
+                                goal_index="{goal_index}"
+                                start="{start2select}"/>
+        <SeqExecuteFinalRecovery>
+          <ComputePathToPose goal="{goal}"
+                             start="{robot}"
+                             path="{p2p_plan}"
+                             server_name="/compute_path"
+                             server_timeout="3.0"
+                             planner_id="SmallMapSmacHybrid"/>
+          <MergePlansAction plan0="{p2p_plan}"
+                            plan1="{ref_plan}"
+                            knot="{goal_index}"
+                            merged_plan="{follow_plan}"/>
+          <PlanSecurityCheckingAction start="0"
+                                      server_name="/plan_security_checking"
+                                      server_timeout="3.0"
+                                      plan="{follow_plan}"
+                                      check_distance="5.0"
+                                      collised="{collised}"
+                                      collised_indexes="{collised_indexes}"/>
+          <ExcapeAction timeout="60"
+                        free="130"
+                        v="0.2"
+                        w="0.0"
+                        r="0.0"/>
+        </SeqExecuteFinalRecovery>
+      </FinalSucceedLoop>
+      <CtrlObstacleLayerAction map_name="/navit_planner_node/planner_costmap"
+                               enable="false"/>
+      <ClearMapAction map_name="planner_costmap"/>
+      <CloseObstacleAvoidance use_avoidance="true"
+                              server_timeout="1.0"
+                              service_name="/toggle_avoidance"/>
+      <PipelineSequence>
+        <TaskPlanRecorderAction task_plan="{task_plan}"
+                                near="5.0"
+                                search="100.0"
+                                capture="0.8"
+                                attach="1.5"
+                                recorder="{recorder}"
+                                on_taskplan="{on_taskplan}"/>
+        <TaskPlanReporterAction task_plan="{task_plan}"
+                                recorder="{recorder}"
+                                completion_percentage="{completion_percentage}"
+                                clean_percentage="{clean_percentage}"/>
+        <FollowPath controller_id="ControllerPathFollow"
+                    server_name="/follow_path"
+                    server_timeout="5.0"
+                    path="{follow_plan}"/>
+      </PipelineSequence>
+    </FinalSucceedLoop>
+  </BehaviorTree>
+
+  <!-- Description of Node Models (used by Groot) -->
+  <TreeNodesModel>
+    <Action ID="ClearMapAction">
+      <input_port name="map_name">map_name</input_port>
+    </Action>
+    <Action ID="CloseObstacleAvoidance">
+      <input_port name="use_avoidance"
+                  default="false">...</input_port>
+      <input_port name="server_timeout"
+                  default="1.0">...</input_port>
+      <input_port name="service_name"
+                  default="/toggle_avoidance">...</input_port>
+    </Action>
+    <Action ID="ComputePathToPose">
+      <input_port name="goal">Destination to plan to</input_port>
+      <input_port name="start">Start pose of the path if overriding current robot pose</input_port>
+      <output_port name="path">Path created by ComputePathToPose node</output_port>
+      <input_port name="server_name"
+                  default="/compute_path">remapped action server name.</input_port>
+      <input_port name="server_timeout">...</input_port>
+      <input_port name="planner_id"/>
+    </Action>
+    <Action ID="CtrlObstacleLayerAction">
+      <input_port name="map_name">map_name</input_port>
+      <input_port name="enable">enable</input_port>
+    </Action>
+    <Action ID="ExcapeAction">
+      <input_port name="timeout">timeout</input_port>
+      <input_port name="free">free</input_port>
+      <input_port name="v">v</input_port>
+      <input_port name="w">w</input_port>
+      <input_port name="r">r</input_port>
+    </Action>
+    <Control ID="FinalSucceedLoop">
+      <input_port name="timeout">node control time limit</input_port>
+    </Control>
+    <Action ID="FollowPath">
+      <input_port name="controller_id"/>
+      <input_port name="server_name"
+                  default="/follow_path">remapped action server name</input_port>
+      <input_port name="server_timeout">...</input_port>
+      <input_port name="path">Path to follow</input_port>
+    </Action>
+    <Action ID="MergePlansAction">
+      <input_port name="plan0">plan0</input_port>
+      <input_port name="plan1">plan1</input_port>
+      <input_port name="knot">knot</input_port>
+      <output_port name="merged_plan">merged_plan</output_port>
+    </Action>
+    <Control ID="PipelineSequence"/>
+    <Action ID="PlanSecurityCheckingAction">
+      <input_port name="start">start</input_port>
+      <input_port name="server_name">server name</input_port>
+      <input_port name="server_timeout">timeout</input_port>
+      <input_port name="plan">plan</input_port>
+      <input_port name="check_distance">check_distance</input_port>
+      <output_port name="collised">collised</output_port>
+      <output_port name="collised_indexes">collised_indexes</output_port>
+    </Action>
+    <Action ID="SelectGoalOnPlanAction">
+      <input_port name="ref_plan">ref_plan</input_port>
+      <input_port name="distance">distance</input_port>
+      <input_port name="jump">jump</input_port>
+      <input_port name="timeout">timeout</input_port>
+      <output_port name="goal">goal</output_port>
+      <output_port name="goal_index">goal_index</output_port>
+      <inout_port name="start">start</inout_port>
+    </Action>
+    <Action ID="SelectStartOnPlanAction">
+      <input_port name="ref_plan">ref_plan</input_port>
+      <input_port name="collised_indexes">collised_indexes</input_port>
+      <input_port name="jump">jump</input_port>
+      <inout_port name="start">start</inout_port>
+    </Action>
+    <Control ID="SeqExecuteFinalRecovery"/>
+    <Action ID="TaskPlanEditorAction">
+      <input_port name="task_plan">task_plan</input_port>
+      <input_port name="recorder">recorder</input_port>
+      <input_port name="jump">jump</input_port>
+      <output_port name="ref_plan">ref_plan</output_port>
+    </Action>
+    <Action ID="TaskPlanRecorderAction">
+      <input_port name="task_plan">task_plan</input_port>
+      <input_port name="near">near</input_port>
+      <input_port name="search">search</input_port>
+      <input_port name="capture">capture</input_port>
+      <input_port name="attach">attach</input_port>
+      <inout_port name="recorder">recorder</inout_port>
+      <inout_port name="on_taskplan">on_taskplan</inout_port>
+    </Action>
+    <Action ID="TaskPlanReporterAction">
+      <input_port name="task_plan">task_plan</input_port>
+      <input_port name="recorder">recorder</input_port>
+      <output_port name="completion_percentage">completion_percentage</output_port>
+      <output_port name="clean_percentage">clean_percentage</output_port>
+    </Action>
+  </TreeNodesModel>
+
+</root>

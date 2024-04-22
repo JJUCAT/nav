@@ -1,0 +1,268 @@
+<?xml version="1.0"?>
+<root main_tree_to_execute="BehaviorTree">
+    <!-- ////////// -->
+    <BehaviorTree ID="BehaviorTree">
+        <Sequence>
+            <Action ID="TaskReceiverAction" cmd="{cmd}" cmd_param_go_coverage="{cmd_param_go_coverage}" cmd_param_go_path="{cmd_param_go_path}" cmd_param_go_pose="{cmd_param_go_pose}" grpc_enable="true" grpc_port="50051"/>
+            <Switch3 case_1="go_pose" case_2="go_path" case_3="go_coverage" variable="{cmd}">
+                <Control ID="PipelineSequence" name="NavigateWithReplanning">
+                    <Decorator ID="RateController" hz="0.001">
+                        <Control ID="RecoveryNode" number_of_retries="5">
+                            <Action ID="ComputePathToPose" goal="{cmd_param_go_pose}" path="{path}" planner_id="topoint" server_name="/compute_path" server_timeout="1.0" start="false"/>
+                            <SubTree ID="RecoveryBehaviorsSequence" __shared_blackboard="true"/>
+                        </Control>
+                    </Decorator>
+                    <Control ID="RecoveryNode" number_of_retries="5">
+                        <Action ID="FollowPath" controller_id="test_2" path="{path}" server_name="/follow_path" server_timeout="1.0"/>
+                        <SubTree ID="RecoveryBehaviorsSequence" __shared_blackboard="true"/>
+                    </Control>
+                </Control>
+                <Sequence>
+                    <Action ID="GetRoutePath" distance_interval="0.2" end="{route_end}" route="{cmd_param_go_path}" route_path="{route_path}" server_timeout="1.0" service_name="/get_map_route_path" start="{route_start}"/>
+                    <Action ID="GetStationPose" server_timeout="1.0" service_name="/get_map_station_pose" station="{route_start}" station_pose="{route_start_pose}"/>
+                    <Control ID="PipelineSequence" name="NavigateWithReplanning">
+                        <Decorator ID="RateController" hz="1.0">
+                            <Control ID="RecoveryNode" number_of_retries="5">
+                                <Action ID="ComputePathToPose" goal="{route_start_pose}" path="{path}" planner_id="topoint" server_name="/compute_path" server_timeout="1.0" start="false"/>
+                                <SubTree ID="RecoveryBehaviorsSequence" __shared_blackboard="true"/>
+                            </Control>
+                        </Decorator>
+                        <Control ID="RecoveryNode" number_of_retries="5">
+                            <Action ID="FollowPath" controller_id="test_2" path="{path}" server_name="/follow_path" server_timeout="1.0"/>
+                            <SubTree ID="RecoveryBehaviorsSequence" __shared_blackboard="true"/>
+                        </Control>
+                    </Control>
+                    <Control ID="RecoveryNode" number_of_retries="5">
+                        <Action ID="FollowPath" controller_id="test_2" path="{path}" server_name="/follow_path" server_timeout="1.0"/>
+                        <SubTree ID="RecoveryBehaviorsSequence" __shared_blackboard="true"/>
+                    </Control>
+                </Sequence>
+                <KeepRunningUntilFailure>
+                    <Sequence>
+                        <Action ID="FetchItemAction" in_items="{cmd_param_go_coverage}" out_item="{area}"/>
+                        <Action ID="GetAreaEdge" area="{area}" edge_path="{edge_path}" server_timeout="1.0" service_name="/get_map_area_edge"/>
+                        <Action ID="CoveragePath" edge_path="{edge_path}" path="{coverage_path}" path_found="{path_found}" planner_id="boustrophedon" server_name="/coverage_path" server_timeout="1.0" start_pose="false"/>
+                        <Control ID="RecoveryNode" number_of_retries="5">
+                            <Action ID="FollowPath" controller_id="test_2" path="{coverage_path}" server_name="/follow_path" server_timeout="1.0"/>
+                            <SubTree ID="RecoveryBehaviorsSequence" __shared_blackboard="true"/>
+                        </Control>
+                    </Sequence>
+                </KeepRunningUntilFailure>
+                <AlwaysFailure/>
+            </Switch3>
+        </Sequence>
+    </BehaviorTree>
+    <!-- ////////// -->
+    <BehaviorTree ID="RecoveryBehaviors">
+        <ReactiveFallback>
+            <Action ID="ClearEntireCostmap" server_timeout="0.5" service_name="clear_planner_costmap"/>
+            <Action ID="Wait" server_name="/wait" server_timeout="1.0" wait_duration="5"/>
+            <Action ID="BackUp" backup_dist="0.25" backup_speed="0.05" server_name="/backup" server_timeout="1.0"/>
+        </ReactiveFallback>
+    </BehaviorTree>
+    <!-- ////////// -->
+    <BehaviorTree ID="RecoveryBehaviorsSequence">
+        <ReactiveSequence>
+            <Action ID="ClearEntireCostmap" server_timeout="0.5" service_name="clear_planner_costmap"/>
+            <Action ID="Wait" server_name="/wait" server_timeout="1.0" wait_duration="5"/>
+            <Action ID="BackUp" backup_dist="0.25" backup_speed="0.05" server_name="/backup" server_timeout="1.0"/>
+        </ReactiveSequence>
+    </BehaviorTree>
+    <!-- ////////// -->
+    <TreeNodesModel>
+        <Action ID="ApproachDock">
+            <input_port name="controller_plugin_name">...</input_port>
+            <input_port name="expected_dock_pose">for perception</input_port>
+            <input_port default="ekf_1" name="filter_plugin_name">...</input_port>
+            <output_port name="goal_reached">Approach DONE</output_port>
+            <input_port name="perception_plugin_name">...</input_port>
+            <input_port name="pre_charging_pose">from current pose (usually should be pre_dock_pose)</input_port>
+            <input_port default="/approach_dock" name="server_name">remapped action server name</input_port>
+            <input_port name="server_timeout">...</input_port>
+        </Action>
+        <Action ID="BackUp">
+            <input_port default="0.25" name="backup_dist">Distance to backup</input_port>
+            <input_port default="0.05" name="backup_speed">Speed at which to backup</input_port>
+            <input_port default="/backup" name="server_name">remapped action server name</input_port>
+            <input_port name="server_timeout">...</input_port>
+        </Action>
+        <Action ID="ClearEntireCostmap">
+            <input_port default="0.5" name="server_timeout">Service name</input_port>
+            <input_port default="clear_planner_costmap" name="service_name">Service name</input_port>
+        </Action>
+        <Action ID="ComputePathToPose">
+            <input_port name="goal">Destination to plan to</input_port>
+            <output_port name="path">Path created by ComputePathToPose node</output_port>
+            <input_port name="planner_id"/>
+            <input_port default="/compute_path" name="server_name">remapped action server name.</input_port>
+            <input_port name="server_timeout">...</input_port>
+            <input_port name="start">Start pose of the path if overriding current robot pose</input_port>
+        </Action>
+        <Action ID="CoveragePath">
+            <input_port name="edge_path">Coverage path edge.</input_port>
+            <output_port name="path">Coverage path out.</output_port>
+            <output_port name="path_found">Path found.</output_port>
+            <input_port name="planner_id">Planner_plugin.</input_port>
+            <input_port default="/get_map_station_pose" name="server_name">remapped action server name</input_port>
+            <input_port name="server_timeout">...</input_port>
+            <input_port name="start_pose">Start pose to start coverage.</input_port>
+        </Action>
+        <Action ID="FetchItemAction">
+            <input_port name="in_items">get string item from vector string.</input_port>
+            <output_port name="out_item">fetch string item in order.</output_port>
+        </Action>
+        <Action ID="FinalDock">
+            <output_port name="dock_finished">Dock DONE</output_port>
+            <input_port name="dock_pose">Final dock pose</input_port>
+            <input_port name="rotate_in_place">rotate_in_place</input_port>
+            <input_port default="/final_dock" name="server_name">remapped action server name</input_port>
+            <input_port name="server_timeout">...</input_port>
+        </Action>
+        <Action ID="FollowPath">
+            <input_port name="controller_id"/>
+            <input_port name="path">Path to follow</input_port>
+            <input_port default="/follow_path" name="server_name">remapped action server name</input_port>
+            <input_port name="server_timeout">...</input_port>
+        </Action>
+        <Action ID="GetAreaEdge">
+            <input_port name="area">The area such as A1.</input_port>
+            <output_port name="edge_path">The edge of the area.</output_port>
+            <input_port name="server_timeout">...</input_port>
+            <input_port default="/get_map_area_edge" name="service_name">remapped action server name</input_port>
+        </Action>
+        <Action ID="GetClosestId">
+            <output_port name="closest_id">The closest id</output_port>
+            <input_port name="current_pos">...</input_port>
+            <input_port name="nodes_path">Nodes file path</input_port>
+        </Action>
+        <Action ID="GetControllerPluginService"/>
+        <Action ID="GetPlannerPluginService"/>
+        <Decorator ID="GetPositionInFrame">
+            <output_port name="current_pos">Robot current position</output_port>
+            <input_port default="map" name="frame_id">Target frame id</input_port>
+        </Decorator>
+        <Action ID="GetRoutePath">
+            <input_port name="distance_interval">The distance interval to gen path.</input_port>
+            <output_port name="end">The end station of the route.</output_port>
+            <input_port name="route">The route such as LM1, LM2, LM3, LM9.</input_port>
+            <output_port name="route_path">The path of the route.</output_port>
+            <input_port name="server_timeout">...</input_port>
+            <input_port default="/get_map_route_path" name="service_name">remapped action server name</input_port>
+            <output_port name="start">The start station of the route.</output_port>
+        </Action>
+        <Action ID="GetSelectionPolygonService">
+            <input_port name="is_saved">do you need to get a saved polygon from the server?</input_port>
+            <output_port name="polygon">get polygon points from server</output_port>
+            <input_port name="saved_path">path to the saved polygon file</input_port>
+            <input_port name="server_timeout">...</input_port>
+            <input_port default="/get_selection" name="service_name">remapped action server name</input_port>
+        </Action>
+        <Action ID="GetStationPose">
+            <input_port name="server_timeout">...</input_port>
+            <input_port default="/get_map_station_pose" name="service_name">remapped action server name</input_port>
+            <input_port name="station">station name or id.</input_port>
+            <output_port name="station_pose">The pose of the station.</output_port>
+        </Action>
+        <Condition ID="GoalUpdated">
+            <input_port name="goal_updated">Is goal updated</input_port>
+        </Condition>
+        <Decorator ID="GoalUpdater">
+            <input_port name="can_be_preempted">is preempted?</input_port>
+            <output_port name="goal_updated">whether goal is updated</output_port>
+            <input_port name="input_goal">Original goal in</input_port>
+            <input_port name="is_docking">is docking?</input_port>
+            <output_port name="output_goal">Output goal set by subscription</output_port>
+        </Decorator>
+        <Condition ID="IsBatteryLow">
+            <input_port name="battery_topic">Topic for battery info</input_port>
+            <input_port name="is_voltage">Bool if check based on voltage or total %</input_port>
+            <input_port name="min_battery">Min battery % or voltage before triggering</input_port>
+        </Condition>
+        <Action ID="LoadPolygonJsonService">
+            <input_port name="json_file_path">path of the polygon to get from the server</input_port>
+            <input_port name="server_timeout">...</input_port>
+            <input_port default="/load_json_data" name="service_name">remapped action server name</input_port>
+        </Action>
+        <Action ID="NemComputePathToPoseAction">
+            <input_port name="closest_id"/>
+            <input_port name="goal">Destination to plan to</input_port>
+            <output_port name="path">Path created by ComputePathToPose node</output_port>
+            <input_port name="planner_id"/>
+            <input_port default="/compute_path" name="server_name">remapped action server name.</input_port>
+            <input_port name="server_timeout">...</input_port>
+            <input_port name="start">Start pose of the path if overriding current robot pose</input_port>
+        </Action>
+        <Control ID="PipelineSequence"/>
+        <Action ID="PrintBlackboardValue">
+            <input_port name="target_point">Current position of the agent</input_port>
+        </Action>
+        <Decorator ID="RateController">
+            <input_port name="hz">Rate</input_port>
+        </Decorator>
+        <SubTree ID="RecoveryBehaviorsSequence">
+            <inout_port name="__shared_blackboard"/>
+        </SubTree>
+        <Control ID="RecoveryNode">
+            <input_port name="number_of_retries">Number of retries</input_port>
+        </Control>
+        <Action ID="RemovePassedGoals">
+            <input_port name="input_goals">Original goals to remove viapoints from</input_port>
+            <input_port name="input_path">Original Global Planner Path</input_port>
+            <output_port name="output_goals">Goals with passed viapoints removed(truncated goals)</output_port>
+            <input_port default="0.2" name="radius">radius to goal for it to be considered for removal</input_port>
+        </Action>
+        <Action ID="Rotate">
+            <input_port default="true" name="is_rotate_clockwise">Rotate direction defalt is clockwise</input_port>
+            <input_port default="0.1" name="rotate_rad">Rotate value in rad</input_port>
+            <input_port default="0.1" name="rotate_speed">Rotate speed in rad/s</input_port>
+            <input_port default="/rotate" name="server_name">remapped action server name</input_port>
+            <input_port name="server_timeout">...</input_port>
+        </Action>
+        <Decorator ID="SelectNearestPose">
+            <input_port name="current_pos">Current position of the agent</input_port>
+            <input_port name="reference_path">Reference path</input_port>
+            <input_port default="0.2" name="step_length">Step length to the next target point</input_port>
+            <output_port name="target_point">Selected target point in the reference path</output_port>
+        </Decorator>
+        <Action ID="SynchronizeNeFilesService">
+            <input_port name="edges_path">Edges file path</input_port>
+            <input_port name="nodes_path">Nodes file path</input_port>
+            <input_port name="server_timeout">...</input_port>
+            <input_port default="/get_map_route_path" name="service_name">remapped action server name</input_port>
+        </Action>
+        <Action ID="TaskReceiverAction">
+            <output_port name="cmd">receive cmd.</output_port>
+            <output_port name="cmd_param_go_coverage">go coverage areas param.</output_port>
+            <output_port name="cmd_param_go_path">go path stations param.</output_port>
+            <output_port name="cmd_param_go_pose">go pose param.</output_port>
+            <input_port default="true" name="grpc_enable">grpc enable.</input_port>
+            <input_port default="50051" name="grpc_port">...</input_port>
+        </Action>
+        <Action ID="TruncatePath">
+            <input_port name="distance">Distance before goal to truncate</input_port>
+            <input_port name="input_path">Path to truncate</input_port>
+            <output_port name="output_path">Truncated path to utilize</output_port>
+        </Action>
+        <Decorator ID="ViaPoints">
+            <output_port name="output_path">following via points path</output_port>
+            <input_port default="/via_points" name="topic_name">via points topic name</input_port>
+        </Decorator>
+        <Action ID="Wait">
+            <input_port default="/wait" name="server_name">remapped action server name</input_port>
+            <input_port name="server_timeout">...</input_port>
+            <input_port name="wait_duration">Wait time</input_port>
+        </Action>
+        <Decorator ID="WayPoints">
+            <input_port default="true" name="accept_new_goal">True for new goal receive</input_port>
+            <input_port default="false" name="goal_without_loop">True for new goal to stop all way-points LOOP; false                for restart remain loop            </input_port>
+            <input_port name="input_goal">Original goal in</input_port>
+            <input_port default="false" name="jump_goal">True for new received simple goal will replace current goal in                loop; false for following current goal in loop after arrived simple goal            </input_port>
+            <input_port default="0" name="max_loop">max loop number, zero or negative means inf.</input_port>
+            <output_port name="output_goal">Output goal set by subscription</output_port>
+            <input_port default="{path}" name="path">Global path</input_port>
+            <input_port default="move_base_simple/goal" name="simple_goal_topic">simple goal name</input_port>
+            <input_port default="way_points" name="way_points_topic">way points topic name</input_port>
+        </Decorator>
+    </TreeNodesModel>
+    <!-- ////////// -->
+</root>

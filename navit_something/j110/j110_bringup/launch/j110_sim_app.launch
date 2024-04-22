@@ -1,0 +1,56 @@
+<launch>
+    <!-- sim time -->
+    <param name="/use_sim_time" value="true"/>
+    <!-- j110 urdf -->
+    <include file="$(find j110_description)/launch/j110_description.launch"/>
+    <!-- stage -->
+    <node pkg="stage_ros" type="stageros" name="stageros" args="$(find j110_bringup)/stage/j110_google_park.world">
+        <remap from="base_scan" to="scan"/>
+    </node>
+
+    <!--fale localization-->
+    <node pkg="fake_localization" type="fake_localization" name="fakelocalization">
+        <param name="delta_x" value="11.265"/>
+        <param name="delta_y" value="-23.153"/>
+        <param name="delta_yaw" value="0.0"/>
+    </node>
+
+    <!-- routing -->
+    <include file="$(find j110_bringup)/launch/inner/routing.launch"/>
+
+    <!-- planner -->
+    <include file="$(find j110_bringup)/launch/inner/planner.launch"/>
+
+    <!-- controller -->
+    <include file="$(find j110_bringup)/launch/inner/controller.launch"/>
+
+    <!-- auto_dock -->
+    <include file="$(find j110_bringup)/launch/inner/auto_dock.launch"/>
+
+    <!-- behavior trees -->
+    <include file="$(find app_bringup)/launch/app_bringup.launch">
+        <arg name="app_sim" value="true"/>
+    </include>
+
+    <!-- behavior trees -->
+    <include file="$(find j110_bringup)/launch/inner/bt.launch"/>
+
+    <!-- velocity smoother -->
+    <include file="$(find j110_bringup)/launch/inner/velocity_smoother.launch"/>
+
+    <!-- collision monitor -->
+    <include file="$(find j110_bringup)/launch/inner/collision_monitor.launch"/>
+
+    <!-- recovery -->
+    <include file="$(find j110_bringup)/launch/inner/recovery.launch"/>
+
+    <node name="navit_utils_geometry_recoorder_node" type="navit_utils_geometry_recoorder_node" pkg="navit_utils"
+          output="screen">
+        launch-prefix="gdb -ex start --args"
+        <param name="area_expand_dis" value="0.5"/>
+        <param name="smooth_step" value="0.1"/>
+        <param name="is_smooth" value="true"/>
+    </node>
+    <!-- rviz -->
+    <node name="rviz" pkg="rviz" type="rviz" args="-d $(find j110_bringup)/config/rviz/j110.rviz"/>
+</launch>

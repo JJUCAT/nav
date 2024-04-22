@@ -1,0 +1,16 @@
+<launch>
+    <!-- stage_ros -->
+    <!-- <node pkg="map_server" type="map_server" name="map_server_ros" output="screen" args="/home/yjh/navit/src/navit_stack/navit_move_base/map/gudao.yaml" respawn="false">
+        <param name="frame_id" value="map" />
+        <remap from="map_mb" to="map"/>
+    </node> -->
+
+    <include file="$(find j110_description)/launch/j110_description.launch"/>
+
+    <include file="$(find j110_bringup)/launch/inner/base.launch"/>
+    <include file="$(find j110_bringup)/launch/inner/driver.launch"/>
+
+    <include file="$(find j110_bringup)/launch/inner/planner.launch"/>
+    <include file="$(find j110_bringup)/launch/inner/controller.launch"/>
+    <include file="$(find j110_bringup)/launch/inner/auto_dock.launch"/>
+</launch>

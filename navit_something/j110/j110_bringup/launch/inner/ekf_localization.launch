@@ -1,0 +1,9 @@
+<launch>
+<!--TODO(薛)：整理好配置文件，放到j110_bringup/config 
+暂时这样include，后续应该单独写好launch文件，加入到自启动中
+-->
+
+<!-- TODO: 修复typo -->
+<include file="$(find navit_localization)/launch/ekf_navsav_j110.launch" />
+
+</launch>

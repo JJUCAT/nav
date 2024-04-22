@@ -1,0 +1,95 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>j110</name>
+  <version>0.0.0</version>
+  <description>The j110 package</description>
+
+  <!-- One maintainer tag required, multiple allowed, one person per tag -->
+  <!-- Example:  -->
+  <!-- <maintainer email="jane.doe@example.com">Jane Doe</maintainer> -->
+  <maintainer email="yijiahe@todo.todo">yijiahe</maintainer>
+
+  <!-- One license tag required, multiple allowed, one license per tag -->
+  <!-- Commonly used license strings: -->
+  <!--   BSD, MIT, Boost Software License, GPLv2, GPLv3, LGPLv2.1, LGPLv3 -->
+  <license>TODO</license>
+
+
+  <buildtool_depend>catkin</buildtool_depend>
+  <!-- app_stack -->
+  <!-- <exec_depend>app_stack</exec_depend> -->
+
+  <!--- navit depends -->
+  <exec_depend>navit_auto_dock</exec_depend>
+  <exec_depend>navit_controller</exec_depend>
+  <exec_depend>navit_core</exec_depend>
+  <exec_depend>navit_msgs</exec_depend>
+  <exec_depend>navit_planner</exec_depend>
+  <exec_depend>navit_recovery</exec_depend>
+  <exec_depend>navit_bt_navigator</exec_depend>
+  <exec_depend>navit_bt_nodes</exec_depend>
+  <exec_depend>navit_map_server</exec_depend>
+  <exec_depend>navit_costmap</exec_depend>
+  <exec_depend>navit_utils</exec_depend>
+  <exec_depend>navit_common</exec_depend>
+  <exec_depend>navit_collision_checker</exec_depend>
+  <exec_depend>navit_rviz_panel</exec_depend>
+  <exec_depend>navit_routing</exec_depend>
+  <exec_depend>navit_velocity_smoother</exec_depend>
+  <exec_depend>navit_localization</exec_depend>
+  <exec_depend>navit_collision_monitor</exec_depend>
+
+  <!-- slam -->
+  <!-- <exec_depend>slam_stack</exec_depend> -->
+
+  <!--  routing planners-->
+  <exec_depend>navit_router</exec_depend>
+
+  <!--  recovery-->
+  <exec_depend>recovery_plugins</exec_depend>
+
+  <!--- golbal planner -->
+  <exec_depend>global_planner</exec_depend>
+  <exec_depend>navfn</exec_depend>
+  <exec_depend>smac_planner</exec_depend>
+
+  <!--- local planner -->
+  <exec_depend>teb_local_planner</exec_depend>
+  <exec_depend>path_follower</exec_depend>
+  <exec_depend>path_smoother</exec_depend>
+  <exec_depend>mpc_local_planner</exec_depend>
+
+  <!--- full coverage planner -->
+  <!--exec_depend>fcpp_ros</exec_depend-->
+  <!--exec_depend>fcpp_algorithm</exec_depend-->
+  <exec_depend>polygon_coverage_plugin</exec_depend>
+  <exec_depend>slic3r_coverage_planner</exec_depend>
+
+  <!--- dock -->
+  <exec_depend>dock_fake_perception</exec_depend>
+  <exec_depend>dock_perception</exec_depend>
+  <exec_depend>dock_visual_perception</exec_depend>
+  <exec_depend>dock_fg100_controller</exec_depend>
+  <exec_depend>dock_diff_purepursuit_pid_controller</exec_depend>
+  <exec_depend>dock_diff_graceful_controller</exec_depend>
+
+  <!-- drivers -->
+  <exec_depend>pointcloud_to_laserscan</exec_depend>
+  <exec_depend>livox_ros_driver2</exec_depend>
+  <exec_depend>integrated_navigation</exec_depend>
+  <exec_depend>weite_rtk</exec_depend>
+  <exec_depend>bdf07_imu</exec_depend>
+  <exec_depend>bluesea2</exec_depend>
+  <exec_depend>vanjee_lidar</exec_depend>
+
+  <!-- other denpens -->
+  <exec_depend>j110_description</exec_depend>
+  <exec_depend>j110_bringup</exec_depend>
+  <exec_depend>app_chassis_control_msgs</exec_depend>
+
+  <!-- The export tag contains other, unspecified, tags -->
+  <export>
+    <!-- Other tools can request additional information be placed here -->
+    <metapackage/>
+  </export>
+</package>

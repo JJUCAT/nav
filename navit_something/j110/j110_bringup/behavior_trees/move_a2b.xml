@@ -1,0 +1,70 @@
+<?xml version="1.0"?>
+<root main_tree_to_execute="MainTree">
+    <!-- ////////// -->
+    <BehaviorTree ID="MainTree">
+        <Sequence>
+            <Action ID="GetStationPose" server_timeout="1.0" service_name="/get_map_station_pose" station="{goal_id}" station_pose="{updated_goal}"/>
+            <Control ID="PipelineSequence" name="NavigateWithReplanning">
+                <Decorator ID="RateController" hz="1.0">
+                    <ForceSuccess>
+                        <Action ID="ComputePathToPose" goal="{updated_goal}" path="{path}" planner_id="topoint" server_name="/compute_path" server_timeout="1.0" start="false"/>
+                    </ForceSuccess>
+                </Decorator>
+                <Control ID="RecoveryNode" number_of_retries="5">
+                    <Action ID="FollowPath" controller_id="avoidance" path="{path}" server_name="/follow_path" server_timeout="1.0"/>
+                    <Action ID="ClearEntireCostmap" server_timeout="1.0" service_name="clear_controller_costmap"/>
+                </Control>
+            </Control>
+        </Sequence>
+    </BehaviorTree>
+    <!-- ////////// -->
+    <TreeNodesModel>
+        <Action ID="ClearEntireCostmap">
+            <input_port name="server_timeout">...</input_port>
+            <input_port default="clear_planner_costmap" name="service_name">Service name</input_port>
+        </Action>
+        <Action ID="ComputePathToPose">
+            <input_port name="goal">Destination to plan to</input_port>
+            <output_port name="path">Path created by ComputePathToPose node</output_port>
+            <input_port name="planner_id"/>
+            <input_port default="/compute_path" name="server_name">remapped action server name.</input_port>
+            <input_port name="server_timeout">...</input_port>
+            <input_port name="start">Start pose of the path if overriding current robot pose</input_port>
+        </Action>
+        <Action ID="FollowPath">
+            <input_port name="controller_id"/>
+            <input_port name="path">Path to follow</input_port>
+            <input_port default="/follow_path" name="server_name">remapped action server name</input_port>
+            <input_port name="server_timeout">...</input_port>
+        </Action>
+        <Action ID="GetRoutePath">
+            <input_port name="route">The route such as LM1, LM2, LM3, LM9.</input_port>
+            <output_port name="route_path">The path of the route.</output_port>
+            <input_port name="server_timeout">...</input_port>
+            <input_port default="/get_map_route_path" name="service_name">remapped action server name</input_port>
+        </Action>
+        <Action ID="GetStationPose">
+            <input_port name="server_timeout">...</input_port>
+            <input_port default="/get_map_station_pose" name="service_name">remapped action server name</input_port>
+            <input_port name="station">station name or id.</input_port>
+            <output_port name="station_pose">The pose of the station.</output_port>
+        </Action>
+        <Decorator ID="GoalUpdater">
+            <input_port name="input_goal">Original goal in</input_port>
+            <output_port name="output_goal">Output goal set by subscription</output_port>
+        </Decorator>
+        <Control ID="PipelineSequence"/>
+        <Decorator ID="RateController">
+            <input_port name="hz">Rate</input_port>
+        </Decorator>
+        <Control ID="RecoveryNode">
+            <input_port name="number_of_retries">Number of retries</input_port>
+        </Control>
+        <Action ID="TruncatePath">
+            <input_port name="distance" type="double">distance</input_port>
+            <input_port name="input_path">Original Path</input_port>
+            <output_port name="output_path">Path truncated to a certain distance</output_port>
+        </Action>
+    </TreeNodesModel>
+    <!-- ////////// -->
+</root>

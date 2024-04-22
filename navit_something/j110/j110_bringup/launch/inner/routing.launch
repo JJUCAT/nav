@@ -1,0 +1,7 @@
+<launch>
+    <node name="navit_routing_node" pkg="navit_routing" type="navit_routing_node"
+        output="screen" respawn="true">
+        launch-prefix="gdb -ex start --args"
+        <rosparam file="$(find j110_bringup)/config/routing/routing.yaml" command="load" />
+    </node>
+</launch>
