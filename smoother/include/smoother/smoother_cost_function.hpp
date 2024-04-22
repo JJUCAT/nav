@@ -583,7 +583,8 @@ protected:
 
   /**
    * @brief  新代价地图梯度计算
-   * cost^2(x) 的梯度 = 2 * cost(x) * cost'(x) = 2 * cost(x) * 0.5 * (cost(x+1)-cost(x-1))
+   * cost^2(x) 的梯度 = 2 * cost(x) * cost'(x)
+   *                 = 2 * cost(x) * 0.5 * (cost(x+1)-cost(x-1))
    *                 = cost(x) * (cost(x+1)-cost(x-1))
    * @param  mx  地图坐标 x
    * @param  my  地图坐标 y
