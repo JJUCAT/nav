@@ -1,0 +1,20 @@
+# Example configuration:
+# - velocity limits are around a 10% above the physical limits
+# - acceleration limits are just low enough to avoid jerking
+
+ackermann:
+    # Mandatory parameters
+    steer_lim: 1.2 # 转向角度限制，rad
+    steer_speed_lim: 0.2 # 转向角速度限制，rad/s
+    
+    speed_lim_vx: 0.8 # 速度限制, m/s
+    accel_lim_vx: 0.3 # 加速度限制，m/s^2
+    
+    # Optional parameters
+    frequency: 10.0
+    decel_factor: 2.0 # 最大减速度倍数，乘以加速度限制得到最大减速度
+    decel_factor_safety: 4.0 # 紧急停止最大减速度倍数，检测到速度命令超时，加速度限制乘以此倍数得到最大减速度
+    
+    topic_names:
+        raw_cmd_vel: raw_cmd_vel_test_ackermann # 订阅的话题名称，注意命名空间
+        smooth_cmd_vel: smooth_cmd_vel_test_ackermann # 发布的话题名称，注意命名空间

@@ -1,0 +1,18 @@
+<library path="lib/libnavit_velocity_smoother_nodelet">
+    <class name="navit_velocity_smoother/TwistVelocitySmoother" 
+        type="navit_velocity_smoother::TwistVelocitySmoother" 
+        base_class_type="nodelet::Nodelet">
+        <description>
+                  This is my nodelet.
+        </description>
+     </class>
+
+    <class name="navit_velocity_smoother/AckermannVelocitySmoother" 
+        type="navit_velocity_smoother::AckermannVelocitySmoother" 
+        base_class_type="nodelet::Nodelet">
+        <description>
+                  This is my nodelet.
+        </description>
+     </class>
+
+</library>

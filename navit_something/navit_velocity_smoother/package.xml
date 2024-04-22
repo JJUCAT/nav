@@ -1,0 +1,28 @@
+<package format="2">
+  <name>navit_velocity_smoother</name>
+  <version>0.0.1</version>
+  <description>The 'navit_velocity_smoother' reads velocity messages and publishes messages of the same type for "smoothed" velocity to avoid shaking behavior.</description>
+
+  <license>Apache 2.0</license>
+
+  <url type="website">http://ros.org/wiki/cob_base_velocity_smoother</url>
+  <!-- <url type="bugtracker"></url> -->
+
+  <maintainer email="xuemantian@yijiahe.com">Xue, Mantian</maintainer>
+  <author email="xuemantian@yijiahe.com">Xue, Mantian</author>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <build_depend>message_generation</build_depend>
+
+  <depend>nodelet</depend>
+  <depend>dynamic_reconfigure</depend>
+  <depend>geometry_msgs</depend>
+  <depend>nav_msgs</depend>
+  <depend>roscpp</depend>
+  <depend>ackermann_msgs</depend>
+
+  <export>
+     <nodelet plugin="${prefix}/velocity_smoother_nodelet.xml" />
+  </export>
+</package>

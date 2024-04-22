@@ -1,0 +1,10 @@
+<launch>
+  <node pkg="nodelet"
+        type="nodelet"
+        name="navit_vel_smoother"
+        args="standalone navit_velocity_smoother/TwistVelocitySmoother"
+        output="screen">
+    <rosparam command="load" file="$(find navit_velocity_smoother)/config/twist_nodelet_ep100.yaml"/>
+  </node>
+
+</launch>

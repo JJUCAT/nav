@@ -1,0 +1,3 @@
+navit_routing:
+     - name: tsp
+       type: route/Route
