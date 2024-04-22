@@ -1,3 +1,4 @@
+#include "costmap_2d/cost_values.h"
 #include "costmap_2d/costmap_2d.h"
 #include "geometry_msgs/PoseStamped.h"
 #include "ros/ros.h"
@@ -11,7 +12,7 @@
 #include <costmap_2d/costmap_2d_ros.h>
 #include <tf2_ros/transform_listener.h>
 
-nav_msgs::Path genRandomPath()
+nav_msgs::Path genRandomPath(costmap_2d::Costmap2D* costmap)
 {
   unsigned int now = clock();
   srand(static_cast<unsigned int>(now));
@@ -25,15 +26,32 @@ nav_msgs::Path genRandomPath()
   double len = 0.1;
   double yaw_max = 1.4;
   path.poses.push_back(pose);
-  for (int i = 0; i < 50; i++) {
+  int num = 50;
+  for (int i = 0; i < num; ) {
     int rand0 = rand();
     srand(static_cast<unsigned int>(rand0));
     double yaw_step = (static_cast<double>(rand0) / RAND_MAX - 0.5) * yaw_max;
-    double cur_yaw = tf::getYaw(pose.pose.orientation);
-    pose.pose.position.x += len * cos(cur_yaw);
-    pose.pose.position.y += len * sin(cur_yaw);
-    pose.pose.orientation = tf::createQuaternionMsgFromYaw(cur_yaw + yaw_step);
-    path.poses.push_back(pose);
+    double cur_yaw = tf::getYaw(pose.pose.orientation) + yaw_step;
+    auto tmp = pose;
+    tmp.pose.position.x += len * cos(cur_yaw);
+    tmp.pose.position.y += len * sin(cur_yaw);
+    tmp.pose.orientation = tf::createQuaternionMsgFromYaw(cur_yaw);
+    unsigned int mx, my;
+    bool in_map = costmap->worldToMap(tmp.pose.position.x, tmp.pose.position.y, mx, my);
+    if (in_map) {
+      auto cost = costmap->getCost(mx, my);
+      if (cost < costmap_2d::LETHAL_OBSTACLE-3) {
+        pose = tmp;
+        path.poses.push_back(pose);
+        i ++;
+      } else {
+        pose = path.poses.at(path.poses.size()-2);
+        path.poses.pop_back();
+        i --;
+      }
+    } else {
+      break;
+    }
   }
   return path;
 }
@@ -88,14 +106,16 @@ int main(int argc, char** argv)
   double hz = 0.5f;
   ros::Rate r(hz);
   while(ros::ok()) {
-    nav_msgs::Path unsmooth_path = genRandomPath();
+    nav_msgs::Path unsmooth_path = genRandomPath(costmap_ros->getCostmap());
     plan_pub.publish(unsmooth_path);
 
-    smoother->use_new_curvature_jacobian(false);
+    smoother->use_new_curvature_jacobian(true);
+    smoother->use_new_cost_jacobian(false);
     nav_msgs::Path smooth_path = Smooth(smoother, unsmooth_path, costmap_ros->getCostmap());
     splan_pub.publish(smooth_path);
 
     smoother->use_new_curvature_jacobian(true);
+    smoother->use_new_cost_jacobian(true);
     nav_msgs::Path new_smooth_path = Smooth(smoother, unsmooth_path, costmap_ros->getCostmap());
     nsplan_pub.publish(new_smooth_path);
 

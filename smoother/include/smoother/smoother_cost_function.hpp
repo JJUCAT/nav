@@ -39,7 +39,7 @@ struct SmootherParams
   double max_curvature = 0.7;
   double smooth_weight = 1000;
   double curvature_weight = 30.0;
-  double distance_weight = 100;
+  double distance_weight = 3000; // 100
   double costmap_weight = 1.0;
   double costmap_factor = 1.0;
 };
@@ -172,7 +172,7 @@ public:
           if (!use_new_cost_jacobian_) {
             addCostJacobian(_params.costmap_weight, mx, my, costmap_cost, grad_x_raw, grad_y_raw);
           } else {
-            addCostJacobianNew(_params.costmap_weight, mx, my, costmap_cost, grad_x_raw, grad_y_raw);
+            addCostJacobianNew(mx, my, costmap_cost, grad_x_raw, grad_y_raw);
           }
         }
 
@@ -340,9 +340,9 @@ protected:
 
     const Eigen::Vector2d jacobian = u *
       (common_prefix * (-p1 - p2) - (common_suffix * d_delta_xi_d_xi));
-    const Eigen::Vector2d jacobian_im1 = u *
-      (common_prefix * p2 + (common_suffix * d_delta_xi_d_xi));
-    const Eigen::Vector2d jacobian_ip1 = u * (common_prefix * p1);
+    // const Eigen::Vector2d jacobian_im1 = u *
+    //   (common_prefix * p2 + (common_suffix * d_delta_xi_d_xi));
+    // const Eigen::Vector2d jacobian_ip1 = u * (common_prefix * p1);
 
     // Old formulation we may require again.
     // j0 += weight *
@@ -602,11 +602,22 @@ protected:
       return;
     }
 
-    const Eigen::Vector2d grad = getCostmapGradient(mx, my);
-    const double common_prefix = 2.0 * _params.costmap_factor * value * value;
+    double l_1 = 0.0, r_1 = 0.0;
+    Eigen::Vector2d gradient;
+    if (mx < _costmap->getSizeInCellsX()) 
+      r_1 = static_cast<double>(_costmap->getCost(mx + 1, my));
+    if (mx > 0)
+      l_1 = static_cast<double>(_costmap->getCost(mx - 1, my));
+    gradient[0] = r_1 - l_1;
 
-    j0 += common_prefix * grad[0];  // xi x component of partial-derivative
-    j1 += common_prefix * grad[1];  // xi y component of partial-derivative
+    if (my < _costmap->getSizeInCellsY())
+      r_1 = static_cast<double>(_costmap->getCost(mx, my + 1));
+    if (my > 0)
+      l_1 = static_cast<double>(_costmap->getCost(mx, my - 1));
+    gradient[1] = r_1 - l_1;
+
+    j0 += _params.costmap_factor * value * gradient[0];
+    j1 += _params.costmap_factor * value * gradient[1];
   }
 
   std::vector<Eigen::Vector2d> * _original_path{nullptr};
