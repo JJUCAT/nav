@@ -21,6 +21,7 @@ find_package(Eigen3 REQUIRED)
 find_package(Boost REQUIRED COMPONENTS system thread)
 include_directories(
   include
+  3rdparty
   ${catkin_INCLUDE_DIRS}
   ${EIGEN3_INCLUDE_DIRS}
   ${Boost_INCLUDE_DIRS}
@@ -50,6 +51,7 @@ generate_dynamic_reconfigure_options(
 catkin_package(
   INCLUDE_DIRS
       include
+      3rdparty
       ${EIGEN3_INCLUDE_DIRS}
   LIBRARIES voronoi_field
   CATKIN_DEPENDS
@@ -68,10 +70,28 @@ catkin_package(
       Boost
 )
 
+# 第三方库
+# 第三方 dynamic voronoi
+add_library(lib3rd_dynamic_voronoi
+  3rdparty/dynamic_voronoi/dynamicvoronoi.cpp
+)
+
+# 第三方库接口
+add_library(libnanoflann_port
+  src/nanoflann_port.cpp)
+add_dependencies(libnanoflann_port
+  ${${PROJECT_NAME}_EXPORTED_TARGETS}
+  ${catkin_EXPORTED_TARGETS})
+
+
+
 add_library(voronoi_field
   src/voronoi_field.cpp
 )
-add_dependencies(voronoi_field ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+add_dependencies(voronoi_field
+  libnanoflann_port
+  ${${PROJECT_NAME}_EXPORTED_TARGETS}
+  ${catkin_EXPORTED_TARGETS})
 target_link_libraries(voronoi_field
   ${Boost_LIBRARIES}
   ${catkin_LIBRARIES}
