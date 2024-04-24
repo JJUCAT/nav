@@ -1,27 +1,14 @@
 <?xml version="1.0"?>
 <?xml-model href="http://download.ros.org/schema/package_format2.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="2">
-    <name>costmap_2d</name>
-    <version>1.17.3</version>
+    <name>voronoi_field</name>
+    <version>0.1.0</version>
     <description>
-        This package provides an implementation of a 2D costmap that takes in sensor
-        data from the world, builds a 2D or 3D occupancy grid of the data (depending
-        on whether a voxel based implementation is used), and inflates costs in a
-        2D costmap based on the occupancy grid and a user specified inflation radius.
-        This package also provides support for map_server based initialization of a
-        costmap, rolling window based costmaps, and parameter based subscription to
-        and configuration of sensor topics.
+        A costmap_2d plugins to create voronoi field of obstacles.
     </description>
-    <author>Eitan Marder-Eppstein</author>
-    <author>David V. Lu!!</author>
-    <author>Dave Hershberger</author>
-    <author>contradict@gmail.com</author>
-    <maintainer email="davidvlu@gmail.com">David V. Lu!!</maintainer>
-    <maintainer email="mfergs7@gmail.com">Michael Ferguson</maintainer>
-    <maintainer email="ahoy@fetchrobotics.com">Aaron Hoy</maintainer>
+    <author>lmr</author>
+    <maintainer email="lmr2887@163.com">lmr</maintainer>
     <license>BSD</license>
-    <url>http://wiki.ros.org/costmap_2d</url>
-
     <buildtool_depend>catkin</buildtool_depend>
 
     <build_depend>cmake_modules</build_depend>
@@ -45,6 +32,7 @@
     <depend>tf2_ros</depend>
     <depend>visualization_msgs</depend>
     <depend>voxel_grid</depend>
+    <depend>costmap_2d</depend>
 
     <exec_depend>message_runtime</exec_depend>
     <exec_depend>rosconsole</exec_depend>
