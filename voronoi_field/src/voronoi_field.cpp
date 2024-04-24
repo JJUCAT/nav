@@ -44,6 +44,7 @@ void VoronoiFieldLayer::reconfigureCB(costmap_2d::VoronoiFieldPluginConfig &conf
     enabled_ = config.enabled;
     alpha_ = config.alpha;
     dist2O_ = config.dist2O;
+    cell_dist2O_ = layered_costmap_->getCostmap()->cellDistance(dist2O_);
     need_recompute_ = true;
   }
 }
@@ -78,11 +79,63 @@ void VoronoiFieldLayer::updateBounds(double robot_x, double robot_y, double robo
   }
 }
 
+
 void VoronoiFieldLayer::updateCosts(costmap_2d::Costmap2D& master_grid,
   int min_i, int min_j, int max_i, int max_j)
 {
+  int min_range_i=min_i, min_range_j=min_j, max_range_i=max_i, max_range_j=max_j;
+  GetRange(master_grid, min_range_i, min_range_j, max_range_i, max_range_j);
 
+  std::vector<costmap_2d::MapLocation> obstacles;
+  size_t obs_size = GetObstacles(obstacles, master_grid, 254u, min_range_i, min_range_j, max_range_i, max_range_j);
+
+  if (obs_size > 0) {
+    
+  }
 }
+
+
+// -------------------- protected --------------------
+
+
+void VoronoiFieldLayer::GetRange(const costmap_2d::Costmap2D& master_grid,
+  int& min_range_i, int& min_range_j, int& max_range_i, int& max_range_j)
+{
+  unsigned int size_x = master_grid.getSizeInCellsX();
+  unsigned int size_y = master_grid.getSizeInCellsY();
+
+  min_range_i -= cell_dist2O_;
+  min_range_j -= cell_dist2O_;
+  max_range_i += cell_dist2O_;
+  max_range_j += cell_dist2O_;
+
+  min_range_i = std::max(0, min_range_i);
+  min_range_j = std::max(0, min_range_j);
+  max_range_i = std::min(int(size_x), max_range_i);
+  max_range_j = std::min(int(size_y), max_range_j);
+}
+
+
+size_t VoronoiFieldLayer::GetObstacles(std::vector<costmap_2d::MapLocation> obstacles,
+  const costmap_2d::Costmap2D& master_grid, const unsigned char obs_cost,
+  const int min_range_i, const int min_range_j, const int max_range_i, const int max_range_j)
+{
+  for (int j = min_range_j; j < max_range_j; j++) {
+    for (int i = min_range_i; i < max_range_i; i++) {
+      unsigned char cost = master_grid.getCost(i, j);
+      if (cost >= obs_cost) {
+        costmap_2d::MapLocation ml;
+        ml.x = i; ml.y = j;
+        obstacles.push_back(ml);
+      }
+    }
+  }
+  return obstacles.size();
+}
+
+
+
+
 
 void VoronoiFieldLayer::matchSize()
 {

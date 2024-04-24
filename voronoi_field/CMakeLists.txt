@@ -83,6 +83,11 @@ add_dependencies(libnanoflann_port
   ${${PROJECT_NAME}_EXPORTED_TARGETS}
   ${catkin_EXPORTED_TARGETS})
 
+add_library(libdynamic_voronoi_port
+  src/dynamic_voronoi_port.cpp)
+add_dependencies(libdynamic_voronoi_port
+  ${${PROJECT_NAME}_EXPORTED_TARGETS}
+  ${catkin_EXPORTED_TARGETS})
 
 
 add_library(voronoi_field
@@ -90,6 +95,7 @@ add_library(voronoi_field
 )
 add_dependencies(voronoi_field
   libnanoflann_port
+  libdynamic_voronoi_port
   ${${PROJECT_NAME}_EXPORTED_TARGETS}
   ${catkin_EXPORTED_TARGETS})
 target_link_libraries(voronoi_field

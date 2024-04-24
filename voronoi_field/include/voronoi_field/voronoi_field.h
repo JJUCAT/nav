@@ -7,6 +7,7 @@
 #ifndef _VORONOI_FIELD__VORONOI_FIELD_H_
 #define _VORONOI_FIELD__VORONOI_FIELD_H_
 
+#include "costmap_2d/costmap_2d.h"
 #include <ros/ros.h>
 #include <costmap_2d/layer.h>
 #include <costmap_2d/layered_costmap.h>
@@ -14,6 +15,7 @@
 #include <dynamic_reconfigure/server.h>
 #include <boost/thread.hpp>
 #include <voronoi_field/nanoflann_port.h>
+#include <voronoi_field/dynamic_voronoi_port.h>
 
 namespace costmap_2d
 {
@@ -42,6 +44,15 @@ class VoronoiFieldLayer : public Layer
 
   boost::recursive_mutex* voronoi_access_;
 
+  virtual void GetRange(const costmap_2d::Costmap2D& master_grid,
+    int& min_range_i, int& min_range_j, int& max_range_i, int& max_range_j);
+
+  virtual size_t GetObstacles(std::vector<costmap_2d::MapLocation> obstacles,
+    const costmap_2d::Costmap2D& master_grid, const unsigned char obs_cost,
+    const int min_range_i, const int min_range_j, const int max_range_i, const int max_range_j);
+
+  
+
  private:
 
   dynamic_reconfigure::Server<costmap_2d::VoronoiFieldPluginConfig> *dsrv_;
@@ -49,6 +60,7 @@ class VoronoiFieldLayer : public Layer
 
   double alpha_;
   double dist2O_;
+  double cell_dist2O_;
   double last_min_x_, last_min_y_, last_max_x_, last_max_y_;
   bool need_recompute_;
 
