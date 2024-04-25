@@ -91,8 +91,8 @@ class VoronoiFieldLayer : public Layer
    */
   void PubVoronoiDiagram(const int width, const int height, const std::vector<geometry_msgs::Point>& vdiagram);
 
-  double alpha_;
-  double dist2O_;
+  double alpha_{10.0};
+  double dist2O_{3.0};
   double cell_dist2O_;
   double last_min_x_, last_min_y_, last_max_x_, last_max_y_;
   bool need_recompute_;

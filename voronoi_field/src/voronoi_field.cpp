@@ -1,3 +1,4 @@
+#include "costmap_2d/cost_values.h"
 #include "geometry_msgs/Point.h"
 #include "nav_msgs/GridCells.h"
 #include <voronoi_field/voronoi_field.h>
@@ -49,6 +50,7 @@ void VoronoiFieldLayer::reconfigureCB(costmap_2d::VoronoiFieldPluginConfig &conf
     dist2O_ = config.dist2O;
     cell_dist2O_ = layered_costmap_->getCostmap()->cellDistance(dist2O_);
     need_recompute_ = true;
+    ROS_INFO("[VFL] reconfigureCB, enable %d, alpha %f, dist2O %f", enabled_, alpha_, dist2O_);
   }
 }
 
@@ -91,20 +93,41 @@ void VoronoiFieldLayer::updateCosts(costmap_2d::Costmap2D& master_grid,
   int range_i = max_range_i - min_range_i + 1, range_j = max_range_j - min_range_j + 1;
 
   std::vector<costmap_2d::MapLocation> obstacles;
-  size_t obs_size = GetObstacles(obstacles, master_grid, 254u, min_range_i, min_range_j, max_range_i, max_range_j);
+  size_t obs_size = GetObstacles(obstacles, master_grid, costmap_2d::LETHAL_OBSTACLE,
+    min_range_i, min_range_j, max_range_i, max_range_j);
 
   std::vector<costmap_2d::MapLocation> vdiagram;
   if (obs_size > 0) {
+    std::vector<geometry_msgs::Point> obs_world;
+    VectorMap2World(obstacles, obs_world);
+    auto nanoflann_obs = new nanoflann_port_ns::NanoflannPort(obs_world);
+
     auto voronoi_port = new dynamic_voronoi_port_ns::DynamicVoronoiPort(range_i, range_j, obstacles);
     voronoi_port->GetVoronoiDiagram(vdiagram);
-
     std::vector<geometry_msgs::Point> vdi_world;
     VectorMap2World(vdiagram, vdi_world);
     PubVoronoiDiagram(range_i, range_j, vdi_world);
-    auto nanoflann_port = new nanoflann_port_ns::NanoflannPort(vdi_world);
-    
+    auto nanoflann_vdi = new nanoflann_port_ns::NanoflannPort(vdi_world);
 
-
+    unsigned int mx = master_grid.getSizeInCellsX(), my = master_grid.getSizeInCellsY();
+    for (unsigned int y = 0; y < my; y ++) {
+      for (unsigned int x = 0; x < mx; x ++) {
+        auto cost = master_grid.getCost(x, y);
+        if (cost < costmap_2d::LETHAL_OBSTACLE) {
+          geometry_msgs::Point wp;
+          master_grid.mapToWorld(x, y, wp.x, wp.y);
+          double dist_obs = nanoflann_obs->FindClosestPoint(wp).dist;          
+          double dist_vdi = nanoflann_vdi->FindClosestPoint(wp).dist;
+          double dist_obs_max = 5.0;
+          dist_obs = std::min(dist_obs, dist_obs_max);
+          double field_value = ProjectFieldValue(x, y, dist_obs, dist_vdi, dist_obs_max);
+          cost = static_cast<unsigned char>(field_value * costmap_2d::LETHAL_OBSTACLE);
+          // ROS_INFO("[VFL] map[%u, %u] world[%f,%f], field value %f, cost %u",
+          //   x, y, wp.x, wp.y, field_value, cost);
+          master_grid.setCost(x, y, cost);
+        }
+      }
+    }
   }
 }
 
@@ -170,7 +193,7 @@ double VoronoiFieldLayer::ProjectFieldValue(const double x, const double y,
 {
   double prefix = alpha_ / ( alpha_ + dist_obs);
   double middle = dist_vdi / (dist_obs + dist_vdi);
-  double suffix = std::pow(dist_obs - dist_obs_max, 2)/std::pow(dist_obs_max, 2);
+  double suffix = std::pow(dist2O_ - dist_obs_max, 2)/std::pow(dist_obs_max, 2);
   double field_value = prefix * middle * suffix;
   return field_value;
 }

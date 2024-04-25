@@ -17,8 +17,8 @@ test_costmap:
 
   voronoifield_layer:
     enabled:              true
-    alpha:                1.0
-    dist2O:               5.0
+    alpha:                30.0
+    dist2O:               0.0
 
   inflation_layer:
     enabled:              true
