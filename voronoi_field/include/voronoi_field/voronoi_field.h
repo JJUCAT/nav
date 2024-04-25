@@ -39,22 +39,35 @@ class VoronoiFieldLayer : public Layer
   virtual void updateCosts(costmap_2d::Costmap2D& master_grid,
     int min_i, int min_j, int max_i, int max_j);
 
-  virtual void matchSize();
-
-  virtual void reset();
-
  protected:
 
   boost::recursive_mutex* voronoi_access_;
 
+  /**
+   * @brief  计算更新边界，边界需要 >= 地图实际边界
+   * @param  master_grid  master 地图
+   * @param  min_range_i  地图边界 x 最小值
+   * @param  min_range_j  地图边界 y 最小值
+   * @param  max_range_i  地图边界 x 最大值
+   * @param  max_range_j  地图边界 y 最大值
+   */
   virtual void GetRange(const costmap_2d::Costmap2D& master_grid,
     int& min_range_i, int& min_range_j, int& max_range_i, int& max_range_j);
 
+  /**
+   * @brief  获取地图中的障碍物，基于地图坐标
+   * @param  obstacles  障碍物
+   * @param  master_grid  master 地图
+   * @param  obs_cost  障碍物代价
+   * @param  min_range_i  地图边界 x 最小值
+   * @param  min_range_j  地图边界 y 最小值
+   * @param  max_range_i  地图边界 x 最大值
+   * @param  max_range_j  地图边界 y 最大值
+   * @return size_t  障碍物数量
+   */
   virtual size_t GetObstacles(std::vector<costmap_2d::MapLocation>& obstacles,
     const costmap_2d::Costmap2D& master_grid, const unsigned char obs_cost,
     const int min_range_i, const int min_range_j, const int max_range_i, const int max_range_j);
-
-  
 
  private:
 

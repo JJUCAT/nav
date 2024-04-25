@@ -171,20 +171,6 @@ size_t VoronoiFieldLayer::GetObstacles(std::vector<costmap_2d::MapLocation>& obs
 }
 
 
-
-
-
-void VoronoiFieldLayer::matchSize()
-{
-
-}
-
-void VoronoiFieldLayer::reset()
-{
-
-}
-
-
 // -------------------- protected --------------------
 
 
