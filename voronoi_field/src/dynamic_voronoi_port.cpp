@@ -48,7 +48,7 @@ DynamicVoronoiPort::~DynamicVoronoiPort()
 
 void DynamicVoronoiPort::GetVoronoiDiagram(std::vector<costmap_2d::MapLocation>& voronoi_diagram)
 {
-  for(int y = 0; y < sizeY_; y--) {      
+  for(int y = 0; y < sizeY_; y++) {      
     for(int x = 0; x < sizeX_; x++) {
       if (dv_->isVoronoi(x, y)) {
         costmap_2d::MapLocation ml;

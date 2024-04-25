@@ -15,6 +15,7 @@ find_package(catkin REQUIRED
     tf2_geometry_msgs
     tf2_ros
     visualization_msgs
+    costmap_2d
 )
 
 find_package(Eigen3 REQUIRED)
@@ -77,36 +78,58 @@ add_library(lib3rd_dynamic_voronoi
 )
 
 # 第三方库接口
-add_library(libnanoflann_port
+add_library(nanoflann_port
   src/nanoflann_port.cpp)
-add_dependencies(libnanoflann_port
+add_dependencies(nanoflann_port
   ${${PROJECT_NAME}_EXPORTED_TARGETS}
   ${catkin_EXPORTED_TARGETS})
+target_link_libraries(nanoflann_port
+  ${Boost_LIBRARIES}
+  ${catkin_LIBRARIES}
+)
 
-add_library(libdynamic_voronoi_port
+
+add_library(dynamic_voronoi_port
   src/dynamic_voronoi_port.cpp)
-add_dependencies(libdynamic_voronoi_port
+add_dependencies(dynamic_voronoi_port
+  lib3rd_dynamic_voronoi
   ${${PROJECT_NAME}_EXPORTED_TARGETS}
   ${catkin_EXPORTED_TARGETS})
+target_link_libraries(dynamic_voronoi_port
+  lib3rd_dynamic_voronoi
+  ${Boost_LIBRARIES}
+  ${catkin_LIBRARIES}
+)
 
 
-add_library(voronoi_field
+# 生成一个 lib 需要哪些文件
+add_library(voronoi_field_layer
   src/voronoi_field.cpp
 )
-add_dependencies(voronoi_field
-  libnanoflann_port
-  libdynamic_voronoi_port
+# lib 依赖哪些文件，在生成 lib 之前需要先编译的文件
+add_dependencies(voronoi_field_layer
+  nanoflann_port
+  dynamic_voronoi_port
   ${${PROJECT_NAME}_EXPORTED_TARGETS}
   ${catkin_EXPORTED_TARGETS})
-target_link_libraries(voronoi_field
+# lib 链接需要的文件/库，主要是调用的函数所在的库
+target_link_libraries(voronoi_field_layer
+  nanoflann_port
+  dynamic_voronoi_port
   ${Boost_LIBRARIES}
+  ${catkin_LIBRARIES}
+)
+
+add_executable(${PROJECT_NAME}_node src/voronoi_field_node.cpp)
+target_link_libraries(${PROJECT_NAME}_node
+  ${CERES_LIBRARIES}
   ${catkin_LIBRARIES}
 )
 
 # gtest 参考 costmap2d 的配置
 
 install(TARGETS
-    voronoi_field
+    voronoi_field_layer
     ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
     LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
     RUNTIME DESTINATION ${CATKIN_GLOBAL_BIN_DESTINATION}

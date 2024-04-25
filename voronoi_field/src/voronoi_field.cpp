@@ -1,3 +1,5 @@
+#include "geometry_msgs/Point.h"
+#include "nav_msgs/GridCells.h"
 #include <voronoi_field/voronoi_field.h>
 #include <pluginlib/class_list_macros.hpp>
 PLUGINLIB_EXPORT_CLASS(costmap_2d::VoronoiFieldLayer, costmap_2d::Layer)
@@ -7,7 +9,7 @@ namespace costmap_2d {
 
 VoronoiFieldLayer::VoronoiFieldLayer()
 {
-
+  voronoi_access_ = new boost::recursive_mutex();
 }
 
 VoronoiFieldLayer::~VoronoiFieldLayer()
@@ -22,6 +24,7 @@ void VoronoiFieldLayer::onInitialize()
 
     ros::NodeHandle nh("~/" + name_);
     need_recompute_ = false;
+    voronoi_diagram_pub_ = nh.advertise<nav_msgs::GridCells>("voronoi_diagram", 1);
     dynamic_reconfigure::Server<costmap_2d::VoronoiFieldPluginConfig>::CallbackType cb =
       [this](auto& config, auto level){ reconfigureCB(config, level); };
 
@@ -85,12 +88,17 @@ void VoronoiFieldLayer::updateCosts(costmap_2d::Costmap2D& master_grid,
 {
   int min_range_i=min_i, min_range_j=min_j, max_range_i=max_i, max_range_j=max_j;
   GetRange(master_grid, min_range_i, min_range_j, max_range_i, max_range_j);
-
+  int range_i = max_range_i - min_range_i + 1, range_j = max_range_j - min_range_j + 1;
+  ROS_INFO("[VFL] min i %d, min j %d, max i %d, max j %d, i %d, j %d.", min_i, min_j, max_i, max_j, range_i, range_j);
   std::vector<costmap_2d::MapLocation> obstacles;
   size_t obs_size = GetObstacles(obstacles, master_grid, 254u, min_range_i, min_range_j, max_range_i, max_range_j);
-
+  ROS_INFO("[VFL] obstacle size %lu.", obs_size);
+  std::vector<costmap_2d::MapLocation> vdiagram;
   if (obs_size > 0) {
-    
+    auto dynamic_voronoi_port = new dynamic_voronoi_port_ns::DynamicVoronoiPort(range_i, range_j, obstacles);
+    dynamic_voronoi_port->GetVoronoiDiagram(vdiagram);
+    ROS_INFO("[VFL] vdiagram size %lu.", vdiagram.size());
+    PubVoronoiDiagram(range_i, range_j, vdiagram);
   }
 }
 
@@ -145,6 +153,28 @@ void VoronoiFieldLayer::matchSize()
 void VoronoiFieldLayer::reset()
 {
 
+}
+
+
+// -------------------- protected --------------------
+
+
+void VoronoiFieldLayer::PubVoronoiDiagram(const int width, const int height,
+  const std::vector<costmap_2d::MapLocation>& vdiagram)
+{
+  auto map = layered_costmap_->getCostmap();
+
+  nav_msgs::GridCells grid;
+  grid.header.seq = 0;
+  grid.header.stamp = ros::Time::now();
+  grid.header.frame_id = layered_costmap_->getGlobalFrameID();
+  grid.cell_width = width * map->getResolution();
+  grid.cell_height = height * map->getResolution();
+  for (auto p : vdiagram) {
+    geometry_msgs::Point point;
+    map->mapToWorld(p.x, p.y, point.x, point.y);
+  }
+  voronoi_diagram_pub_.publish(grid);
 }
 
 

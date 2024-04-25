@@ -1,0 +1,10 @@
+<launch>
+  <node name="map_server" pkg="map_server" type="map_server" args="$(find voronoi_field)/config/map.yaml"/>
+  <node name="tf_node" pkg="tf" type="static_transform_publisher" args="0 0 0 0 0 0 map base_link 10"/>
+  <node pkg="voronoi_field" type="voronoi_field_node" name="vfn" output="screen">
+    <rosparam file="$(find voronoi_field)/config/test_costmap.yaml" command="load"/>
+  </node>
+
+  <arg name="rviz" default="true" />
+  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find voronoi_field)/config/rviz.rviz" if="$(arg rviz)"/>
+</launch>

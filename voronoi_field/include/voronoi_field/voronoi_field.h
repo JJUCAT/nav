@@ -16,6 +16,7 @@
 #include <boost/thread.hpp>
 #include <voronoi_field/nanoflann_port.h>
 #include <voronoi_field/dynamic_voronoi_port.h>
+#include <nav_msgs/GridCells.h>
 
 namespace costmap_2d
 {
@@ -58,11 +59,21 @@ class VoronoiFieldLayer : public Layer
   dynamic_reconfigure::Server<costmap_2d::VoronoiFieldPluginConfig> *dsrv_;
   void reconfigureCB(costmap_2d::VoronoiFieldPluginConfig &config, uint32_t level);
 
+  /**
+   * @brief  发布 voronoi 图
+   * @param  width  地图宽
+   * @param  height  地图高
+   * @param  vdiagram  voronoi 数据
+   */
+  void PubVoronoiDiagram(const int width, const int height, const std::vector<costmap_2d::MapLocation>& vdiagram);
+
   double alpha_;
   double dist2O_;
   double cell_dist2O_;
   double last_min_x_, last_min_y_, last_max_x_, last_max_y_;
   bool need_recompute_;
+
+  ros::Publisher voronoi_diagram_pub_;
 
 }; // class VoronoiFieldLayer
 
