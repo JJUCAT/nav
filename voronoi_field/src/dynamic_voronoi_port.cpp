@@ -28,7 +28,6 @@ DynamicVoronoiPort::DynamicVoronoiPort(const int sizeX, const int sizeY,
     memset(map_[x], false, sizeY_);
   }
 
-  ROS_INFO("[VFL] obstacles size %lu", obstacles.size());
   for (auto obs : obstacles)
     map_[obs.x][obs.y] = true;
 
@@ -36,7 +35,7 @@ DynamicVoronoiPort::DynamicVoronoiPort(const int sizeX, const int sizeY,
   dv_->initializeMap(sizeX, sizeY, map_);
   dv_->update(); 
   dv_->prune();
-  dv_->updateAlternativePrunedDiagram();
+  // dv_->updateAlternativePrunedDiagram();
 }
 
 DynamicVoronoiPort::~DynamicVoronoiPort()
@@ -54,6 +53,7 @@ void DynamicVoronoiPort::GetVoronoiDiagram(std::vector<costmap_2d::MapLocation>&
   for(int y = 0; y < sizeY_; y++) {      
     for(int x = 0; x < sizeX_; x++) {
       if (dv_->isVoronoi(x, y)) {
+      // if (dv_->isVoronoiAlternative(x, y)) {
         costmap_2d::MapLocation ml;
         ml.x = x; ml.y = y;
         voronoi_diagram.push_back(ml);

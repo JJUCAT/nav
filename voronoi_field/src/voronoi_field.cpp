@@ -88,17 +88,23 @@ void VoronoiFieldLayer::updateCosts(costmap_2d::Costmap2D& master_grid,
 {
   int min_range_i=min_i, min_range_j=min_j, max_range_i=max_i, max_range_j=max_j;
   GetRange(master_grid, min_range_i, min_range_j, max_range_i, max_range_j);
-  int range_i = max_range_i - min_range_i, range_j = max_range_j - min_range_j;
-  ROS_INFO("[VFL] min i %d, min j %d, max i %d, max j %d, i %d, j %d.", min_i, min_j, max_i, max_j, range_i, range_j);
+  int range_i = max_range_i - min_range_i + 1, range_j = max_range_j - min_range_j + 1;
+
   std::vector<costmap_2d::MapLocation> obstacles;
   size_t obs_size = GetObstacles(obstacles, master_grid, 254u, min_range_i, min_range_j, max_range_i, max_range_j);
-  ROS_INFO("[VFL] obstacle size %lu.", obs_size);
+
   std::vector<costmap_2d::MapLocation> vdiagram;
   if (obs_size > 0) {
-    auto dynamic_voronoi_port = new dynamic_voronoi_port_ns::DynamicVoronoiPort(range_i, range_j, obstacles);
-    dynamic_voronoi_port->GetVoronoiDiagram(vdiagram);
-    ROS_INFO("[VFL] vdiagram size %lu.", vdiagram.size());
-    PubVoronoiDiagram(range_i, range_j, vdiagram);
+    auto voronoi_port = new dynamic_voronoi_port_ns::DynamicVoronoiPort(range_i, range_j, obstacles);
+    voronoi_port->GetVoronoiDiagram(vdiagram);
+
+    std::vector<geometry_msgs::Point> vdi_world;
+    VectorMap2World(vdiagram, vdi_world);
+    PubVoronoiDiagram(range_i, range_j, vdi_world);
+    auto nanoflann_port = new nanoflann_port_ns::NanoflannPort(vdi_world);
+    
+
+
   }
 }
 
@@ -159,8 +165,31 @@ void VoronoiFieldLayer::reset()
 // -------------------- protected --------------------
 
 
+double VoronoiFieldLayer::ProjectFieldValue(const double x, const double y,
+  const double dist_obs, const double dist_vdi, const double dist_obs_max)
+{
+  double prefix = alpha_ / ( alpha_ + dist_obs);
+  double middle = dist_vdi / (dist_obs + dist_vdi);
+  double suffix = std::pow(dist_obs - dist_obs_max, 2)/std::pow(dist_obs_max, 2);
+  double field_value = prefix * middle * suffix;
+  return field_value;
+}
+
+
+void VoronoiFieldLayer::VectorMap2World(const std::vector<costmap_2d::MapLocation>& obs_map,
+  std::vector<geometry_msgs::Point>& obs_world)
+{
+  auto map = layered_costmap_->getCostmap();
+
+  for (auto p : obs_map) {
+    geometry_msgs::Point cell;
+    map->mapToWorld(p.x, p.y, cell.x, cell.y);
+    obs_world.push_back(cell);
+  }
+}
+
 void VoronoiFieldLayer::PubVoronoiDiagram(const int width, const int height,
-  const std::vector<costmap_2d::MapLocation>& vdiagram)
+  const std::vector<geometry_msgs::Point>& vdiagram)
 {
   auto map = layered_costmap_->getCostmap();
 
@@ -170,11 +199,7 @@ void VoronoiFieldLayer::PubVoronoiDiagram(const int width, const int height,
   grid.header.frame_id = layered_costmap_->getGlobalFrameID();
   grid.cell_width = map->getResolution();
   grid.cell_height = map->getResolution();
-  for (auto p : vdiagram) {
-    geometry_msgs::Point cell;
-    map->mapToWorld(p.x, p.y, cell.x, cell.y);
-    grid.cells.push_back(cell);
-  }
+  grid.cells = vdiagram;
   voronoi_diagram_pub_.publish(grid);
 }
 

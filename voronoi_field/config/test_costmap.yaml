@@ -1,7 +1,7 @@
 test_costmap:
   global_frame: map
   robot_base_frame: base_link
-  update_frequency: 5
+  update_frequency: 1
   publish_frequency: 5
   track_unknown_space: true
   width: 10

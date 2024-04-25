@@ -10,7 +10,7 @@
 #include <costmap_2d/costmap_2d.h>
 #include <nanoflann/nanoflann.hpp>
 #include <nanoflann/utils.h>
-#include <geometry_msgs/Point32.h>
+#include <geometry_msgs/Point.h>
 #include <nav_msgs/Path.h>
 
 
@@ -33,18 +33,18 @@ class NanoflannPort
 
  public:
   NanoflannPort() {}
-  NanoflannPort(const std::vector<costmap_2d::MapLocation>& nl);
+  NanoflannPort(const std::vector<geometry_msgs::Point>& nl);
   ~NanoflannPort();
 
-  void Init(const std::vector<costmap_2d::MapLocation>& nl);
+  void Init(const std::vector<geometry_msgs::Point>& nl);
   void Reset();
 
-  KDTIndex FindClosestPoint(const costmap_2d::MapLocation p) const;
+  KDTIndex FindClosestPoint(const geometry_msgs::Point p) const;
 
-  size_t FindClosestPoint(const costmap_2d::MapLocation p,
+  size_t FindClosestPoint(const geometry_msgs::Point p,
     const size_t num, std::vector<KDTIndex>& idx_list) const;
 
-  size_t FindPointsInRadius(const costmap_2d::MapLocation p,
+  size_t FindPointsInRadius(const geometry_msgs::Point p,
     const double r, std::vector<KDTIndex>& idx_list) const;
 
  private:

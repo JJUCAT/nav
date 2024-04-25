@@ -10,7 +10,7 @@
 namespace nanoflann_port_ns
 {
 
-NanoflannPort::NanoflannPort(const std::vector<costmap_2d::MapLocation>& nl)
+NanoflannPort::NanoflannPort(const std::vector<geometry_msgs::Point>& nl)
 {
   Init(nl);
 }
@@ -20,7 +20,7 @@ NanoflannPort::~NanoflannPort()
   Reset();
 }
 
-void NanoflannPort::Init(const std::vector<costmap_2d::MapLocation>& nl)
+void NanoflannPort::Init(const std::vector<geometry_msgs::Point>& nl)
 {
   if (nl.empty()) return;
 
@@ -43,10 +43,9 @@ void NanoflannPort::Reset()
   kdtree_.reset();
 }
 
-KDTIndex NanoflannPort::FindClosestPoint(const costmap_2d::MapLocation p) const
+KDTIndex NanoflannPort::FindClosestPoint(const geometry_msgs::Point p) const
 {
-  double x = p.x, y = p.y;
-  double query_pnt[3] = {x, y, 0.0};
+  double query_pnt[3] = {p.x, p.y, p.z};
   size_t num_results = 1;
   std::vector<unsigned int> ret_index(num_results);
   std::vector<double> out_dist_sqr(num_results);
@@ -65,12 +64,11 @@ KDTIndex NanoflannPort::FindClosestPoint(const costmap_2d::MapLocation p) const
   return kdti;
 }
 
-size_t NanoflannPort::FindClosestPoint(const costmap_2d::MapLocation p,
+size_t NanoflannPort::FindClosestPoint(const geometry_msgs::Point p,
   const size_t num, std::vector<KDTIndex>& idx_list) const
 {
   if (pc_ == nullptr) return 0;
-  double x = p.x, y = p.y;
-  double query_pnt[3] = {x, y, 0.0};
+  double query_pnt[3] = {p.x, p.y, p.z};
   size_t num_results = num;
   std::vector<unsigned int> ret_index(num_results);
   std::vector<double> out_dist_sqr(num_results);
@@ -91,12 +89,11 @@ size_t NanoflannPort::FindClosestPoint(const costmap_2d::MapLocation p,
   return idx_list.size();
 }
 
-size_t NanoflannPort::FindPointsInRadius(const costmap_2d::MapLocation p,
+size_t NanoflannPort::FindPointsInRadius(const geometry_msgs::Point p,
   const double r, std::vector<KDTIndex>& idx_list) const
 {
   if (pc_ == nullptr) return 0;
-  double x = p.x, y = p.y;
-  double query_pnt[3] = {x, y, 0.0};
+  double query_pnt[3] = {p.x, p.y, p.z};
   std::vector<std::pair<uint32_t, double>> ret_matches;
   size_t num = kdtree_->radiusSearch(&query_pnt[0], r, ret_matches, nanoflann::SearchParams());
 

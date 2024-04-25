@@ -14,9 +14,11 @@
 #include <voronoi_field/VoronoiFieldPluginConfig.h>
 #include <dynamic_reconfigure/server.h>
 #include <boost/thread.hpp>
-#include <voronoi_field/nanoflann_port.h>
 #include <voronoi_field/dynamic_voronoi_port.h>
+#include <voronoi_field/nanoflann_port.h>
 #include <nav_msgs/GridCells.h>
+#include <geometry_msgs/Point.h>
+
 
 namespace costmap_2d
 {
@@ -60,12 +62,34 @@ class VoronoiFieldLayer : public Layer
   void reconfigureCB(costmap_2d::VoronoiFieldPluginConfig &config, uint32_t level);
 
   /**
+   * @brief  计算势场值
+   * @param  x  坐标 x
+   * @param  y  坐标 y
+   * @param  dist_obs   [x,y] 最近障碍物距离
+   * @param  dist_vdi   [x,y] 最近 voronoi 图距离
+   * @param  dist_obs_max   地图中最远障碍物距离
+   * @return double 
+   */
+  double ProjectFieldValue(const double x, const double y,
+    const double dist_obs, const double dist_vdi, const double dist_obs_max);
+
+
+  /**
+   * @brief  vector 地图坐标转 vector 世界坐标
+   * @param  obs_map  地图坐标
+   * @param  obs_world   世界坐标
+   */
+  void VectorMap2World(const std::vector<costmap_2d::MapLocation>& map,
+    std::vector<geometry_msgs::Point>& world);
+
+
+  /**
    * @brief  发布 voronoi 图
    * @param  width  地图宽
    * @param  height  地图高
    * @param  vdiagram  voronoi 数据
    */
-  void PubVoronoiDiagram(const int width, const int height, const std::vector<costmap_2d::MapLocation>& vdiagram);
+  void PubVoronoiDiagram(const int width, const int height, const std::vector<geometry_msgs::Point>& vdiagram);
 
   double alpha_;
   double dist2O_;
