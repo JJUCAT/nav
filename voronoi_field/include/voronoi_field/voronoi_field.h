@@ -48,7 +48,7 @@ class VoronoiFieldLayer : public Layer
   virtual void GetRange(const costmap_2d::Costmap2D& master_grid,
     int& min_range_i, int& min_range_j, int& max_range_i, int& max_range_j);
 
-  virtual size_t GetObstacles(std::vector<costmap_2d::MapLocation> obstacles,
+  virtual size_t GetObstacles(std::vector<costmap_2d::MapLocation>& obstacles,
     const costmap_2d::Costmap2D& master_grid, const unsigned char obs_cost,
     const int min_range_i, const int min_range_j, const int max_range_i, const int max_range_j);
 

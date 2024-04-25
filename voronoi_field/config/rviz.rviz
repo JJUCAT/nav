@@ -61,7 +61,7 @@ Visualization Manager:
       Value: true
     - Alpha: 1
       Class: rviz/GridCells
-      Color: 252; 233; 79
+      Color: 239; 41; 41
       Enabled: true
       Name: GridCells
       Queue Size: 10
@@ -96,7 +96,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 15.58057975769043
+      Distance: 5.603314399719238
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
@@ -104,17 +104,17 @@ Visualization Manager:
         Value: false
       Field of View: 0.7853981852531433
       Focal Point:
-        X: 0.19922354817390442
-        Y: -1.1622816324234009
-        Z: -0.0019753417000174522
+        X: 4.1261467933654785
+        Y: -3.1845569610595703
+        Z: 0.001964034279808402
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 1.509796380996704
+      Pitch: 1.5697963237762451
       Target Frame: <Fixed Frame>
-      Yaw: 3.1304030418395996
+      Yaw: 3.1254031658172607
     Saved: ~
 Window Geometry:
   Displays:

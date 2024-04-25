@@ -88,7 +88,7 @@ void VoronoiFieldLayer::updateCosts(costmap_2d::Costmap2D& master_grid,
 {
   int min_range_i=min_i, min_range_j=min_j, max_range_i=max_i, max_range_j=max_j;
   GetRange(master_grid, min_range_i, min_range_j, max_range_i, max_range_j);
-  int range_i = max_range_i - min_range_i + 1, range_j = max_range_j - min_range_j + 1;
+  int range_i = max_range_i - min_range_i, range_j = max_range_j - min_range_j;
   ROS_INFO("[VFL] min i %d, min j %d, max i %d, max j %d, i %d, j %d.", min_i, min_j, max_i, max_j, range_i, range_j);
   std::vector<costmap_2d::MapLocation> obstacles;
   size_t obs_size = GetObstacles(obstacles, master_grid, 254u, min_range_i, min_range_j, max_range_i, max_range_j);
@@ -124,7 +124,7 @@ void VoronoiFieldLayer::GetRange(const costmap_2d::Costmap2D& master_grid,
 }
 
 
-size_t VoronoiFieldLayer::GetObstacles(std::vector<costmap_2d::MapLocation> obstacles,
+size_t VoronoiFieldLayer::GetObstacles(std::vector<costmap_2d::MapLocation>& obstacles,
   const costmap_2d::Costmap2D& master_grid, const unsigned char obs_cost,
   const int min_range_i, const int min_range_j, const int max_range_i, const int max_range_j)
 {
@@ -168,11 +168,12 @@ void VoronoiFieldLayer::PubVoronoiDiagram(const int width, const int height,
   grid.header.seq = 0;
   grid.header.stamp = ros::Time::now();
   grid.header.frame_id = layered_costmap_->getGlobalFrameID();
-  grid.cell_width = width * map->getResolution();
-  grid.cell_height = height * map->getResolution();
+  grid.cell_width = map->getResolution();
+  grid.cell_height = map->getResolution();
   for (auto p : vdiagram) {
-    geometry_msgs::Point point;
-    map->mapToWorld(p.x, p.y, point.x, point.y);
+    geometry_msgs::Point cell;
+    map->mapToWorld(p.x, p.y, cell.x, cell.y);
+    grid.cells.push_back(cell);
   }
   voronoi_diagram_pub_.publish(grid);
 }
