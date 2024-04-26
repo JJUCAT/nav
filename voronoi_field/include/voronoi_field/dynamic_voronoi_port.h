@@ -29,6 +29,44 @@ class DynamicVoronoiPort
 
   void Save(const char* filename);
 
+ protected:
+
+  /**
+   * @brief  是否是边界
+   * @param  x  栅格 x
+   * @param  y  栅格 y
+   * @return true 
+   * @return false 
+   */
+  bool IsBoundary(const int x, const int y);
+
+  /**
+   * @brief  是否靠近边界
+   * @param  x  栅格 x
+   * @param  y  栅格 y
+   * @return true 
+   * @return false 
+   */
+  bool IsNearBoundary(const int x, const int y);
+
+  /**
+   * @brief  是否是端点，需要检查邻近 8 个栅格，使用前需要排除 [x,y] 不靠近边界
+   * @param  x  栅格 x
+   * @param  y  栅格 y
+   * @return true 
+   * @return false 
+   */
+  bool IsLineEnd(const int x, const int y);
+
+  /**
+   * @brief  是否是交叉点，需要检查邻近 8 个栅格，使用前需要排除 [x,y] 不靠近边界
+   * @param  x  栅格 x
+   * @param  y  栅格 y
+   * @return true 
+   * @return false 
+   */
+  bool IsLineJunctions(const int x, const int y);
+
  private:
 
   std::shared_ptr<DynamicVoronoi> dv_;
