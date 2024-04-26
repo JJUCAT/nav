@@ -47,8 +47,8 @@ DynamicVoronoiPort::DynamicVoronoiPort(const int sizeX, const int sizeY,
   dv_ = std::make_shared<DynamicVoronoi>();
   dv_->initializeMap(sizeX_, sizeY_, map_);
   dv_->update(); 
-  // dv_->prune();
-  dv_->updateAlternativePrunedDiagram();
+  dv_->prune();
+  // dv_->updateAlternativePrunedDiagram();
 }
 
 DynamicVoronoiPort::~DynamicVoronoiPort()
@@ -65,8 +65,8 @@ void DynamicVoronoiPort::GetVoronoiDiagram(std::vector<costmap_2d::MapLocation>&
 {
   for(int y = 0; y < sizeY_; y++) {      
     for(int x = 0; x < sizeX_; x++) {
-      // if (dv_->isVoronoi(x, y)) {
-      if (dv_->isVoronoiAlternative(x, y)) {
+      if (dv_->isVoronoi(x, y)) {
+      // if (dv_->isVoronoiAlternative(x, y)) {
         costmap_2d::MapLocation ml;
         ml.x = x; ml.y = y;
         if (boundary_) { ml.x-=boundary_size_; ml.y-=boundary_size_; }
