@@ -26,6 +26,7 @@ void VoronoiFieldLayer::onInitialize()
     ros::NodeHandle nh("~/" + name_);
     need_recompute_ = false;
     voronoi_diagram_pub_ = nh.advertise<nav_msgs::GridCells>("voronoi_diagram", 1);
+    pruned_voronoi_diagram_pub_ = nh.advertise<nav_msgs::GridCells>("pruned_voronoi_diagram", 1);
     dynamic_reconfigure::Server<costmap_2d::VoronoiFieldPluginConfig>::CallbackType cb =
       [this](auto& config, auto level){ reconfigureCB(config, level); };
 
@@ -96,7 +97,6 @@ void VoronoiFieldLayer::updateCosts(costmap_2d::Costmap2D& master_grid,
   size_t obs_size = GetObstacles(obstacles, master_grid, costmap_2d::LETHAL_OBSTACLE,
     min_range_i, min_range_j, max_range_i, max_range_j);
 
-  std::vector<costmap_2d::MapLocation> vdiagram;
   if (obs_size > 0) {
     std::vector<geometry_msgs::Point> obs_world;
     VectorMap2World(obstacles, obs_world);
@@ -105,10 +105,16 @@ void VoronoiFieldLayer::updateCosts(costmap_2d::Costmap2D& master_grid,
     auto voronoi_port = new dynamic_voronoi_port_ns::DynamicVoronoiPort(range_i, range_j, obstacles, true);
     std::string savepath = std::getenv("HOME") + std::string("/voronoifield.pgm");
     voronoi_port->Save(savepath.c_str());
+    std::vector<costmap_2d::MapLocation> vdiagram;
     voronoi_port->GetVoronoiDiagram(vdiagram);
     std::vector<geometry_msgs::Point> vdi_world;
     VectorMap2World(vdiagram, vdi_world);
-    PubVoronoiDiagram(range_i, range_j, vdi_world);
+    PubVoronoiDiagram(voronoi_diagram_pub_, range_i, range_j, vdi_world);
+    std::vector<costmap_2d::MapLocation> pruned_vdiagram = vdiagram;
+    voronoi_port->GetPruneVoronoiDiagram(pruned_vdiagram);
+    std::vector<geometry_msgs::Point> pvdi_world;
+    PubVoronoiDiagram(pruned_voronoi_diagram_pub_, range_i, range_j, pvdi_world);
+
     auto nanoflann_vdi = new nanoflann_port_ns::NanoflannPort(vdi_world);
 
     unsigned int mx = master_grid.getSizeInCellsX(), my = master_grid.getSizeInCellsY();
@@ -215,7 +221,8 @@ void VoronoiFieldLayer::VectorMap2World(const std::vector<costmap_2d::MapLocatio
   }
 }
 
-void VoronoiFieldLayer::PubVoronoiDiagram(const int width, const int height,
+void VoronoiFieldLayer::PubVoronoiDiagram(const ros::Publisher& pub,
+  const int width, const int height,
   const std::vector<geometry_msgs::Point>& vdiagram)
 {
   auto map = layered_costmap_->getCostmap();
@@ -227,7 +234,7 @@ void VoronoiFieldLayer::PubVoronoiDiagram(const int width, const int height,
   grid.cell_width = map->getResolution();
   grid.cell_height = map->getResolution();
   grid.cells = vdiagram;
-  voronoi_diagram_pub_.publish(grid);
+  pub.publish(grid);
 }
 
 

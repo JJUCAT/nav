@@ -76,6 +76,35 @@ void DynamicVoronoiPort::GetVoronoiDiagram(std::vector<costmap_2d::MapLocation>&
   }
 }
 
+void DynamicVoronoiPort::GetPruneVoronoiDiagram(std::vector<costmap_2d::MapLocation>& voronoi_diagram)
+{
+  std::vector<size_t> line_junctions;
+  std::vector<size_t> line_ends;
+  FindJunctionsAndEnd(voronoi_diagram, line_junctions, line_ends);
+  std::sort(line_ends.begin(), line_ends.end(), std::greater<int>()); // 从大到小排
+  ROS_INFO("[VFL] first prune, ends:%lu, junctions:%lu", line_ends.size(), line_junctions.size());
+
+  auto IsHit = [&](const size_t e, const std::vector<size_t>& line_junctions) {
+    for (auto j : line_junctions) {
+      if (e == j) return true;
+    }
+    return false;
+  };
+
+  size_t loop = 0;
+  while (!line_ends.empty()) {
+    loop ++;
+    for (auto e : line_ends) {
+      if (!IsHit(e, line_junctions)) voronoi_diagram.erase(voronoi_diagram.begin()+e);
+    }
+    line_junctions.clear();
+    line_ends.clear();
+    FindJunctionsAndEnd(voronoi_diagram, line_junctions, line_ends);
+    std::sort(line_ends.begin(), line_ends.end(), std::greater<int>());
+    ROS_INFO("[VFL] [%lu] prune, ends:%lu, junctions:%lu", loop, line_ends.size(), line_junctions.size());
+  }
+}
+
 float DynamicVoronoiPort::GetDistance2Obstacle(const int x, const int y)
 {
   return dv_->getDistance(x, y);
@@ -304,6 +333,25 @@ bool DynamicVoronoiPort::IsLineJunctions(const int x, const int y)
   }
   return false;
 }
+
+void DynamicVoronoiPort::FindJunctionsAndEnd(
+  const std::vector<costmap_2d::MapLocation>& voronoi_diagram,
+  std::vector<size_t>& line_junctions, std::vector<size_t>& line_ends)
+{
+  for (size_t i = 0; i < voronoi_diagram.size(); i ++) {
+    const auto& v = voronoi_diagram.at(i);
+    if (IsNearBoundary(v.x, v.y)) {
+      line_ends.push_back(i);
+    } else if (IsLineJunctions(v.x, v.y)) {
+      line_junctions.push_back(i);
+    } else if (IsLineEnd(v.x, v.y)) {
+      line_ends.push_back(i);
+    }
+  }
+}
+
+
+
 
 
 

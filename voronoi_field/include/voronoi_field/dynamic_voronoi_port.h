@@ -25,6 +25,8 @@ class DynamicVoronoiPort
 
   void GetVoronoiDiagram(std::vector<costmap_2d::MapLocation>& voronoi_diagram);
 
+  void GetPruneVoronoiDiagram(std::vector<costmap_2d::MapLocation>& branch);
+
   float GetDistance2Obstacle(const int x, const int y);
 
   void Save(const char* filename);
@@ -66,6 +68,11 @@ class DynamicVoronoiPort
    * @return false 
    */
   bool IsLineJunctions(const int x, const int y);
+
+
+  void FindJunctionsAndEnd(
+    const std::vector<costmap_2d::MapLocation>& voronoi_diagram,
+    std::vector<size_t>& line_junctions, std::vector<size_t>& line_ends);
 
  private:
 

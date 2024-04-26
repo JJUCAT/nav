@@ -102,11 +102,12 @@ class VoronoiFieldLayer : public Layer
 
   /**
    * @brief  发布 voronoi 图
+   * @param  pub 发布器
    * @param  width  地图宽
    * @param  height  地图高
    * @param  vdiagram  voronoi 数据
    */
-  void PubVoronoiDiagram(const int width, const int height, const std::vector<geometry_msgs::Point>& vdiagram);
+  void PubVoronoiDiagram(const ros::Publisher& pub, const int width, const int height, const std::vector<geometry_msgs::Point>& vdiagram);
 
   double alpha_{10.0};
   double dist2O_{3.0};
@@ -115,6 +116,7 @@ class VoronoiFieldLayer : public Layer
   bool need_recompute_;
 
   ros::Publisher voronoi_diagram_pub_;
+  ros::Publisher pruned_voronoi_diagram_pub_;
 
 }; // class VoronoiFieldLayer
 
