@@ -35,6 +35,7 @@ class DynamicVoronoiPort
   int sizeX_, sizeY_;
   bool **map_ = nullptr;
   bool boundary_{false};
+  int boundary_size_{10};
 
 }; // class DynamicVoronoiPort
 

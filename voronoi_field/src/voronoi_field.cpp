@@ -102,7 +102,7 @@ void VoronoiFieldLayer::updateCosts(costmap_2d::Costmap2D& master_grid,
     VectorMap2World(obstacles, obs_world);
     auto nanoflann_obs = new nanoflann_port_ns::NanoflannPort(obs_world);
 
-    auto voronoi_port = new dynamic_voronoi_port_ns::DynamicVoronoiPort(range_i, range_j, obstacles);
+    auto voronoi_port = new dynamic_voronoi_port_ns::DynamicVoronoiPort(range_i, range_j, obstacles, true);
     std::string savepath = std::getenv("HOME") + std::string("/voronoifield.pgm");
     voronoi_port->Save(savepath.c_str());
     voronoi_port->GetVoronoiDiagram(vdiagram);
@@ -113,7 +113,6 @@ void VoronoiFieldLayer::updateCosts(costmap_2d::Costmap2D& master_grid,
 
     unsigned int mx = master_grid.getSizeInCellsX(), my = master_grid.getSizeInCellsY();
     double farest = GetFarestObstacleDistance(*nanoflann_obs, vdi_world);
-    std::cout << "farest distance :" << farest << std::endl;
     ROS_INFO("[VFL] farest distance %f", farest);
     for (unsigned int y = 0; y < my; y ++) {
       for (unsigned int x = 0; x < mx; x ++) {
