@@ -74,6 +74,10 @@ class VoronoiFieldLayer : public Layer
   dynamic_reconfigure::Server<costmap_2d::VoronoiFieldPluginConfig> *dsrv_;
   void reconfigureCB(costmap_2d::VoronoiFieldPluginConfig &config, uint32_t level);
 
+
+  double GetFarestObstacleDistance(const nanoflann_port_ns::NanoflannPort& nanoflann_obs,
+    const std::vector<geometry_msgs::Point>& world);
+
   /**
    * @brief  计算势场值
    * @param  x  坐标 x

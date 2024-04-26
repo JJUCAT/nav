@@ -90,7 +90,7 @@ void VoronoiFieldLayer::updateCosts(costmap_2d::Costmap2D& master_grid,
 {
   int min_range_i=min_i, min_range_j=min_j, max_range_i=max_i, max_range_j=max_j;
   GetRange(master_grid, min_range_i, min_range_j, max_range_i, max_range_j);
-  int range_i = max_range_i - min_range_i + 1, range_j = max_range_j - min_range_j + 1;
+  int range_i = max_range_i - min_range_i, range_j = max_range_j - min_range_j;
 
   std::vector<costmap_2d::MapLocation> obstacles;
   size_t obs_size = GetObstacles(obstacles, master_grid, costmap_2d::LETHAL_OBSTACLE,
@@ -103,6 +103,8 @@ void VoronoiFieldLayer::updateCosts(costmap_2d::Costmap2D& master_grid,
     auto nanoflann_obs = new nanoflann_port_ns::NanoflannPort(obs_world);
 
     auto voronoi_port = new dynamic_voronoi_port_ns::DynamicVoronoiPort(range_i, range_j, obstacles);
+    std::string savepath = std::getenv("HOME") + std::string("/voronoifield.pgm");
+    voronoi_port->Save(savepath.c_str());
     voronoi_port->GetVoronoiDiagram(vdiagram);
     std::vector<geometry_msgs::Point> vdi_world;
     VectorMap2World(vdiagram, vdi_world);
@@ -110,6 +112,9 @@ void VoronoiFieldLayer::updateCosts(costmap_2d::Costmap2D& master_grid,
     auto nanoflann_vdi = new nanoflann_port_ns::NanoflannPort(vdi_world);
 
     unsigned int mx = master_grid.getSizeInCellsX(), my = master_grid.getSizeInCellsY();
+    double farest = GetFarestObstacleDistance(*nanoflann_obs, vdi_world);
+    std::cout << "farest distance :" << farest << std::endl;
+    ROS_INFO("[VFL] farest distance %f", farest);
     for (unsigned int y = 0; y < my; y ++) {
       for (unsigned int x = 0; x < mx; x ++) {
         auto cost = master_grid.getCost(x, y);
@@ -118,7 +123,7 @@ void VoronoiFieldLayer::updateCosts(costmap_2d::Costmap2D& master_grid,
           master_grid.mapToWorld(x, y, wp.x, wp.y);
           double dist_obs = nanoflann_obs->FindClosestPoint(wp).dist;          
           double dist_vdi = nanoflann_vdi->FindClosestPoint(wp).dist;
-          double dist_obs_max = 5.0;
+          double dist_obs_max = farest;
           dist_obs = std::min(dist_obs, dist_obs_max);
           double field_value = ProjectFieldValue(x, y, dist_obs, dist_vdi, dist_obs_max);
           cost = static_cast<unsigned char>(field_value * costmap_2d::LETHAL_OBSTACLE);
@@ -157,8 +162,9 @@ size_t VoronoiFieldLayer::GetObstacles(std::vector<costmap_2d::MapLocation>& obs
   const costmap_2d::Costmap2D& master_grid, const unsigned char obs_cost,
   const int min_range_i, const int min_range_j, const int max_range_i, const int max_range_j)
 {
-  for (int j = min_range_j; j < max_range_j; j++) {
-    for (int i = min_range_i; i < max_range_i; i++) {
+  int min_j = min_range_j, max_j = max_range_j, min_i = min_range_i, max_i = max_range_i;
+  for (int j = min_j; j < max_j; j++) {
+    for (int i = min_i; i < max_i; i++) {
       unsigned char cost = master_grid.getCost(i, j);
       if (cost >= obs_cost) {
         costmap_2d::MapLocation ml;
@@ -171,7 +177,20 @@ size_t VoronoiFieldLayer::GetObstacles(std::vector<costmap_2d::MapLocation>& obs
 }
 
 
-// -------------------- protected --------------------
+// -------------------- private --------------------
+
+
+double VoronoiFieldLayer::GetFarestObstacleDistance(const nanoflann_port_ns::NanoflannPort& nanoflann_obs,
+  const std::vector<geometry_msgs::Point>& world)
+{
+  double farest = std::numeric_limits<double>::min();
+  for (auto p : world) {
+    auto idx = nanoflann_obs.FindClosestPoint(p);
+    if (idx.dist > farest)
+      farest = idx.dist;
+  }
+  return farest;
+}
 
 
 double VoronoiFieldLayer::ProjectFieldValue(const double x, const double y,

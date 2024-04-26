@@ -19,7 +19,7 @@ class DynamicVoronoiPort
  public:
 
   DynamicVoronoiPort(const int sizeX, const int sizeY,
-    const std::vector<costmap_2d::MapLocation>& obstacles);
+    const std::vector<costmap_2d::MapLocation>& obstacles, const bool boundary=false);
 
   ~DynamicVoronoiPort();
 
@@ -27,11 +27,14 @@ class DynamicVoronoiPort
 
   float GetDistance2Obstacle(const int x, const int y);
 
+  void Save(const char* filename);
+
  private:
 
   std::shared_ptr<DynamicVoronoi> dv_;
   int sizeX_, sizeY_;
   bool **map_ = nullptr;
+  bool boundary_{false};
 
 }; // class DynamicVoronoiPort
 
