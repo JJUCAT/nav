@@ -110,10 +110,10 @@ void VoronoiFieldLayer::updateCosts(costmap_2d::Costmap2D& master_grid,
     std::vector<geometry_msgs::Point> vdi_world;
     VectorMap2World(vdiagram, vdi_world);
     PubVoronoiDiagram(voronoi_diagram_pub_, range_i, range_j, vdi_world);
-    std::vector<costmap_2d::MapLocation> pruned_vdiagram = vdiagram;
-    voronoi_port->GetPruneVoronoiDiagram(pruned_vdiagram);
-    std::vector<geometry_msgs::Point> pvdi_world;
-    PubVoronoiDiagram(pruned_voronoi_diagram_pub_, range_i, range_j, pvdi_world);
+    // std::vector<costmap_2d::MapLocation> pruned_vdiagram = vdiagram;
+    // voronoi_port->GetPruneVoronoiDiagram(pruned_vdiagram);
+    // std::vector<geometry_msgs::Point> pvdi_world;
+    // PubVoronoiDiagram(pruned_voronoi_diagram_pub_, range_i, range_j, pvdi_world);
 
     auto nanoflann_vdi = new nanoflann_port_ns::NanoflannPort(vdi_world);
 

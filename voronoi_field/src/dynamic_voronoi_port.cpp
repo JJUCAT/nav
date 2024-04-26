@@ -121,6 +121,7 @@ void DynamicVoronoiPort::Save(const char* filename)
 
 bool DynamicVoronoiPort::IsBoundary(const int x, const int y)
 {
+  int boundary_size = boundary_ ? boundary_size_ : 0;
   if ( y<boundary_size_ || y>=sizeY_-boundary_size_ ||
        x<boundary_size_ || x>=sizeX_-boundary_size_) {
     return true;
