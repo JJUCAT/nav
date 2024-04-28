@@ -117,7 +117,7 @@ class VoronoiFieldLayer : public Layer
 
   ros::Publisher voronoi_diagram_pub_;
   ros::Publisher pruned_voronoi_diagram_pub_;
-
+  ros::Publisher junctions_pub_;
 }; // class VoronoiFieldLayer
 
 } // namespace costmap_2d

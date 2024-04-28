@@ -49,6 +49,8 @@ DynamicVoronoiPort::DynamicVoronoiPort(const int sizeX, const int sizeY,
   dv_->update(); 
   dv_->prune();
   // dv_->updateAlternativePrunedDiagram();
+  GetRawVoronoiDiagram(gvd_);
+  GetRawJunctions(junctions_);
 }
 
 DynamicVoronoiPort::~DynamicVoronoiPort()
@@ -63,46 +65,60 @@ DynamicVoronoiPort::~DynamicVoronoiPort()
 
 void DynamicVoronoiPort::GetVoronoiDiagram(std::vector<costmap_2d::MapLocation>& voronoi_diagram)
 {
-  for(int y = 0; y < sizeY_; y++) {      
-    for(int x = 0; x < sizeX_; x++) {
-      if (dv_->isVoronoi(x, y)) {
-      // if (dv_->isVoronoiAlternative(x, y)) {
-        costmap_2d::MapLocation ml;
-        ml.x = x; ml.y = y;
-        if (boundary_) { ml.x-=boundary_size_; ml.y-=boundary_size_; }
-        voronoi_diagram.push_back(ml);
-      }
-    }
-  }
+  if (gvd_.empty()) return;
+  std::for_each(gvd_.begin(), gvd_.end(), [&](costmap_2d::MapLocation ml){
+    if (boundary_) { ml.x-=boundary_size_; ml.y-=boundary_size_; }
+    voronoi_diagram.push_back(ml);
+  });
+}
+
+void DynamicVoronoiPort::GetJunctions(std::vector<costmap_2d::MapLocation>& junctions)
+{
+  if (junctions_.empty()) return;
+  std::for_each(junctions_.begin(), junctions_.end(), [&](size_t j){
+    auto ml = gvd_.at(j);
+    if (boundary_) { ml.x-=boundary_size_; ml.y-=boundary_size_; }
+    junctions.push_back(ml);
+  });
 }
 
 void DynamicVoronoiPort::GetPruneVoronoiDiagram(std::vector<costmap_2d::MapLocation>& voronoi_diagram)
 {
+  if (gvd_.empty()) return;
+
+  size_t loop = 1;
   std::vector<size_t> line_junctions;
   std::vector<size_t> line_ends;
-  FindJunctionsAndEnd(voronoi_diagram, line_junctions, line_ends);
-  std::sort(line_ends.begin(), line_ends.end(), std::greater<int>()); // 从大到小排
-  ROS_INFO("[VFL] first prune, ends:%lu, junctions:%lu", line_ends.size(), line_junctions.size());
+  FindJunctionsAndEnds(voronoi_diagram, line_junctions, line_ends);
+  std::sort(line_ends.begin(), line_ends.end(), std::greater<int>());
+  ROS_INFO("[VFL] [%lu] prune, ends:%lu, junctions:%lu", loop, line_ends.size(), line_junctions.size());
 
   auto IsHit = [&](const size_t e, const std::vector<size_t>& line_junctions) {
     for (auto j : line_junctions) {
-      if (e == j) return true;
+      if (voronoi_diagram.at(e).x == gvd_.at(j).x && voronoi_diagram.at(e).y == gvd_.at(j).y)
+        return true;
     }
     return false;
   };
 
-  size_t loop = 0;
+  voronoi_diagram = gvd_;
   while (!line_ends.empty()) {
-    loop ++;
     for (auto e : line_ends) {
-      if (!IsHit(e, line_junctions)) voronoi_diagram.erase(voronoi_diagram.begin()+e);
+      if (!IsHit(e, junctions_)) voronoi_diagram.erase(voronoi_diagram.begin()+e);
     }
-    line_junctions.clear();
+
+    loop ++;
     line_ends.clear();
-    FindJunctionsAndEnd(voronoi_diagram, line_junctions, line_ends);
+    FindEnds(voronoi_diagram, junctions_, line_ends);
     std::sort(line_ends.begin(), line_ends.end(), std::greater<int>());
     ROS_INFO("[VFL] [%lu] prune, ends:%lu, junctions:%lu", loop, line_ends.size(), line_junctions.size());
   }
+
+  std::for_each(voronoi_diagram.begin(), voronoi_diagram.end(),
+  [&](costmap_2d::MapLocation& ml){
+      if (boundary_) { ml.x-=boundary_size_; ml.y-=boundary_size_;
+    }
+  });
 }
 
 float DynamicVoronoiPort::GetDistance2Obstacle(const int x, const int y)
@@ -119,11 +135,40 @@ void DynamicVoronoiPort::Save(const char* filename)
 
 // -------------------- protected --------------------
 
+void DynamicVoronoiPort::GetRawVoronoiDiagram(std::vector<costmap_2d::MapLocation>& voronoi_diagram)
+{
+  voronoi_diagram.clear();
+  for(int y = 0; y < sizeY_; y++) {      
+    for(int x = 0; x < sizeX_; x++) {
+      if (dv_->isVoronoi(x, y)) {
+      // if (dv_->isVoronoiAlternative(x, y)) {
+        costmap_2d::MapLocation ml;
+        ml.x = x; ml.y = y;
+        voronoi_diagram.push_back(ml);
+      }
+    }
+  }
+}
+
+void DynamicVoronoiPort::GetRawJunctions(std::vector<size_t>& junctions)
+{
+  for (size_t i = 0; i < gvd_.size(); i ++) {
+    auto v = gvd_.at(i);
+    if (IsNearBoundary(v.x, v.y)) {
+      continue;
+    } else if (IsLineEnd(gvd_, v.x, v.y)) {
+      continue;
+    } else if (IsLineJunctions(gvd_, v.x, v.y)) {
+      junctions.push_back(i);
+    }
+  }
+}
+
 bool DynamicVoronoiPort::IsBoundary(const int x, const int y)
 {
-  int boundary_size = boundary_ ? boundary_size_ : 0;
-  if ( y<boundary_size_ || y>=sizeY_-boundary_size_ ||
-       x<boundary_size_ || x>=sizeX_-boundary_size_) {
+  int boundary_size = boundary_ ? boundary_size_ : 1;
+  if ( y<boundary_size || y>=sizeY_-boundary_size ||
+       x<boundary_size || x>=sizeX_-boundary_size) {
     return true;
   }
   return false;
@@ -131,7 +176,7 @@ bool DynamicVoronoiPort::IsBoundary(const int x, const int y)
 
 bool DynamicVoronoiPort::IsNearBoundary(const int x, const int y)
 {
-  int boundary_size = boundary_ ? boundary_size_+1 : 1;
+  int boundary_size = boundary_ ? boundary_size_+2 : 2;
   if ( y<boundary_size || y>=sizeY_-boundary_size ||
        x<boundary_size || x>=sizeX_-boundary_size) {
     return true;
@@ -140,81 +185,88 @@ bool DynamicVoronoiPort::IsNearBoundary(const int x, const int y)
 }
 
 
-bool DynamicVoronoiPort::IsLineEnd(const int x, const int y)
+bool DynamicVoronoiPort::IsLineEnd(const std::vector<costmap_2d::MapLocation>& gvd, const int x, const int y)
 {
-  if (IsNearBoundary(x, y)) return false;
+  // if (IsNearBoundary(x, y)) return false;
+  auto IsGvd = [&](const int x, const int y){
+    bool isgvd = false;
+    for (auto ml : gvd) {
+      if (ml.x == x && ml.y == y) { isgvd = true; break; }
+    }
+    return isgvd;
+  };
 
   auto IsEnd0 = [&](const int x, const int y) {
-    if ((dv_->isVoronoi(x, y) && dv_->isVoronoi(x+1, y)) &&
-        (!dv_->isVoronoi(x-1, y+1) && !dv_->isVoronoi(x-1, y) && !dv_->isVoronoi(x-1, y-1) &&
-         !dv_->isVoronoi(x, y+1) && !dv_->isVoronoi(x, y-1))) {
+    if ((IsGvd(x, y) && IsGvd(x+1, y)) &&
+        (!IsGvd(x-1, y+1) && !IsGvd(x-1, y) && !IsGvd(x-1, y-1) &&
+         !IsGvd(x, y+1) && !IsGvd(x, y-1))) {
       return true;
     }
     return false;
   };
 
   auto IsEnd1 = [&](const int x, const int y) {
-    if ((dv_->isVoronoi(x, y) && dv_->isVoronoi(x, y-1)) &&
-        (!dv_->isVoronoi(x-1, y+1) && !dv_->isVoronoi(x, y+1) && !dv_->isVoronoi(x+1, y+1) &&
-         !dv_->isVoronoi(x-1, y) && !dv_->isVoronoi(x+1, y))) {
+    if ((IsGvd(x, y) && IsGvd(x, y-1)) &&
+        (!IsGvd(x-1, y+1) && !IsGvd(x, y+1) && !IsGvd(x+1, y+1) &&
+         !IsGvd(x-1, y) && !IsGvd(x+1, y))) {
       return true;
     }
     return false;
   };
 
   auto IsEnd2 = [&](const int x, const int y) {
-    if ((dv_->isVoronoi(x, y) && dv_->isVoronoi(x-1, y)) &&
-        (!dv_->isVoronoi(x, y+1) && !dv_->isVoronoi(x+1, y+1) && !dv_->isVoronoi(x+1, y) &&
-         !dv_->isVoronoi(x+1, y-1) && !dv_->isVoronoi(x, y-1))) {
+    if ((IsGvd(x, y) && IsGvd(x-1, y)) &&
+        (!IsGvd(x, y+1) && !IsGvd(x+1, y+1) && !IsGvd(x+1, y) &&
+         !IsGvd(x+1, y-1) && !IsGvd(x, y-1))) {
       return true;
     }
     return false;
   };
 
   auto IsEnd3 = [&](const int x, const int y) {
-    if ((dv_->isVoronoi(x, y) && dv_->isVoronoi(x, y+1)) &&
-        (!dv_->isVoronoi(x-1, y) && !dv_->isVoronoi(x+1, y) && !dv_->isVoronoi(x+1, y-1) &&
-         !dv_->isVoronoi(x, y-1) && !dv_->isVoronoi(x-1, y-1))) {
+    if ((IsGvd(x, y) && IsGvd(x, y+1)) &&
+        (!IsGvd(x-1, y) && !IsGvd(x+1, y) && !IsGvd(x+1, y-1) &&
+         !IsGvd(x, y-1) && !IsGvd(x-1, y-1))) {
       return true;
     }
     return false;
   };
 
   auto IsEnd4 = [&](const int x, const int y) {
-    if ((dv_->isVoronoi(x, y) && dv_->isVoronoi(x+1, y-1)) &&
-        (!dv_->isVoronoi(x-1, y+1) && !dv_->isVoronoi(x, y+1) && !dv_->isVoronoi(x+1, y+1) &&
-         !dv_->isVoronoi(x-1, y) && !dv_->isVoronoi(x+1, y) && 
-         !dv_->isVoronoi(x-1, y-1) && !dv_->isVoronoi(x, y-1))) {
+    if ((IsGvd(x, y) && IsGvd(x+1, y-1)) &&
+        (!IsGvd(x-1, y+1) && !IsGvd(x, y+1) && !IsGvd(x+1, y+1) &&
+         !IsGvd(x-1, y) && !IsGvd(x+1, y) && 
+         !IsGvd(x-1, y-1) && !IsGvd(x, y-1))) {
       return true;
     }
     return false;
   };
 
   auto IsEnd5 = [&](const int x, const int y) {
-    if ((dv_->isVoronoi(x, y) && dv_->isVoronoi(x-1, y-1)) &&
-        (!dv_->isVoronoi(x-1, y+1) && !dv_->isVoronoi(x, y+1) && !dv_->isVoronoi(x+1, y+1) &&
-         !dv_->isVoronoi(x-1, y) && !dv_->isVoronoi(x+1, y) && 
-         !dv_->isVoronoi(x, y-1) && !dv_->isVoronoi(x+1, y-1))) {
+    if ((IsGvd(x, y) && IsGvd(x-1, y-1)) &&
+        (!IsGvd(x-1, y+1) && !IsGvd(x, y+1) && !IsGvd(x+1, y+1) &&
+         !IsGvd(x-1, y) && !IsGvd(x+1, y) && 
+         !IsGvd(x, y-1) && !IsGvd(x+1, y-1))) {
       return true;
     }
     return false;
   };
 
   auto IsEnd6 = [&](const int x, const int y) {
-    if ((dv_->isVoronoi(x, y) && dv_->isVoronoi(x-1, y+1)) &&
-        (!dv_->isVoronoi(x, y+1) && !dv_->isVoronoi(x+1, y+1) &&
-         !dv_->isVoronoi(x-1, y) && !dv_->isVoronoi(x+1, y) && 
-         !dv_->isVoronoi(x-1, y-1)&&!dv_->isVoronoi(x, y-1) && !dv_->isVoronoi(x+1, y-1))) {
+    if ((IsGvd(x, y) && IsGvd(x-1, y+1)) &&
+        (!IsGvd(x, y+1) && !IsGvd(x+1, y+1) &&
+         !IsGvd(x-1, y) && !IsGvd(x+1, y) && 
+         !IsGvd(x-1, y-1)&&!IsGvd(x, y-1) && !IsGvd(x+1, y-1))) {
       return true;
     }
     return false;
   };
 
   auto IsEnd7 = [&](const int x, const int y) {
-    if ((dv_->isVoronoi(x, y) && dv_->isVoronoi(x+1, y+1)) &&
-        (!dv_->isVoronoi(x-1, y+1) && !dv_->isVoronoi(x, y+1) &&
-         !dv_->isVoronoi(x-1, y) && !dv_->isVoronoi(x+1, y) && 
-         !dv_->isVoronoi(x-1, y-1)&&!dv_->isVoronoi(x, y-1) && !dv_->isVoronoi(x+1, y-1))) {
+    if ((IsGvd(x, y) && IsGvd(x+1, y+1)) &&
+        (!IsGvd(x-1, y+1) && !IsGvd(x, y+1) &&
+         !IsGvd(x-1, y) && !IsGvd(x+1, y) && 
+         !IsGvd(x-1, y-1)&&!IsGvd(x, y-1) && !IsGvd(x+1, y-1))) {
       return true;
     }
     return false;
@@ -227,101 +279,108 @@ bool DynamicVoronoiPort::IsLineEnd(const int x, const int y)
   return false;
 }
 
-bool DynamicVoronoiPort::IsLineJunctions(const int x, const int y)
+bool DynamicVoronoiPort::IsLineJunctions(const std::vector<costmap_2d::MapLocation>& gvd, const int x, const int y)
 {
-  if (IsNearBoundary(x, y)) return false;
+  // if (IsNearBoundary(x, y)) return false;
+  auto IsGvd = [&](const int x, const int y){
+    bool isgvd = false;
+    for (auto ml : gvd) {
+      if (ml.x == x && ml.y == y) { isgvd = true; break; }
+    }
+    return isgvd;
+  };
 
   auto IsJunctions0 = [&](const int x, const int y) {
-    if (dv_->isVoronoi(x-1, y+1) && dv_->isVoronoi(x+1, y+1) &&
-      dv_->isVoronoi(x, y) && dv_->isVoronoi(x, y-1)) {
+    if (IsGvd(x-1, y+1) && IsGvd(x+1, y+1) &&
+      IsGvd(x, y) && IsGvd(x, y-1)) {
       return true;
     }
     return false;
   };
 
   auto IsJunctions1 = [&](const int x, const int y) {
-    if (dv_->isVoronoi(x, y+1) && dv_->isVoronoi(x, y) &&
-      dv_->isVoronoi(x+1, y) && dv_->isVoronoi(x-1, y-1)) {
+    if (IsGvd(x, y+1) && IsGvd(x, y) &&
+      IsGvd(x+1, y) && IsGvd(x-1, y-1)) {
       return true;
     }
     return false;
   };
 
   auto IsJunctions2 = [&](const int x, const int y) {
-    if (dv_->isVoronoi(x+1, y+1) && dv_->isVoronoi(x-1, y) &&
-      dv_->isVoronoi(x, y) && dv_->isVoronoi(x+1, y-1)) {
+    if (IsGvd(x+1, y+1) && IsGvd(x-1, y) &&
+      IsGvd(x, y) && IsGvd(x+1, y-1)) {
       return true;
     }
     return false;
   };
 
   auto IsJunctions3 = [&](const int x, const int y) {
-    if (dv_->isVoronoi(x-1, y+1) && dv_->isVoronoi(x, y) &&
-      dv_->isVoronoi(x+1, y) && dv_->isVoronoi(x, y-1)) {
+    if (IsGvd(x-1, y+1) && IsGvd(x, y) &&
+      IsGvd(x+1, y) && IsGvd(x, y-1)) {
       return true;
     }
     return false;
   };
 
   auto IsJunctions4 = [&](const int x, const int y) {
-    if (dv_->isVoronoi(x, y+1) && dv_->isVoronoi(x, y) &&
-      dv_->isVoronoi(x-1, y-1) && dv_->isVoronoi(x+1, y-1)) {
+    if (IsGvd(x, y+1) && IsGvd(x, y) &&
+      IsGvd(x-1, y-1) && IsGvd(x+1, y-1)) {
       return true;
     }
     return false;
   };
 
   auto IsJunctions5 = [&](const int x, const int y) {
-    if (dv_->isVoronoi(x+1, y+1) && dv_->isVoronoi(x-1, y) &&
-      dv_->isVoronoi(x, y) && dv_->isVoronoi(x, y-1)) {
+    if (IsGvd(x+1, y+1) && IsGvd(x-1, y) &&
+      IsGvd(x, y) && IsGvd(x, y-1)) {
       return true;
     }
     return false;
   };
 
   auto IsJunctions6 = [&](const int x, const int y) {
-    if (dv_->isVoronoi(x+1, y+1) && dv_->isVoronoi(x, y) &&
-      dv_->isVoronoi(x+1, y) && dv_->isVoronoi(x-1, y-1)) {
+    if (IsGvd(x-1, y+1) && IsGvd(x, y) &&
+      IsGvd(x+1, y) && IsGvd(x-1, y-1)) {
       return true;
     }
     return false;
   };
 
   auto IsJunctions7 = [&](const int x, const int y) {
-    if (dv_->isVoronoi(x, y+1) && dv_->isVoronoi(x-1, y) &&
-      dv_->isVoronoi(x, y) && dv_->isVoronoi(x+1, y-1)) {
+    if (IsGvd(x, y+1) && IsGvd(x-1, y) &&
+      IsGvd(x, y) && IsGvd(x+1, y-1)) {
       return true;
     }
     return false;
   };
 
   auto IsJunctions8 = [&](const int x, const int y) {
-    if (dv_->isVoronoi(x-1, y+1) && dv_->isVoronoi(x, y) &&
-      dv_->isVoronoi(x-1, y-1) && dv_->isVoronoi(x+1, y-1)) {
+    if (IsGvd(x-1, y+1) && IsGvd(x, y) &&
+      IsGvd(x-1, y-1) && IsGvd(x+1, y-1)) {
       return true;
     }
     return false;
   };
 
   auto IsJunctions9 = [&](const int x, const int y) {
-    if (dv_->isVoronoi(x-1, y+1) && dv_->isVoronoi(x+1, y+1) &&
-      dv_->isVoronoi(x, y) && dv_->isVoronoi(x-1, y-1)) {
+    if (IsGvd(x-1, y+1) && IsGvd(x+1, y+1) &&
+      IsGvd(x, y) && IsGvd(x-1, y-1)) {
       return true;
     }
     return false;
   };
 
   auto IsJunctions10 = [&](const int x, const int y) {
-    if (dv_->isVoronoi(x-1, y+1) && dv_->isVoronoi(x+1, y+1) &&
-      dv_->isVoronoi(x, y) && dv_->isVoronoi(x+1, y-1)) {
+    if (IsGvd(x-1, y+1) && IsGvd(x+1, y+1) &&
+      IsGvd(x, y) && IsGvd(x+1, y-1)) {
       return true;
     }
     return false;
   };
 
   auto IsJunctions11 = [&](const int x, const int y) {
-    if (dv_->isVoronoi(x+1, y+1) && dv_->isVoronoi(x, y) &&
-      dv_->isVoronoi(x-1, y-1) && dv_->isVoronoi(x+1, y-1)) {
+    if (IsGvd(x+1, y+1) && IsGvd(x, y) &&
+      IsGvd(x-1, y-1) && IsGvd(x+1, y-1)) {
       return true;
     }
     return false;
@@ -335,23 +394,42 @@ bool DynamicVoronoiPort::IsLineJunctions(const int x, const int y)
   return false;
 }
 
-void DynamicVoronoiPort::FindJunctionsAndEnd(
+void DynamicVoronoiPort::FindJunctionsAndEnds(
   const std::vector<costmap_2d::MapLocation>& voronoi_diagram,
   std::vector<size_t>& line_junctions, std::vector<size_t>& line_ends)
 {
   for (size_t i = 0; i < voronoi_diagram.size(); i ++) {
-    const auto& v = voronoi_diagram.at(i);
+    auto v = voronoi_diagram.at(i);
     if (IsNearBoundary(v.x, v.y)) {
       line_ends.push_back(i);
-    } else if (IsLineJunctions(v.x, v.y)) {
-      line_junctions.push_back(i);
-    } else if (IsLineEnd(v.x, v.y)) {
+    } else if (IsLineEnd(voronoi_diagram, v.x, v.y)) {
       line_ends.push_back(i);
+    } else if (IsLineJunctions(voronoi_diagram, v.x, v.y)) {
+      line_junctions.push_back(i);
     }
   }
 }
 
-
+void DynamicVoronoiPort::FindEnds(
+  const std::vector<costmap_2d::MapLocation>& voronoi_diagram,
+  const std::vector<size_t>& ignore, std::vector<size_t>& line_ends)
+{
+  for (size_t i = 0; i < voronoi_diagram.size(); i ++) {
+    auto v = voronoi_diagram.at(i);
+    bool jump = false;
+    for (auto ig : ignore) {
+      if (gvd_.at(ig).x == v.x && gvd_.at(ig).y == v.y) {
+        jump = true; break;
+      }
+    }
+    if (jump) continue;
+    if (IsNearBoundary(v.x, v.y)) {
+      line_ends.push_back(i);
+    } else if (IsLineEnd(voronoi_diagram, v.x, v.y)) {
+      line_ends.push_back(i);
+    }
+  }
+}
 
 
 

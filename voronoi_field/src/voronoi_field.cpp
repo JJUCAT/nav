@@ -11,6 +11,7 @@ namespace costmap_2d {
 VoronoiFieldLayer::VoronoiFieldLayer()
 {
   voronoi_access_ = new boost::recursive_mutex();
+  dsrv_ = nullptr;
 }
 
 VoronoiFieldLayer::~VoronoiFieldLayer()
@@ -27,6 +28,7 @@ void VoronoiFieldLayer::onInitialize()
     need_recompute_ = false;
     voronoi_diagram_pub_ = nh.advertise<nav_msgs::GridCells>("voronoi_diagram", 1);
     pruned_voronoi_diagram_pub_ = nh.advertise<nav_msgs::GridCells>("pruned_voronoi_diagram", 1);
+    junctions_pub_ = nh.advertise<nav_msgs::GridCells>("junctions", 1);
     dynamic_reconfigure::Server<costmap_2d::VoronoiFieldPluginConfig>::CallbackType cb =
       [this](auto& config, auto level){ reconfigureCB(config, level); };
 
@@ -110,15 +112,21 @@ void VoronoiFieldLayer::updateCosts(costmap_2d::Costmap2D& master_grid,
     std::vector<geometry_msgs::Point> vdi_world;
     VectorMap2World(vdiagram, vdi_world);
     PubVoronoiDiagram(voronoi_diagram_pub_, range_i, range_j, vdi_world);
-    // std::vector<costmap_2d::MapLocation> pruned_vdiagram = vdiagram;
-    // voronoi_port->GetPruneVoronoiDiagram(pruned_vdiagram);
-    // std::vector<geometry_msgs::Point> pvdi_world;
-    // PubVoronoiDiagram(pruned_voronoi_diagram_pub_, range_i, range_j, pvdi_world);
+    std::vector<costmap_2d::MapLocation> pruned_vdiagram = vdiagram;
+    voronoi_port->GetPruneVoronoiDiagram(pruned_vdiagram);
+    std::vector<geometry_msgs::Point> pvdi_world;
+    VectorMap2World(pruned_vdiagram, pvdi_world);
+    PubVoronoiDiagram(pruned_voronoi_diagram_pub_, range_i, range_j, pvdi_world);
+    std::vector<costmap_2d::MapLocation> vjunctions;
+    voronoi_port->GetJunctions(vjunctions);
+    std::vector<geometry_msgs::Point> junctions_world;
+    VectorMap2World(vjunctions, junctions_world);
+    PubVoronoiDiagram(junctions_pub_, range_i, range_j, junctions_world);
 
-    auto nanoflann_vdi = new nanoflann_port_ns::NanoflannPort(vdi_world);
+    auto nanoflann_vdi = new nanoflann_port_ns::NanoflannPort(pvdi_world);
 
     unsigned int mx = master_grid.getSizeInCellsX(), my = master_grid.getSizeInCellsY();
-    double farest = GetFarestObstacleDistance(*nanoflann_obs, vdi_world);
+    double farest = GetFarestObstacleDistance(*nanoflann_obs, pvdi_world);
     ROS_INFO("[VFL] farest distance %f", farest);
     for (unsigned int y = 0; y < my; y ++) {
       for (unsigned int x = 0; x < mx; x ++) {
