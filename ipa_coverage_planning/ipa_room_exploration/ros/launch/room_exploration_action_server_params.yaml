@@ -1,14 +1,14 @@
 # this variable selects the algorithm for room exploration
-# 1 = grid point explorator
-# 2 = boustrophedon explorator
+# 1 = grid point explorator # tsp 遍历所以栅格计算
+# 2 = boustrophedon explorator # 牛耕法，多障碍物效果不佳
 # 3 = neural network explorator
 # 4 = convexSPP explorator
 # 5 = flowNetwork explorator
-# 6 = energyFunctional explorator
-# 7 = voronoi explorator
-# 8 = boustrophedon variant explorator
+# 6 = energyFunctional explorator # 局部能量覆盖，抗障碍物
+# 7 = voronoi explorator # voronoi 覆盖
+# 8 = boustrophedon variant explorator # 牛耕法变种
 # int
-room_exploration_algorithm: 8
+room_exploration_algorithm: 3 # 探索/覆盖算法
 
 # display final trajectory plan step by step
 # bool
@@ -50,11 +50,13 @@ use_dyn_goal_eps: false
 # bool
 interrupt_navigation_publishing: false
 
+# 重新访问全覆盖计算中被忽略的区域
 # this variable turns the functionality on/off to revisit areas that haven't been seen during the execution of the coverage path,
 # due to uncertainties or dynamic obstacles
 # bool
 revisit_areas: false
 
+# 被忽略区域被重新访问的最小面积
 # minimal area of not seen sections that they are revisited after the first run through the room
 # double
 # [m^2]
@@ -64,6 +66,7 @@ left_sections_min_area: 0.01
 # string
 global_costmap_topic: "/move_base/global_costmap/costmap"
 
+# TODO@LMR
 # name of the service to call for a coverage check of the driven trajectory
 # string
 coverage_check_service_name: "/room_exploration/coverage_check_server/coverage_check"
@@ -84,7 +87,7 @@ camera_frame: "base_link"
 #   2 = Genetic solver (slightly shorter than Nearest Neighbor)
 #   3 = Concorde solver (usually gives the shortest path while computing the longest)
 # int
-tsp_solver: 1
+tsp_solver: 1 # 多个分区之间的旅行商问题
 
 # a sophisticated solver like Concorde or Genetic can be interrupted if it does not find a solution within this time, in [s],
 # and then falls back to the nearest neighbor solver
@@ -97,26 +100,28 @@ tsp_solver_timeout: 600
 # min area a boustrophedon cell (i.e. a boustrophedon region of the map) must have to be determined for the path generation
 # [pixel^2]
 # double
-min_cell_area: 200.0      #10.0
+min_cell_area: 200.0      #10.0 最小面积，单位是 pixel^2
 
 # distance between two points when generating the (line) path
 # [pixel], where one pixel is the size of one cell in the navigation grid map
 # double
-path_eps: 6.0
+path_eps: 6.0 # 路径点间距，单位是 pixel
 
 # the additional offset of the grid to obstacles, i.e. allows to displace the grid by more than the standard half_grid_size from obstacles
 # [m]
 # double
-grid_obstacle_offset: 0.251     #0.101        #0.251
+grid_obstacle_offset: 0.251     #0.101        #0.251 # TODO@LMR
 
 # maximal allowed shift off the ideal boustrophedon track to both sides for avoiding obstacles on track
 # setting max_deviation_from_track=grid_spacing is usually a good choice
 # for negative values (e.g. max_deviation_from_track: -1) max_deviation_from_track is automatically set to grid_spacing
 # [pixel]
-max_deviation_from_track: 0
+max_deviation_from_track: 0 # 遇到障碍物，覆盖路径区域的最大偏移量，单位 pixel
 
 # cell visiting order
+#   用 TSP 来决定栅格遍历顺序
 #   1 = the optimal visiting order of the cells is determined as TSP problem
+#   y 轴上的栅格从左到右遍历，其他就是 x 轴从小到大遍历
 #   2 = alternative ordering from left to right (measured on y-coordinates of the cells), visits the cells in a more obvious fashion to the human observer (though it is not optimal)
 # int
 cell_visiting_order: 2

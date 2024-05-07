@@ -118,9 +118,9 @@ int main(int argc, char **argv)
 
 	ROS_INFO("Action server started, sending goal.");
 
-	DynamicReconfigureClient drc_exp(nh, "room_exploration_server/set_parameters", "room_exploration_server/parameter_updates");
-	drc_exp.setConfig("room_exploration_algorithm", 8);
-	drc_exp.setConfig("execute_path", false);
+  // DynamicReconfigureClient drc_exp(nh, "room_exploration_server/set_parameters", "room_exploration_server/parameter_updates");
+  // drc_exp.setConfig("room_exploration_algorithm", 8);
+  // drc_exp.setConfig("execute_path", false);
 //	drc_exp.setConfig("path_eps", 3);
 //	drc_exp.setConfig("grid_line_length", 15);
 //	drc_exp.setConfig("path_eps", 10);
