@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<launch>
+
+    <arg name="robot_env" default="ipa_robot"/>
+    <arg name="map" default="map.yaml" />
+
+    <!-- <param name="/use_sim_time" value="true"/> -->
+
+    <node pkg="map_server" type="map_server" name="map_server" args="$(find ipa_env)/envs/$(arg robot_env)/$(arg map)" output="screen"/>
+    <node name="tf_node" pkg="tf" type="static_transform_publisher" args="0 0 0 0 0 0 map base_link 10"/>
+    <node name="rviz" pkg="rviz" type="rviz" args="-d $(find ipa_env)/config/rviz.rviz"/>
+
+    <include file="$(find ipa_room_exploration)/ros/launch/room_exploration_action_server.launch"/>
+
+    <include file="$(find ipa_room_exploration)/ros/test/room_exploration_client.launch">
+        <arg name="robot_env" value="$(arg robot_env)"/>
+        <arg name="use_test_maps" value="false"/>
+    </include>
+
+</launch>

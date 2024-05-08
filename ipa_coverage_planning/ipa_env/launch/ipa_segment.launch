@@ -1,0 +1,41 @@
+<?xml version="1.0"?>
+<launch>
+
+    <arg name="robot_env" default="ipa_robot"/>
+    <!-- <arg name="map" default="map.yaml" /> -->
+
+    <!-- <param name="/use_sim_time" value="true"/> -->
+
+    <!-- <node pkg="map_server" type="map_server" name="map_server" args="$(find ipa_env)/envs/$(arg robot_env)/$(arg map)" output="screen"/>
+    <node name="tf_node" pkg="tf" type="static_transform_publisher" args="0 0 0 0 0 0 map base_link 10"/> -->
+    <node name="rviz" pkg="rviz" type="rviz" args="-d $(find ipa_env)/config/rviz.rviz"/>
+
+    <!--  服务端  -->
+    <node ns="room_segmentation" pkg="ipa_room_segmentation" type="room_segmentation_server" name="room_segmentation_server" output="screen" respawn="true" respawn_delay="2">
+        <rosparam command="load" file="$(find ipa_env)/config/room_segmentation_action_server_params.yaml"/>
+        
+        <!-- Parameters for Semantic segmentation -->
+        <!-- list of files containing maps with room labels for training the semantic segmentation -->
+        <rosparam param="semantic_training_maps_room_file_list" subst_value="true">["$(find ipa_env)/envs/ipa_robot/segment0.png"]</rosparam>
+
+        <!-- list of files containing maps with hallway labels for training the semantic segmentation -->
+        <rosparam param="semantic_training_maps_hallway_file_list" subst_value="true">["$(find ipa_env)/envs/ipa_robot/segment0.png"]</rosparam>
+
+        <!-- Parameters for VRF segmentation -->
+        <!-- list of files containing the original maps for training the VRF segmentation -->
+        <rosparam param="vrf_original_maps_file_list" subst_value="true">["$(find ipa_env)/envs/ipa_robot/segment0.png"]</rosparam>
+        
+        <!-- list of files containing the labeled maps for training the VRF segmentation -->
+        <rosparam param="vrf_training_maps_file_list" subst_value="true">["$(find ipa_env)/envs/ipa_robot/segment0.png"]</rosparam>
+        
+        <!-- list of files containing the Voronoi maps for training the VRF segmentation - these files are optional for training and just yield a speedup -->
+        <rosparam param="vrf_voronoi_maps_file_list" subst_value="true">["$(find ipa_env)/envs/ipa_robot/segment0.png"]</rosparam>
+
+        <!-- list of files containing the Voronoi node maps for training the VRF segmentation - these files are optional for training and just yield a speedup -->
+        <rosparam param="vrf_voronoi_node_maps_file_list" subst_value="true">["$(find ipa_env)/envs/ipa_robot/segment0.png"]</rosparam>
+    </node>
+
+    <!--  客户端  -->
+    <!-- <node ns="room_segmentation" pkg="ipa_room_segmentation" type="room_segmentation_client" name="room_segmentation_client" output="screen"/> -->
+    <node ns="room_segmentation" pkg="ipa_room_segmentation" type="room_segmentation_client" name="room_segmentation_client"/>
+</launch>

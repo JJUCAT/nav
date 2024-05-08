@@ -83,51 +83,53 @@ int main(int argc, char **argv)
 
 	// map names
 	std::vector< std::string > map_names;
-	map_names.push_back("lab_ipa");
-	map_names.push_back("lab_c_scan");
-	map_names.push_back("Freiburg52_scan");
-	map_names.push_back("Freiburg79_scan");
-	map_names.push_back("lab_b_scan");
-	map_names.push_back("lab_intel");
-	map_names.push_back("Freiburg101_scan");
-	map_names.push_back("lab_d_scan");
-	map_names.push_back("lab_f_scan");
-	map_names.push_back("lab_a_scan");
-	map_names.push_back("NLB");
-	map_names.push_back("office_a");
-	map_names.push_back("office_b");
-	map_names.push_back("office_c");
-	map_names.push_back("office_d");
-	map_names.push_back("office_e");
-	map_names.push_back("office_f");
-	map_names.push_back("office_g");
-	map_names.push_back("office_h");
-	map_names.push_back("office_i");
-	map_names.push_back("lab_ipa_furnitures");
-	map_names.push_back("lab_c_scan_furnitures");
-	map_names.push_back("Freiburg52_scan_furnitures");
-	map_names.push_back("Freiburg79_scan_furnitures");
-	map_names.push_back("lab_b_scan_furnitures");
-	map_names.push_back("lab_intel_furnitures");
-	map_names.push_back("Freiburg101_scan_furnitures");
-	map_names.push_back("lab_d_scan_furnitures");
-	map_names.push_back("lab_f_scan_furnitures");
-	map_names.push_back("lab_a_scan_furnitures");
-	map_names.push_back("NLB_furnitures");
-	map_names.push_back("office_a_furnitures");
-	map_names.push_back("office_b_furnitures");
-	map_names.push_back("office_c_furnitures");
-	map_names.push_back("office_d_furnitures");
-	map_names.push_back("office_e_furnitures");
-	map_names.push_back("office_f_furnitures");
-	map_names.push_back("office_g_furnitures");
-	map_names.push_back("office_h_furnitures");
-	map_names.push_back("office_i_furnitures");
+  map_names.push_back("segment0");
+	// map_names.push_back("lab_ipa");
+	// map_names.push_back("lab_c_scan");
+	// map_names.push_back("Freiburg52_scan");
+	// map_names.push_back("Freiburg79_scan");
+	// map_names.push_back("lab_b_scan");
+	// map_names.push_back("lab_intel");
+	// map_names.push_back("Freiburg101_scan");
+	// map_names.push_back("lab_d_scan");
+	// map_names.push_back("lab_f_scan");
+	// map_names.push_back("lab_a_scan");
+	// map_names.push_back("NLB");
+	// map_names.push_back("office_a");
+	// map_names.push_back("office_b");
+	// map_names.push_back("office_c");
+	// map_names.push_back("office_d");
+	// map_names.push_back("office_e");
+	// map_names.push_back("office_f");
+	// map_names.push_back("office_g");
+	// map_names.push_back("office_h");
+	// map_names.push_back("office_i");
+	// map_names.push_back("lab_ipa_furnitures");
+	// map_names.push_back("lab_c_scan_furnitures");
+	// map_names.push_back("Freiburg52_scan_furnitures");
+	// map_names.push_back("Freiburg79_scan_furnitures");
+	// map_names.push_back("lab_b_scan_furnitures");
+	// map_names.push_back("lab_intel_furnitures");
+	// map_names.push_back("Freiburg101_scan_furnitures");
+	// map_names.push_back("lab_d_scan_furnitures");
+	// map_names.push_back("lab_f_scan_furnitures");
+	// map_names.push_back("lab_a_scan_furnitures");
+	// map_names.push_back("NLB_furnitures");
+	// map_names.push_back("office_a_furnitures");
+	// map_names.push_back("office_b_furnitures");
+	// map_names.push_back("office_c_furnitures");
+	// map_names.push_back("office_d_furnitures");
+	// map_names.push_back("office_e_furnitures");
+	// map_names.push_back("office_f_furnitures");
+	// map_names.push_back("office_g_furnitures");
+	// map_names.push_back("office_h_furnitures");
+	// map_names.push_back("office_i_furnitures");
 
 	for (size_t image_index = 0; image_index<map_names.size(); ++image_index)
 	{
 		// import maps
-		std::string image_filename = ros::package::getPath("ipa_room_segmentation") + "/common/files/test_maps/" + map_names[image_index] + ".png";
+		// std::string image_filename = ros::package::getPath("ipa_room_segmentation") + "/common/files/test_maps/" + map_names[image_index] + ".png";
+    std::string image_filename = ros::package::getPath("ipa_env") + "/envs/ipa_robot/" + map_names[image_index] + ".png";
 		cv::Mat map = cv::imread(image_filename.c_str(), 0);
 		//make non-white pixels black
 		for (int y = 0; y < map.rows; y++)
@@ -163,11 +165,11 @@ int main(int argc, char **argv)
 		ac.waitForServer(); //will wait for infinite time
 		ROS_INFO("Action server started, sending goal.");
 
-		// test dynamic reconfigure
-		DynamicReconfigureClient drc(nh, "room_segmentation_server/set_parameters", "room_segmentation_server/parameter_updates");
-		drc.setConfig("room_segmentation_algorithm", 5);
-//		drc.setConfig("display_segmented_map", true);
-		//drc.setConfig("room_area_factor_upper_limit_voronoi", 120.0);
+    // test dynamic reconfigure
+    // DynamicReconfigureClient drc(nh, "room_segmentation_server/set_parameters", "room_segmentation_server/parameter_updates");
+    // drc.setConfig("room_segmentation_algorithm", 5);
+    // drc.setConfig("display_segmented_map", true);
+    // drc.setConfig("room_area_factor_upper_limit_voronoi", 120.0);
 
 		// send a goal to the action
 		ipa_building_msgs::MapSegmentationGoal goal;
@@ -228,7 +230,7 @@ int main(int argc, char **argv)
 			cv::imshow("segmentation", colour_segmented_map);
 			cv::waitKey();
 		}
-	}
+	} // for
 
 	//exit
 	return 0;
