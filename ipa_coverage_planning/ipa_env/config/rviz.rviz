@@ -85,11 +85,11 @@ Visualization Manager:
       Value: true
     - Alpha: 0.699999988079071
       Class: rviz/Map
-      Color Scheme: map
+      Color Scheme: costmap
       Draw Behind: false
       Enabled: true
-      Name: segmentation
-      Topic: /room_segmentation/room_segmentation_server/segmented_map
+      Name: TestMap
+      Topic: /ipa_test_node/test_costmap/costmap
       Unreliable: false
       Use Timestamp: false
       Value: true
@@ -129,17 +129,17 @@ Visualization Manager:
         Value: false
       Field of View: 0.7853981852531433
       Focal Point:
-        X: 4.8684916496276855
-        Y: 2.624168634414673
-        Z: -0.005230431444942951
-      Focal Shape Fixed Size: true
+        X: 2.8160715103149414
+        Y: 4.825483798980713
+        Z: -0.006123987026512623
+      Focal Shape Fixed Size: false
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
       Pitch: 1.5697963237762451
       Target Frame: <Fixed Frame>
-      Yaw: 1.5203973054885864
+      Yaw: 1.585397720336914
     Saved: ~
 Window Geometry:
   Displays:

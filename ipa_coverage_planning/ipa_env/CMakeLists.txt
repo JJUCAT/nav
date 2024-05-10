@@ -7,7 +7,22 @@ project(ipa_env)
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
-find_package(catkin REQUIRED)
+find_package(catkin REQUIRED
+  COMPONENTS
+    cmake_modules
+    dynamic_reconfigure
+    geometry_msgs
+    map_msgs
+    nav_msgs
+    pluginlib
+    roscpp
+    std_msgs
+    tf2
+    tf2_geometry_msgs
+    tf2_ros
+    visualization_msgs
+    costmap_2d
+)
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
@@ -101,7 +116,15 @@ find_package(catkin REQUIRED)
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES j110_bringup
-#  CATKIN_DEPENDS other_catkin_pkg
+  CATKIN_DEPENDS
+    costmap_2d
+    dynamic_reconfigure
+    geometry_msgs
+    map_msgs
+    roscpp
+    std_msgs
+    tf2_ros
+    visualization_msgs
 #  DEPENDS system_lib
 )
 
@@ -111,14 +134,20 @@ catkin_package(
 
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
+find_package(Eigen3 REQUIRED)
+find_package(Boost REQUIRED COMPONENTS system thread)
 include_directories(
-# include
-# ${catkin_INCLUDE_DIRS}
+  # include
+  ${catkin_INCLUDE_DIRS}
+  ${EIGEN3_INCLUDE_DIRS}
+  ${Boost_INCLUDE_DIRS}
 )
+
+add_definitions(${EIGEN3_DEFINITIONS})
 
 ## Declare a C++ library
 # add_library(${PROJECT_NAME}
-#   src/${PROJECT_NAME}/j110_bringup.cpp
+#   src/ipa_test_node.cpp
 # )
 
 ## Add cmake target dependencies of the library
@@ -129,7 +158,11 @@ include_directories(
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
-# add_executable(${PROJECT_NAME}_node src/j110_bringup_node.cpp)
+add_executable(ipa_test_node src/ipa_test_node.cpp)
+target_link_libraries(ipa_test_node
+  ${CERES_LIBRARIES}
+  ${catkin_LIBRARIES}
+)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
