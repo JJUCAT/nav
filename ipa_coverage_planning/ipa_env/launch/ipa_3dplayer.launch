@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<launch>
+
+    <arg name="robot_env" default="ipa_robot"/>
+    <arg name="map" default="map.yaml" />
+
+    <!-- <param name="/use_sim_time" value="true"/> -->
+
+    <node pkg="map_server" type="map_server" name="map_server" args="$(find ipa_env)/envs/$(arg robot_env)/$(arg map)" output="screen"/>
+    <node name="tf_node" pkg="tf" type="static_transform_publisher" args="0 0 0 0 0 0 map base_link 10"/>
+    <node name="rviz" pkg="rviz" type="rviz" args="-d $(find ipa_env)/config/rviz.rviz"/>
+
+    <!-- 3d 曲面图 -->
+    <node name="costmap3dplayer" pkg="ipa_env" type="costmap3dplayer.py"  output="screen"/>    
+    <node name="ipa_test_node" pkg="ipa_env" type="ipa_test_node">
+        <rosparam command="load" file="$(find ipa_env)/config/test_costmap.yaml"/>
+    </node>
+
+</launch>

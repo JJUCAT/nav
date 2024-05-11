@@ -10,12 +10,6 @@
     <node name="tf_node" pkg="tf" type="static_transform_publisher" args="0 0 0 0 0 0 map base_link 10"/>
     <node name="rviz" pkg="rviz" type="rviz" args="-d $(find ipa_env)/config/rviz.rviz"/>
 
-    <!-- 3d 曲面图 -->
-    <node name="ipa_test_node" pkg="ipa_env" type="ipa_test_node">
-        <rosparam command="load" file="$(find ipa_env)/config/test_costmap.yaml"/>
-    </node>
-    <node name="costmap3dplayer" pkg="ipa_env" type="costmap3dplayer.py"/>
-
     <!--  服务端  -->
     <node ns="room_segmentation" pkg="ipa_room_segmentation" type="room_segmentation_server" name="room_segmentation_server" output="screen" respawn="true" respawn_delay="2">
         <rosparam command="load" file="$(find ipa_env)/config/room_segmentation_action_server_params.yaml"/>
@@ -43,5 +37,5 @@
 
     <!--  客户端  -->
     <!-- <node ns="room_segmentation" pkg="ipa_room_segmentation" type="room_segmentation_client" name="room_segmentation_client" output="screen"/> -->
-    <!-- <node ns="room_segmentation" pkg="ipa_room_segmentation" type="room_segmentation_client" name="room_segmentation_client"/> -->
+    <node ns="room_segmentation" pkg="ipa_room_segmentation" type="room_segmentation_client" name="room_segmentation_client"/>
 </launch>
