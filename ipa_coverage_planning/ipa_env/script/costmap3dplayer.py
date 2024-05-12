@@ -109,15 +109,19 @@ def plotlylib_display(map_topic):
       map_topic (OccupancyGrid): 地图话题数据
   """  
   X, Y, Z = display_map(map_topic) # 地图数据
-  surface = go.Surface(x=X, y=Y, z=Z, colorscale='Rainbow', showscale=True)
+  surface = go.Surface(x=X, y=Y, z=Z,
+                       colorscale='Portland', # Blackbody,Bluered,Blues,Cividis,Earth,Electric,Greens,Greys,Hot,Jet,Picnic,Portland,Rainbow,RdBu,Reds,Viridis,YlGnBu,YlOrRd.
+                       showscale=False, # 关闭颜色条显示
+                       contours=dict(x=dict(highlight=False), # 悬浮显示的图形轮廓线 
+                                     y=dict(highlight=False), # 关闭 x y 轴的轮廓线
+                                     z=dict(highlightcolor='#ffffff', highlightwidth=3), # 网页安全色
+                                     ))
   data = [surface]
   layout = go.Layout(title='3D Surface Plot', autosize=True, margin=dict(l=0, r=0, b=0, t=0),
                      scene=dict(aspectmode='data', # 坐标轴比例用正常数据的大小显示
-                                # hover 鼠标悬停数据显示的配置
-                                hovermode=False,
                                 xaxis=dict(title='X Axis'),
                                 yaxis=dict(title='Y Axis'),
-                                zaxis=dict(title='Z Axis')
+                                zaxis=dict(title='Z Axis'),
                                 ))
   fig = go.Figure(data=data, layout=layout)
   pio.show(fig)
