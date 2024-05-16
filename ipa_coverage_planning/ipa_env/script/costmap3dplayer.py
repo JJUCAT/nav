@@ -14,6 +14,7 @@ import matplotlib.pyplot as plt
 
 import plotly.graph_objs as go
 import plotly.io as pio
+import plotly.graph_objects as grob
 # -------------------- global --------------------
 
 g_recv_map = False
@@ -128,6 +129,21 @@ def plotlylib_display(map_topic):
 
 
 
+def plotlylib_display_contour(map_topic):
+  """plotlylib 绘制等高线，网页端显示，可交互
+
+  Args:
+      map_topic (OccupancyGrid): 地图话题数据
+  """  
+  X, Y, Z = display_map(map_topic) # 地图数据
+  layout = grob.Layout(title='地图等高线图', autosize=True)
+  grid_fig = grob.Figure(data = grob.Contour(z = Z), layout=layout)
+  grid_fig.update_layout(xaxis=dict(scaleanchor="y", scaleratio=1), # x, y 轴等比例显示
+                         yaxis=dict(scaleanchor="x", scaleratio=1))
+  grid_fig.show()
+
+
+
 # -------------------- ros --------------------
 
 def callback(data):
@@ -136,9 +152,9 @@ def callback(data):
     g_recv_map = True
     g_costmap_topic = data
     print("Received costmap2d message")
-    # matplotlib_display(g_costmap_topic)
-    plotlylib_display(g_costmap_topic)
-
+    # matplotlib_display(g_costmap_topic) # matplotlib 3D 曲面
+    # plotlylib_display(g_costmap_topic) # plotlib 3D 曲面
+    plotlylib_display_contour(g_costmap_topic) # plotlib 等高线图
 
 
 def listener():
