@@ -1,0 +1,12 @@
+base_global_planner: rrt_planner/RrtStarSmartPlanner
+planner_frequency: 5.0
+
+RrtStarSmartPlanner:
+  max_iterations: 10000
+  timeout: 2.0
+  step: 1.0
+  r_gamma: 10.0
+  goal_err: 0.25
+  r_beacon: 1.0
+  biasing_ratio: 20000.0
+

@@ -1,0 +1,9 @@
+<library path="lib/libccpp_planner">
+  <class name="ccpp_planner/RrtStarSmartPlanner"
+         type="rrt_planner::RrtStarSmartPlanner"
+         base_class_type="nav_core::BaseGlobalPlanner">
+    <description>
+      ccpp planner
+    </description>
+  </class>
+</library>
