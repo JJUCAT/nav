@@ -163,7 +163,7 @@ int main(int argc, char **argv)
 	fov_points[2].y = 0.364;
 	fov_points[3].x = 0.54035;
 	fov_points[3].y = -0.136;
-	int planning_mode = 2;	// viewpoint planning
+	int planning_mode = 1;	// viewpoint planning
 //	fov_points[0].x = 0.15;		// this field of view fits a Asus Xtion sensor mounted at 0.63m height (camera center) pointing downwards to the ground in a respective angle
 //	fov_points[0].y = 0.35;
 //	fov_points[1].x = 0.15;

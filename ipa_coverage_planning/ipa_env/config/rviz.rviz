@@ -57,7 +57,7 @@ Visualization Manager:
       Head Diameter: 0.30000001192092896
       Head Length: 0.20000000298023224
       Length: 0.30000001192092896
-      Line Style: Lines
+      Line Style: Billboards
       Line Width: 0.029999999329447746
       Name: ccpp
       Offset:
@@ -97,12 +97,12 @@ Visualization Manager:
       Class: rviz/PoseArray
       Color: 114; 159; 207
       Enabled: true
-      Head Length: 0.699999988079071
-      Head Radius: 0.30000001192092896
+      Head Length: 0.30000001192092896
+      Head Radius: 0.10000000149011612
       Name: ccpp_start_end
       Queue Size: 10
-      Shaft Length: 0.5
-      Shaft Radius: 0.10000000149011612
+      Shaft Length: 0.30000001192092896
+      Shaft Radius: 0.05000000074505806
       Shape: Arrow (3D)
       Topic: /room_exploration/room_exploration_server/coverage_start_end
       Unreliable: false
@@ -155,7 +155,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 27.357728958129883
+      Distance: 15.108654022216797
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
@@ -163,9 +163,9 @@ Visualization Manager:
         Value: false
       Field of View: 0.7853981852531433
       Focal Point:
-        X: 16.882139205932617
-        Y: 15.818904876708984
-        Z: 0.5550588369369507
+        X: 0.3555559813976288
+        Y: -0.11194556206464767
+        Z: 0.5067889094352722
       Focal Shape Fixed Size: false
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
@@ -173,7 +173,7 @@ Visualization Manager:
       Near Clip Distance: 0.009999999776482582
       Pitch: 1.5697963237762451
       Target Frame: <Fixed Frame>
-      Yaw: 2.1503963470458984
+      Yaw: 1.5703964233398438
     Saved: ~
 Window Geometry:
   Displays:

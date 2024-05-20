@@ -359,6 +359,11 @@ void RoomExplorationServer::exploreRoom(const ipa_building_msgs::RoomExploration
 	cv::Mat temp;
 	cv::erode(room_map, temp, cv::Mat(), cv::Point(-1, -1), map_correction_closing_neighborhood_size_);
 	cv::dilate(temp, room_map, cv::Mat(), cv::Point(-1, -1), map_correction_closing_neighborhood_size_);
+  std::cout << "handle map, open operation:" << map_correction_closing_neighborhood_size_ << std::endl;
+  cv::namedWindow("open operation", cv::WINDOW_NORMAL);
+  cv::resizeWindow("open operation", 1400, 1000);
+  cv::imshow("open operation", room_map);
+  cv::waitKey();
 
 	// remove unconnected, i.e. inaccessible, parts of the room (i.e. obstructed by furniture), only keep the room with the largest area
 	const bool room_not_empty = removeUnconnectedRoomParts(room_map);
@@ -391,6 +396,7 @@ void RoomExplorationServer::exploreRoom(const ipa_building_msgs::RoomExploration
 	}
 	// map the grid size to an int in pixel coordinates, using floor method
 	const double grid_spacing_in_pixel = grid_spacing_in_meter/map_resolution;		// is the square grid cell side length that fits into the circle with the robot's coverage radius or fov coverage radius, multiply with sqrt(2) to receive the whole working width
+  std::cout << "coverage radius: " << goal->coverage_radius << " m" << std::endl;
 	std::cout << "grid size: " << grid_spacing_in_meter << " m   (" << grid_spacing_in_pixel << " px)" << std::endl;
 	// set the cell_size_ for #4 convexSPP explorator or #5 flowNetwork explorator if it is not provided
 	if (cell_size_ <= 0)

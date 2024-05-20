@@ -8,7 +8,7 @@
 # 7 = voronoi explorator # voronoi 覆盖
 # 8 = boustrophedon variant explorator # 牛耕法变种
 # int
-room_exploration_algorithm: 8 # 探索/覆盖算法
+room_exploration_algorithm: 2 # 探索/覆盖算法
 
 # display final trajectory plan step by step
 # bool
@@ -21,7 +21,7 @@ display_trajectory: false
 # if the map_correction_closing_neighborhood_size parameter is larger than 0.
 # The parameter then specifies the iterations (or neighborhood size) of that closing operation.
 # int
-map_correction_closing_neighborhood_size: 2
+map_correction_closing_neighborhood_size: 4
 
 
 # parameters specific to the navigation of the robot along the computed coverage trajectory
