@@ -217,8 +217,11 @@ int main(int argc, char **argv)
 		}
 		std::cout << "coverage_path[" << point << "]: x=" << action_result->coverage_path[point].x << ", y=" << action_result->coverage_path[point].y << ", theta=" << action_result->coverage_path[point].theta << std::endl;
 	}
-	cv::imshow("path", path_map);
-	cv::waitKey();
+  std::cout << "exploration show image" << std::endl;
+  cv::namedWindow("path", cv::WINDOW_NORMAL);
+  cv::resizeWindow("path", 1400, 1000);
+  cv::imshow("path", path_map);
+  cv::waitKey();
 
 	return 0;
 }

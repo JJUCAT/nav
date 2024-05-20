@@ -57,6 +57,7 @@
  *
  ****************************************************************/
 
+#include "opencv2/highgui.hpp"
 #include <ros/ros.h>
 #include <ros/package.h>
 
@@ -226,7 +227,8 @@ int main(int argc, char **argv)
 				cv::circle(colour_segmented_map, current_center, 2, CV_RGB(0,0,255), cv::FILLED);
 #endif
 			}
-
+      std::cout << "segmentation show image" << std::endl;
+      cv::namedWindow("segmentation", cv::WINDOW_AUTOSIZE);
 			cv::imshow("segmentation", colour_segmented_map);
 			cv::waitKey();
 		}

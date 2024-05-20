@@ -58,6 +58,8 @@
  ****************************************************************/
 
 
+#include "sensor_msgs/PointCloud.h"
+#include "geometry_msgs/PoseArray.h"
 #include <ipa_room_exploration/room_exploration_action_server.h>
 
 // constructor
@@ -196,7 +198,8 @@ RoomExplorationServer::RoomExplorationServer(ros::NodeHandle nh, std::string nam
 	// min area for revisiting left sections
 
 	path_pub_ = node_handle_.advertise<nav_msgs::Path>("coverage_path", 2);
-
+	poses_pub_ = node_handle_.advertise<geometry_msgs::PoseArray>("coverage_poses", 1);
+  start_end_pub_ = node_handle_.advertise<geometry_msgs::PoseArray>("coverage_start_end", 1);
 	//Start action server
 	room_exploration_server_.start();
 
@@ -624,6 +627,18 @@ void RoomExplorationServer::exploreRoom(const ipa_building_msgs::RoomExploration
 		coverage_path.header.stamp = ros::Time::now();
 		coverage_path.poses = exploration_path_pose_stamped;
 		path_pub_.publish(coverage_path);
+
+    geometry_msgs::PoseArray pa;
+    pa.header = coverage_path.header;
+    pa.poses.reserve(exploration_path_pose_stamped.size());
+    for (auto p : exploration_path_pose_stamped) {
+      pa.poses.emplace_back(p.pose);
+    }
+    poses_pub_.publish(pa);
+
+    pa.poses.resize(2);
+    pa.poses.back() = exploration_path_pose_stamped.back().pose;
+    start_end_pub_.publish(pa);
 	}
 
 	// ***************** III. Navigate trough all points and save the robot poses to check what regions have been seen *****************

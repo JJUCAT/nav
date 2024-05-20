@@ -121,6 +121,7 @@ protected:
 	int planning_mode_; // 1 = plans a path for coverage with the robot footprint, 2 = plans a path for coverage with the robot's field of view
 
 	ros::Publisher path_pub_; // a publisher sending the path as a nav_msgs::Path before executing
+	ros::Publisher poses_pub_, start_end_pub_;
 
 	GridPointExplorator grid_point_planner; // object that uses the grid point method to plan a path trough a room
 	BoustrophedonExplorer boustrophedon_explorer_; // object that uses the boustrophedon exploration method to plan a path trough the room

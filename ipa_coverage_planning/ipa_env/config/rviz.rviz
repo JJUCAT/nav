@@ -73,6 +73,40 @@ Visualization Manager:
       Topic: /room_exploration/room_exploration_server/coverage_path
       Unreliable: false
       Value: true
+    - Alpha: 1
+      Arrow Length: 0.5
+      Axes Length: 0.30000001192092896
+      Axes Radius: 0.009999999776482582
+      Class: rviz/PoseArray
+      Color: 255; 25; 0
+      Enabled: true
+      Head Length: 0.07000000029802322
+      Head Radius: 0.029999999329447746
+      Name: ccpp_poses
+      Queue Size: 10
+      Shaft Length: 0.23000000417232513
+      Shaft Radius: 0.009999999776482582
+      Shape: Arrow (Flat)
+      Topic: /room_exploration/room_exploration_server/coverage_poses
+      Unreliable: false
+      Value: true
+    - Alpha: 1
+      Arrow Length: 1
+      Axes Length: 0.30000001192092896
+      Axes Radius: 0.009999999776482582
+      Class: rviz/PoseArray
+      Color: 114; 159; 207
+      Enabled: true
+      Head Length: 0.699999988079071
+      Head Radius: 0.30000001192092896
+      Name: ccpp_start_end
+      Queue Size: 10
+      Shaft Length: 0.5
+      Shaft Radius: 0.10000000149011612
+      Shape: Arrow (3D)
+      Topic: /room_exploration/room_exploration_server/coverage_start_end
+      Unreliable: false
+      Value: true
     - Alpha: 0.699999988079071
       Class: rviz/Map
       Color Scheme: map
@@ -121,7 +155,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 34.785499572753906
+      Distance: 27.357728958129883
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
@@ -129,9 +163,9 @@ Visualization Manager:
         Value: false
       Field of View: 0.7853981852531433
       Focal Point:
-        X: 2.8160715103149414
-        Y: 4.825483798980713
-        Z: -0.006123987026512623
+        X: 16.882139205932617
+        Y: 15.818904876708984
+        Z: 0.5550588369369507
       Focal Shape Fixed Size: false
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
@@ -139,7 +173,7 @@ Visualization Manager:
       Near Clip Distance: 0.009999999776482582
       Pitch: 1.5697963237762451
       Target Frame: <Fixed Frame>
-      Yaw: 1.585397720336914
+      Yaw: 2.1503963470458984
     Saved: ~
 Window Geometry:
   Displays:
