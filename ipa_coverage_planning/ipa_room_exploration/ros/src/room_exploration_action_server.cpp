@@ -356,14 +356,24 @@ void RoomExplorationServer::exploreRoom(const ipa_building_msgs::RoomExploration
 	std::cout << "### room area = " << area_px*map_resolution*map_resolution << " m^2" << std::endl;
 
 	// closing operation to neglect inaccessible areas and map errors/artifacts
+  bool show_operation_image = false;
 	cv::Mat temp;
 	cv::erode(room_map, temp, cv::Mat(), cv::Point(-1, -1), map_correction_closing_neighborhood_size_);
+  if (show_operation_image) {
+    std::cout << "handle map, erode operation:" << map_correction_closing_neighborhood_size_ << std::endl;
+    cv::namedWindow("erode operation", cv::WINDOW_NORMAL);
+    cv::resizeWindow("erode operation", 1400, 1000);
+    cv::imshow("erode operation", temp);
+    cv::waitKey();
+  }
 	cv::dilate(temp, room_map, cv::Mat(), cv::Point(-1, -1), map_correction_closing_neighborhood_size_);
-  std::cout << "handle map, open operation:" << map_correction_closing_neighborhood_size_ << std::endl;
-  cv::namedWindow("open operation", cv::WINDOW_NORMAL);
-  cv::resizeWindow("open operation", 1400, 1000);
-  cv::imshow("open operation", room_map);
-  cv::waitKey();
+  if (show_operation_image) {
+    std::cout << "handle map, dilate operation:" << map_correction_closing_neighborhood_size_ << std::endl;
+    cv::namedWindow("dilate operation", cv::WINDOW_NORMAL);
+    cv::resizeWindow("dilate operation", 1400, 1000);
+    cv::imshow("dilate operation", room_map);
+    cv::waitKey();
+  }
 
 	// remove unconnected, i.e. inaccessible, parts of the room (i.e. obstructed by furniture), only keep the room with the largest area
 	const bool room_not_empty = removeUnconnectedRoomParts(room_map);
