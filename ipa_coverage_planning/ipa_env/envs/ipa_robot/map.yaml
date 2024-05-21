@@ -1,4 +1,4 @@
-image: simplemap.png
+image: simplemap1.png
 resolution: 0.05
 origin: [-5, -5, 0]
 occupied_thresh: 0.65

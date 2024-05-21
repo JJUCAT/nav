@@ -92,7 +92,7 @@ camera_frame: "base_link"
 #   2 = Genetic solver (slightly shorter than Nearest Neighbor)
 #   3 = Concorde solver (usually gives the shortest path while computing the longest)
 # int
-tsp_solver: 1 # 多个分区之间的旅行商问题
+tsp_solver: 3 # 多个分区之间的旅行商问题
 
 # a sophisticated solver like Concorde or Genetic can be interrupted if
 # it does not find a solution within this time, in [s],
