@@ -1,0 +1,9 @@
+<library path="lib/libvanjee_pointcloud_nodelet">
+  <class name="vanjee_lidar/CloudNodelet"
+         type="vanjee_lidar::CloudNodelet"
+         base_class_type="nodelet::Nodelet">
+    <description>
+      Aggregates points from multiple packets, publishing PointCloud2.
+    </description>
+  </class>
+</library>

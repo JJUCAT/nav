@@ -1,0 +1,12 @@
+#rotate angle
+float32 target_yaw   #rad
+
+float32 speed  #rad/s
+
+---
+
+std_msgs/Duration total_time
+
+---
+float32 angular_traveled
+

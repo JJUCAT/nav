@@ -1,0 +1,73 @@
+---
+all_topics:
+  - topic_type: nav_msgs::OccupancyGrid
+    number: 1
+    topics:
+      1: /map
+      2: /move_base/local_costmap/costmap
+  - topic_type: sensor_msgs::LaserScan
+    number: 2
+    topics:
+      1: /scan
+  - topic_type: sensor_msgs::PointCloud2
+    number: 3
+    topics:
+      1: /scan_matched_points2
+  - topic_type: sensor_msgs::Imu
+    number: 4
+    topics:
+      1: /imu
+  - topic_type: nav_msgs::Path
+    number: 5
+    topics:
+      1: move_base/NemGlobalPlannerROS/plan
+      2: move_base/NemLocalPlannerROS/local_plan
+  - topic_type: nav_msgs::Odometry
+    number: 6
+    topics:
+      1: /odom
+  - topic_type: tf2_msgs::TFMessage
+    number: 7
+    topics:
+      1: /tf
+  - topic_type: geometry_msgs::PoseStamped
+    number: 8
+    topics:
+      1: /pose
+      2: /move_base/current_goal
+      3: /pose_smooth
+  - topic_type: geometry_msgs::PoseWithCovarianceStamped
+    number: 9
+    topics:
+      1: /initialpose
+  - topic_type: geometry_msgs::Twist
+    number: 10
+    topics:
+      1: /cmd_vel
+      2: /move_base_cmd_vel
+  - topic_type: geometry_msgs::PolygonStamped
+    number: 11
+    topics:
+      1: /move_base/local_costmap/footprint
+      2: /move_base/NemLocalPlannerROS/not_feasible_footprint
+  - topic_type: visualization_msgs::Marker
+    number: 12
+    topics:
+      1: /nem_edges
+      2: /nem_nodes
+      3: /nem_nodes_id
+  - topic_type: std_msgs::Float64
+    number: 13
+    topics:
+      1: /error_value
+      2: /actual_confidence
+      3: /pid_reset
+  - topic_type: move_base_msgs::MoveBaseActionGoal
+    number: 14
+    topics:
+      1: /move_base/goal
+  - topic_type: std_msgs::String
+    number: 15
+    topics:
+      1: /long_corridor_detection
+---

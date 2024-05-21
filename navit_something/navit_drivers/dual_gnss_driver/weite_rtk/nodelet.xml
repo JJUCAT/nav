@@ -1,0 +1,26 @@
+<class_libraries>
+
+    <library path="lib/libweite_rtk_multi_sensor_nodelet">
+        <class name="weite/MultiSensorDriverNodelet"
+               type="integrated_navigation::MultiSensorDriverNodelet"
+               base_class_type="nodelet::Nodelet">
+            <description>
+                Nodelet for reading data from Imu and Novatel GPS devices.
+            </description>
+        </class>
+    </library>
+
+ 
+
+    <library path="lib/libweite_rtk_ins_nodelet">
+        <class name="weite/InsDriverNodelet"
+               type="integrated_navigation::InsDriverNodelet"
+               base_class_type="nodelet::Nodelet">
+            <description>
+                ins driver nodelet.
+            </description>
+        </class>
+    </library>
+
+
+</class_libraries>

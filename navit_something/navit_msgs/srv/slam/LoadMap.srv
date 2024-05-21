@@ -1,0 +1,6 @@
+string map_dir
+string map_name
+
+---
+bool is_load_success
+string message

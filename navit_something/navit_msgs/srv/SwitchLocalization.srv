@@ -1,0 +1,17 @@
+# use_lidar use_rtk   result
+#    true      true   FUSION_LOCALIZATION
+#    false     true   RTK_LOCALIZATION 
+#    false     false  NO_LOCALIZATION
+#    true      false  LIDAR_LOCALIZATION
+
+bool use_lidar
+bool use_rtk
+
+---
+uint8 NO_LOCALIZATION      = 0
+uint8 RTK_LOCALIZATION     = 1
+uint8 LIDAR_LOCALIZATION   = 2
+uint8 FUSION_LOCALIZATION  = 3
+uint8 REQUEST_ERROR        = 255
+
+uint8 result

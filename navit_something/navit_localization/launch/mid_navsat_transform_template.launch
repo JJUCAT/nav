@@ -1,0 +1,56 @@
+
+
+<launch>
+  <param name="/use_sim_time" value="true" />
+
+  <node pkg="navit_localization" type="navsat_transform_node" output="screen" name="navsat_transform_node" clear_params="true" >
+    <rosparam command="load" file="$(find navit_localization)/params/navsat_transform_template.yaml" />
+      <param name="yaw_offset" value="0"/>
+      <param name="use_odometry_yaw" value="true"/>
+
+      Placeholders for input remapping. Set your topic names as the "to" values.
+      <remap from="imu/data" to="/imu_data"/>
+      <!-- <remap from="odometry/filtered" to="/odom"/> -->
+      <remap from="gps/fix" to="/Novatel/Fix"/>
+     
+  </node>
+
+
+  <arg name = "model"/>
+  <param name = "robot_description" textfile = "$(find navit_localization)/urdf/j110.urdf"/>
+  <param name = "use_gui" value = "true"/>
+  <node name = "joint_state_publisher" pkg = "joint_state_publisher" type = "joint_state_publisher"/>
+  <node name = "robot_state_publisher" pkg = "robot_state_publisher" type = "robot_state_publisher"/>
+
+
+	<node name="odom2tf" pkg="navit_localization" type="odom2tf"   />
+  <!-- <node name="odomekftf" pkg="navit_localization" type="odomekftf"/> -->
+
+  <node pkg="navit_localization" type="ekf_localization_node" name="ekf_se" output="screen" clear_params="true">
+    <rosparam command="load" file="$(find navit_localization)/params/mid_test_ekf_template.yaml" />
+  </node>
+  
+
+
+	<arg name="rviz" default="true" />
+	<group if="$(arg rviz)">
+	<node launch-prefix="nice" pkg="rviz" type="rviz" name="rviz" args="-d $(find navit_localization)/rviz/test.rviz" />
+
+
+	<arg name="bag" default="/home/oem/workplace/test_data/1121/2023-03-15-23-57-08.bag"/>
+	<node name="playbag" pkg="rosbag" type="play" args="--clock $(arg bag) --hz=1000 --topic /livox/lidar_192_168_1_166  /Novatel/PosVelHeadingData /livox/imu_192_168_1_166  /Novatel/Fix /odom /imu_data -s 0 -r 3"/>
+
+	</group>
+
+
+ 
+
+    <!--  Placeholder for output topic remapping
+    <remap from="odometry/filtered" to=""/>
+    <remap from="accel/filtered" to=""/>
+    -->
+
+
+
+</launch>
+

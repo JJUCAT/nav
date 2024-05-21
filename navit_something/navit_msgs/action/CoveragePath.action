@@ -1,0 +1,23 @@
+# 起点
+geometry_msgs/PoseStamped start
+
+# 包围的边界 
+nav_msgs/Path edge_path
+
+# 选择插件
+string planner_plugin
+
+---
+# 是否成功
+bool path_found
+
+# 规划结果
+nav_msgs/Path coverage_path
+# nav_msgs/Path wall_path
+
+# 规划用时
+std_msgs/Duration planning_used_time
+
+---
+
+# 反馈(暂无）

@@ -1,0 +1,32 @@
+<launch>
+    <arg name="manager_name" default="nodelet_manager" />
+    <arg name="bag" default="/home/yijiahe/Downloads/1026/nav/2023-10-29-17-30-50.bag"/>
+
+    <param name="use_sim_time" value="true" />
+
+    <node pkg="nodelet" type="nodelet" name="$(arg manager_name)" args="manager" output="screen"/>
+
+    <rosparam file="$(find integrated_navigation)/config/filtering/error_state_kalman_filter.yaml" command="load" />
+    <rosparam file="$(find integrated_navigation)/config/filtering/complementary_filter.yaml" command="load" />
+    <rosparam file="$(find integrated_navigation)/config/sensor/sensor.yaml" command="load" />
+    <node pkg="nodelet" type="nodelet" name="SinsGnssFilteringNodelet"
+          args="load integrated_navigation/SinsGnssFilteringNodelet $(arg manager_name)" output="screen">
+    </node>
+
+    <node pkg="nodelet" type="nodelet" name="SystemControlNodelet"
+          args="load integrated_navigation/SystemControlNodelet $(arg manager_name)" output="screen">
+    </node>
+
+    <node pkg="nodelet" type="nodelet" name="DebugNodelet"
+          args="load integrated_navigation/DebugNodelet $(arg manager_name)" output="screen">
+    </node>
+
+    <node name="playbag" pkg="rosbag" type="play"
+          args="--clock $(arg bag) --hz=1000 --topic /imu_data /Novatel/PosVelHeadingData /rslidar_points -s 0 -r 1"/>
+
+
+     <node pkg="rviz" type="rviz" name="rviz" output="screen"
+           args="-d $(find integrated_navigation)/rviz/odometry.rviz" required="true">
+     </node>
+
+</launch>

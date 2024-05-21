@@ -1,0 +1,6 @@
+#LoadNemData.srv 加载点边文件
+string node_file_path  #点文件名及其路径
+string edge_file_path  #边文件名及其路径
+---
+bool success      #1:成功; 0:失败
+string message    #反馈结果

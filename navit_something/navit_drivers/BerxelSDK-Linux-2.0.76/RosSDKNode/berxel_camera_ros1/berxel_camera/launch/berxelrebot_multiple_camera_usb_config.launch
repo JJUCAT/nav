@@ -1,0 +1,20 @@
+<launch>
+
+<arg name="device1" default="left_camera"/>
+<arg name="device2" default="right_camera"/>
+<arg name="serial_no_1" default="HK100RB3518P1B300" />
+<arg name="serial_no_2" default="HK100RB3518P1B364" />
+
+<group ns="$(arg device1)">
+    <param name="camera" type="str" value="$(arg device1)" />
+    <param name="serial_no" type="str" value="$(arg serial_no_1)" />
+    <include file="$(find berxel_camera)/launch/include/berxel_camera_iHawk100.launch.xml"/>
+</group>
+
+<group ns="$(arg device2)">
+    <param name="camera" type="str" value="$(arg device2)" />
+    <param name="serial_no" type="str" value="$(arg serial_no_2)" />
+    <include file="$(find berxel_camera)/launch/include/berxel_camera_iHawk100.launch.xml"/>
+</group>
+
+</launch>

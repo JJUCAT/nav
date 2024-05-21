@@ -1,0 +1,23 @@
+#action name: /action_task_follow_path
+#goal definition
+uint16 SCENE_FOLLOW_PATH = 0                    # 沿线全覆盖或者手绘的沿线轨迹
+uint16 SCENE_FOLLOW_ALONG_EDGES = 1             # 沿墙用于录制的地图边界
+uint16 SCENE_FOLLOW_PATH_WITH_NO_AVOIDANCE = 2  # 无避障沿线（停障），用于一些窄道、小径等场景
+
+nav_msgs/Path path      #目标轨迹
+uint16 working_scene    #工作场景 default: SCENE_FOLLOW_PATH
+---
+#result definition
+bool goal_reached
+uint16 error_code
+string error_msg
+
+---
+#feedback
+uint32 status_code               #状态码
+string status_msg                #状态信息
+float32 distance_to_goal         #剩余距离
+float32 current_vel              #当前速度
+float32 completion_percentage    #完成百分比
+uint16 num_of_recoveries         #重试次数（脱困次数）
+bool on_taskplan                 #是否抵达任务路径

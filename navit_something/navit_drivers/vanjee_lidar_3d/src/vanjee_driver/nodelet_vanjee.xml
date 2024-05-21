@@ -1,0 +1,9 @@
+<library path="lib/libvanjee_driver_nodelet">
+  <class name="vanjee_driver/DriverNodelet"
+         type="vanjee_driver::DriverNodelet"
+         base_class_type="nodelet::Nodelet">
+    <description>
+      Publish one vanjeelidar raw data packet each time.
+    </description>
+  </class>
+</library>

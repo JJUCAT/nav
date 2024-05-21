@@ -1,0 +1,5 @@
+string map_name #地图名 如："default_map"
+string map_data #地图数据 smap的json表示
+---
+uint16 error_code
+string error_msg

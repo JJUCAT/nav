@@ -1,0 +1,44 @@
+camera_info:
+    - camera_name: camera_long
+      camera_type: navit_camera/UvcCamera
+      camera_path: /dev/ttyUSB0
+      camera_matrix: [839.92, 0.0,    340.78
+                      0.0,    837.67, 261.76
+                      0.0,    0.0,      1.0]
+      camera_distortion: [0.08,
+                          0.04,
+                          0.002,
+                          -0.0007,
+                          0.0]
+      resolution_width: 640
+      resolution_height: 480
+      width_offset: 0
+      height_offset: 0
+      fps: 100
+      auto_exposure: true
+      exposure_value: 70
+      exposure_time: 10
+      auto_white_balance: true
+      auto_gain: false
+
+    - camera_name: camera_short
+      camera_type: navit_camera/FakeCamera
+      camera_path: /dev/ttyUSB1
+      camera_matrix: [839.92, 0.0,    340.78
+                      0.0,    837.67, 261.76
+                      0.0,    0.0,      1.0]
+      camera_distortion: [0.08,
+                          0.04,
+                          0.002,
+                          -0.0007,
+                          0.0]
+      resolution_width: 640
+      resolution_height: 480
+      width_offset: 0
+      height_offset: 0
+      fps: 100
+      auto_exposure: true
+      exposure_value: 70
+      exposure_time: 10
+      auto_white_balance: true
+      auto_gain: false

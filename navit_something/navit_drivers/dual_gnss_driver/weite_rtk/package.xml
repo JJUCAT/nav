@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<package format="3">
+  <name>weite_rtk</name>
+  <version>0.0.0</version>
+  <description>The weite_rtk package</description>
+  <maintainer email="waynee@todo.todo">waynee</maintainer>
+  <license>BSD</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+  <depend>navit_msgs</depend>
+  <depend>diagnostic_msgs</depend>
+  <depend>diagnostic_updater</depend>
+  <depend>serial</depend>
+  <build_depend>roscpp</build_depend>
+  <build_depend>rospy</build_depend>
+  <build_depend condition="$ROS_PYTHON_VERSION == 2">python-catkin-pkg</build_depend>
+  <build_depend condition="$ROS_PYTHON_VERSION == 3">python3-catkin-pkg</build_depend>
+  <exec_depend condition="$ROS_PYTHON_VERSION == 2">python-serial</exec_depend>
+  <exec_depend condition="$ROS_PYTHON_VERSION == 3">python3-serial</exec_depend>
+  <build_depend>std_msgs</build_depend>
+  <build_export_depend>roscpp</build_export_depend>
+  <build_export_depend>rospy</build_export_depend>
+  <build_export_depend>std_msgs</build_export_depend>
+  <exec_depend>roscpp</exec_depend>
+  <exec_depend>rospy</exec_depend>
+  <exec_depend>std_msgs</exec_depend>
+
+  <build_depend>nodelet</build_depend>
+  <exec_depend>nodelet</exec_depend>
+  <export>
+    <nodelet plugin="${prefix}/nodelet.xml"/>
+  </export>
+</package>

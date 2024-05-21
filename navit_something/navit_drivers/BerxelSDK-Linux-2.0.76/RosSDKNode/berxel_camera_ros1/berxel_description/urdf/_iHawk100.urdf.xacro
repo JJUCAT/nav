@@ -1,0 +1,77 @@
+<?xml version="1.0"?>
+
+<robot name="berxel_iHawk_100" xmlns:xacro="http://ros.org/wiki/xacro">
+
+  <xacro:macro name="berxel_iHawk_100" params="parent *origin  name:=camera  use_nominal_extrinsics:=false add_plug:=false use_mesh:=true">
+    <xacro:property name="M_PI" value="3.1415926535897931" />
+    
+    <joint name="${name}_joint" type="fixed">
+      <xacro:insert_block name="origin" />
+      <parent link="${parent}"/>
+      <child link="${name}_back_screw_frame" />
+    </joint>
+
+    <link name="${name}_back_screw_frame">
+      <visual>
+        <origin xyz="0 0 0.01520" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="package://berxel_description/meshes/BerxeliHawk100.stl" />
+        </geometry>
+        <material name="aluminum">
+          <color rgba="0.5 0.5 0.5 1"/>
+        </material> 
+      </visual>
+    </link>
+
+    <joint name="${name}_link_joint" type="fixed">
+      <origin xyz="0.008155 0 0.01520" rpy="0 0 0"/>
+      <parent link="${name}_back_screw_frame"/>
+      <child link="${name}_link" />
+    </joint>
+
+    <link name="${name}_link" />
+
+    <joint name="${name}_color_joint" type="fixed">
+      <origin xyz="0 -0.006 0" rpy="0 0 0"/>
+      <parent link="${name}_link"/>
+      <child link="${name}_color_frame" />
+    </joint>
+    <link name="${name}_color_frame"/>
+
+    <joint name="${name}_color_optical_frame" type="fixed">
+      <origin xyz="0 0 0" rpy="${-M_PI/2} 0 ${-M_PI/2}" />
+      <parent link="${name}_color_frame" />
+      <child link="${name}_color_optical_frame" />
+    </joint>
+    <link name="${name}_color_optical_frame"/>
+
+    <joint name="${name}_depth_joint" type="fixed">
+      <origin xyz="0 0.004 0" rpy="0 0 0"/>
+      <parent link="${name}_link"/>
+      <child link="${name}_depth_frame" />
+    </joint>
+    <link name="${name}_depth_frame"/>
+
+    <joint name="${name}_depth_optical_frame" type="fixed">
+      <origin xyz="0 0 0" rpy="${-M_PI/2} 0 ${-M_PI/2}" />
+      <parent link="${name}_depth_frame" />
+      <child link="${name}_depth_optical_frame" />
+    </joint>
+    <link name="${name}_depth_optical_frame"/>
+
+    <joint name="${name}_lite_joint" type="fixed">
+      <origin xyz="0 -0.03 0" rpy="0 0 0"/>
+      <parent link="${name}_link"/>
+      <child link="${name}_lite_frame" />
+    </joint>
+    <link name="${name}_lite_frame"/>
+
+    <joint name="${name}_lite_optical_frame" type="fixed">
+      <origin xyz="0 0 0" rpy="${-M_PI/2} 0 ${-M_PI/2}" />
+      <parent link="${name}_lite_frame" />
+      <child link="${name}_lite_optical_frame" />
+    </joint>
+    <link name="${name}_lite_optical_frame"/>
+
+  </xacro:macro>
+</robot>

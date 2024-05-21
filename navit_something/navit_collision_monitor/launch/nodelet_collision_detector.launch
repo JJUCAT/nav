@@ -1,0 +1,16 @@
+<launch>
+
+    <!-- arg -->
+    <arg name="nodelet_manager" default="unname_nodelet_manager"/>
+
+    <!-- nodelet_manager -->
+    <node pkg="nodelet" type="nodelet" name="$(arg nodelet_manager)" args="manager" output="screen"/>
+
+    <!-- collision_detector_node -->
+    <node pkg="nodelet" type="nodelet" name="collision_detector_node"
+          args="load nodelet_collision_detector/CollisionDetector $(arg nodelet_manager)"
+          output="screen">
+        <rosparam file="$(find navit_collision_monitor)/config/collision_detector_params.yaml"
+                  command="load"/>
+    </node>
+</launch>

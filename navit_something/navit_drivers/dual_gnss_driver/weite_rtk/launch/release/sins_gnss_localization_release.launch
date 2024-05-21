@@ -1,0 +1,19 @@
+<launch>
+    <arg name="manager_name" default="nodelet_manager" />
+    <node pkg="nodelet" type="nodelet" name="$(arg manager_name)" args="manager" output="screen"/>
+
+    <rosparam file="$(find integrated_navigation)/config/filtering/error_state_kalman_filter.yaml" command="load" />
+    <rosparam file="$(find integrated_navigation)/config/filtering/complementary_filter.yaml" command="load" />
+    <rosparam file="$(find integrated_navigation)/config/sensor/sensor.yaml" command="load" />
+    <node pkg="nodelet" type="nodelet" name="MultiSensorDriverNodelet"
+          args="load integrated_navigation/MultiSensorDriverNodelet $(arg manager_name)" output="screen">
+    </node>
+
+    <node pkg="nodelet" type="nodelet" name="SinsGnssFilteringNodelet"
+          args="load integrated_navigation/SinsGnssFilteringNodelet $(arg manager_name)" output="screen">
+    </node>
+
+    <node pkg="nodelet" type="nodelet" name="SystemControlNodelet"
+          args="load integrated_navigation/SystemControlNodelet $(arg manager_name)" output="screen">
+    </node>
+</launch>

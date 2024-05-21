@@ -1,0 +1,7 @@
+std_msgs/Header header
+bool success
+string controller_plugin
+float32 cpu_time_ms
+float32 average_cpu_time_ms
+geometry_msgs/Twist current_cmd_vel
+geometry_msgs/Twist average_cmd_vel

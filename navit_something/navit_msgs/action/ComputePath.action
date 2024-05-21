@@ -1,0 +1,59 @@
+# 起点
+geometry_msgs/PoseStamped start
+
+
+# 终点
+geometry_msgs/PoseStamped goal
+
+# 选择插件
+string planner_plugin
+
+# 是否使用给定点为起点
+bool use_start
+
+---
+# 路径规划错误码
+
+# OK
+uint16 OK=0
+
+# 非法规划插件
+uint16 INVALID_PLANNER=201
+
+# tf树错误
+uint16 TF_ERROR=202
+
+# 起始点在地图之外
+uint16 START_OUTSIDE_MAP=203
+
+# 目标点在地图在外
+uint16 GOAL_OUTSIDE_MAP=204
+
+# 起始点在障碍物中
+uint16 START_OCCUPIED=205
+
+# 目标点在障碍物中
+uint16 GOAL_OCCUPIED=206
+
+# 计算超时
+uint16 TIMEOUT=207
+
+# 规划失败
+uint16 NO_VALID_PATH=208
+
+uint16 error_code
+
+string error_msg
+
+# 是否成功
+bool path_found
+
+# 规划结果
+nav_msgs/Path path
+
+# 规划用时
+std_msgs/Duration planning_used_time
+
+---
+
+# 反馈(暂无）

@@ -1,0 +1,19 @@
+#action name: /action_task_auto_dock
+uint16 MODEL_J110
+uint16 MODEL_J40
+uint16 MODEL_EP100
+
+geometry_msgs/PoseStamped expected_dock_pose
+uint16 robot_model                               #机器人模型
+
+---
+bool is_docked                                   #是否回充成功
+uint16 error_code
+string error_msg
+
+---
+geometry_msgs/PoseStamped dock_pose
+geometry_msgs/PoseStamped target_pose
+geometry_msgs/Twist command
+uint32 status_code             # 状态码
+string status_msg              # 状态信息

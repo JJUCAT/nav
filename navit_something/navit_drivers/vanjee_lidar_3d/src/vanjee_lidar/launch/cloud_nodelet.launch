@@ -1,0 +1,10 @@
+<!-- -*- mode: XML -*- -->
+<!-- run vanjee_lidar/CloudNodelet in a nodelet manager -->
+
+<launch>
+  <arg name="manager" default="vanjee_nodelet_manager" />
+
+  <node pkg="nodelet" type="nodelet" name="$(arg manager)_cloud"
+        args="load vanjee_lidar/CloudNodelet $(arg manager) " output="screen">
+  </node>
+</launch>

@@ -1,0 +1,54 @@
+<?xml version = "1.0"?>
+<launch>
+  <env name="ROSCONSOLE_CONFIG_FILE"
+         value="$(eval optenv('ROSCONSOLE_CONFIG_FILE', find('navit_move_base') + '/cfg/log.conf'))"/>
+    <param name="sim_mode" value="false"/>
+    <!-- gdb -->
+    <arg name="debug" default="false"/>
+    <arg if="$(arg debug)" name="launch_prefix" value="xterm -rv -e gdb -ex run -args"/>
+    <arg unless="$(arg debug)" name="launch_prefix" value=""/>
+
+    <!--arg param-->
+    <arg name="cmd_vel_topic" default="move_base_cmd_vel" />
+    <arg name="odom_topic" default="odom" />
+    <!--router server -->
+    <include file="$(find navit_routing)/launch/routing.launch"/>
+    <!-- move_base -->
+    <node pkg="navit_move_base" type="navit_move_base_node" respawn="false" name="move_base" output="screen" launch-prefix="$(arg launch_prefix)">
+
+        <rosparam file="$(find navit_move_base)/params/costmap_params/ep100/global_costmap_common_params.yaml" command="load" ns="global_costmap" />
+        <rosparam file="$(find navit_move_base)/params/costmap_params/ep100/local_costmap_common_params.yaml" command="load" ns="local_costmap" />
+        <rosparam file="$(find navit_move_base)/params/costmap_params/ep100/local_costmap_params.yaml" command="load" />
+        <rosparam file="$(find navit_move_base)/params/costmap_params/ep100/global_costmap_params.yaml" command="load" />
+        <rosparam file="$(find navit_move_base)/params/costmap_params/ep100/costmap_converter_params.yaml" command="load" />
+
+        <rosparam file="$(find navit_move_base)/params/move_base_params/ep100/move_base_params.yaml" command="load" />
+
+        <rosparam file="$(find navit_move_base)/params/global_planner_params/ep100/nem_global_planner_params.yaml" command="load" />
+        <rosparam file="$(find navit_move_base)/params/global_planner_params/ep100/global_planner_params.yaml" command="load" />
+
+        <rosparam file="$(find navit_move_base)/params/local_planner_params/ep100/base_local_planner_params.yaml" command="load" />
+        <rosparam file="$(find navit_move_base)/params/local_planner_params/ep100/dwa_local_planner_params.yaml" command="load" />
+        <rosparam file="$(find navit_move_base)/params/local_planner_params/ep100/teb_local_planner_params.yaml" command="load" />
+        <rosparam file="$(find navit_move_base)/params/local_planner_params/ep100/nem_local_planner_params.yaml" command="load" />
+        <rosparam file="$(find navit_move_base)/params/local_planner_params/ep100/m100_dock_local_planner_params.yaml" command="load" />
+
+        <param name="record_bag_cfg_path" value="$(find navit_move_base)/cfg/navi_bag_record_topics.yaml"/>
+        <param name="navi_bag_path" value="$(env HOME)/.ros/"/>
+
+        <param name="sim_mode" value="false"/>
+        <remap from="cmd_vel" to="$(arg cmd_vel_topic)"/>
+        <remap from="odom" to="$(arg odom_topic)"/>
+    </node>
+
+    <!--vel smooth-->
+    <include file="$(find navit_velocity_smoother)/launch/vel_smoother_nodelet_ep100.launch"/>
+
+    <!--pid visualization -->
+    <!--node name="pid_visual" pkg="move_base" type="pid_plot.py" output="screen" /-->
+
+    <!-- rviz -->
+    <!--node pkg="rviz" type="rviz" name="rviz" required="true" args="-d $(find move_base)/rviz/navigation.rviz"/-->
+</launch>
+
+

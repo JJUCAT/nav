@@ -1,0 +1,12 @@
+# Action for find a valid route
+int64 start
+int64[] via_points
+int64 goal
+
+GraphPointsConnection map #GraphPointsConnection is a struct with two uint16 (point1, point2)
+
+---
+int64[] route
+uint16 error_code
+string error_msg
+---

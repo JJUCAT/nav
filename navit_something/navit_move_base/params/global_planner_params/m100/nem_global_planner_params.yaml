@@ -1,0 +1,3 @@
+NemGlobalPlannerROS:
+  onNodeDist: 0.2   #查看是否在节点上的距离阈值
+  onEdgeDist: 0.2   #查看是否在边上的距离阈值

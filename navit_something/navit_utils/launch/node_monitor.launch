@@ -1,0 +1,6 @@
+<launch>
+<node name="navit_utils_node" pkg="navit_utils" type="navit_utils_node"
+      output="screen" respawn="true">
+      <rosparam file="$(find navit_utils)/config/node_monitor.yaml" command="load" />
+</node>
+</launch>

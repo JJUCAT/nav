@@ -1,0 +1,5 @@
+<launch>
+<param name="camera" type="str" value="berxel_camera" />
+<include file="$(find berxel_camera)/launch/include/berxel_camera_iHawk100M1_back.launch.xml"/>
+
+</launch>

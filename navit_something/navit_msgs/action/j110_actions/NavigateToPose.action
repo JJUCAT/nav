@@ -1,0 +1,28 @@
+#action name: /action_task_move_a2b
+uint16 PRECISE_POSE_AND_ORIENTATION = 0     #精准的位置和方向
+uint16 ACCEPTABLE_POSE_AND_ORIENTATION = 1  #可接受的位置和方向
+uint16 PRECISE_POSE_ONLY = 2
+uint16 ACCEPTABLE_POSE_ONLY = 3
+
+geometry_msgs/PoseStamped start
+geometry_msgs/PoseStamped goal
+
+# 是否使用给定点为起点
+bool use_start
+uint16 arrival_mode                         # default: 0, PRECISE_POSE_AND_ORIENTATION
+float32 xy_goal_tolerance                   #[m]   设置为 ACCEPTABLE_POSE_AND_ORIENTATION 时有效
+float32 yaw_goal_tolerance                  #[rad] 设置为 ACCEPTABLE_POSE_AND_ORIENTATION 时有效
+
+---
+bool goal_reached
+uint16 error_code
+string error_msg
+
+---
+float32 distance_to_goal
+float32 current_vel
+float32 completion_percentage
+
+uint32 status_code             # 状态码
+string status_msg              # 状态信息
+nav_msgs/Path path

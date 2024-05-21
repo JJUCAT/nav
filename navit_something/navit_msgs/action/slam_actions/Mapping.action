@@ -1,0 +1,26 @@
+std_msgs/Time time     # 时间戳
+string command         # 命令 begin cancel save update
+int8 type              # Type = 0时开始新的建图，type=1时表示地图拓展
+string map_name        # map_name：地图名字(yijiahe.pgm)
+string path_name       # path_name：地图存储路径(/home/admin/resource/map/)
+
+float64 latitude
+float64 longitude
+float64 altitude
+
+float64 x              # 地图扩展初始化位置
+float64 y
+float64 qz
+float64 qw
+
+---
+
+#请求结果，一般由服务端发送给客户端
+bool success          # success：成功为true，失败为false;
+string error_msg      # error_msg:失败时返回错误信息
+nav_msgs/MapMetaData map_info # 保存地图时，需响应 
+
+---
+
+#反馈的消息内容，一般由服务端不间断发送到客户端
+int32 process_bar     # process_bar：进度条

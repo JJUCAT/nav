@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>berxel_description</name>
+  <version>1.0.0</version>
+  <description>Berxel Camera description package</description>
+  <maintainer email="adamsun_sun@outlook.com">adam</maintainer>
+  <license>BSD</license>
+  <buildtool_depend>catkin</buildtool_depend>
+  <exec_depend>xacro</exec_depend>
+  <test_depend>rosunit</test_depend>
+</package>

@@ -1,0 +1,9 @@
+<library path="lib/libnodelet_sunny_tof_camera">
+    <class name="nodelet_sunny_tof_camera/SunnyTofCamera"
+           type="nodelet_sunny_tof_camera::SunnyTofCamera"
+           base_class_type="nodelet::Nodelet">
+        <description>
+            Sunny Tof Camera.
+        </description>
+    </class>
+</library>

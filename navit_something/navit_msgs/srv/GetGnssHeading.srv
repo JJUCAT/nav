@@ -1,0 +1,8 @@
+# calculate GNSS heading based on two given pose
+# heading: start ---> end
+sensor_msgs/NavSatFix start
+sensor_msgs/NavSatFix end
+
+---
+float64 gnss_heading # GNSS heading in radians, 和正东的夹角
+geometry_msgs/Quaternion ros_heading # ROS heading in quaternion, 和正东的夹角

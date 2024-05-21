@@ -1,0 +1,9 @@
+<library path="lib/libnodelet_berxel_camera">
+    <class name="nodelet_berxel_camera/BerxelCamera"
+           type="nodelet_berxel_camera::BerxelCamera"
+           base_class_type="nodelet::Nodelet">
+        <description>
+            Berxel Camera.
+        </description>
+    </class>
+</library>

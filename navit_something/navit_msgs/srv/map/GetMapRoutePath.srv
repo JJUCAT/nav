@@ -1,0 +1,6 @@
+string[] waypoints #经过点名 如：[LM1,LM3,LM5,LM7,LM9] LM1起点 LM9终点
+float32 distance_interval #插值距离间隔，单位m。
+---
+uint16 error_code
+string error_msg
+nav_msgs/Path path #输出路径。

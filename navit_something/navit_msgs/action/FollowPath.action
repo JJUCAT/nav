@@ -1,0 +1,49 @@
+# 指定跟踪路径
+nav_msgs/Path path
+
+# 选用控制器
+string controller_plugin
+
+---
+# 跟踪路径控制服务错误码设计
+# OK 没有错误
+uint16 OK=0
+
+# 非法控制插件
+uint16 INVALID_CONTROLLER=101
+
+# tf树错误
+uint16 TF_ERROR=102
+
+# 非法的跟随路径
+uint16 INVALID_PATH=103
+
+# 等待超时(由控制插件计算失败引发的等待）
+uint16 PATIENCE_EXCEEDED=104
+
+# 无法取得进展
+uint16 FAILED_TO_MAKE_PROGRESS=105
+
+# 控制插件计算控制量失败
+uint16 NO_VALID_CONTROL=106
+
+# 一定时间内持续被障碍物阻挡
+uint16 OBSTACLE_BLOCKED=107
+
+#目标点被障碍物阻挡
+uint16 GOAL_BLOCKED = 108
+
+#起点被障碍物阻挡
+uint16 START_BLOCKED = 109
+
+# 执行结果
+uint16 error_code
+string error_msg
+
+---
+# 实时反馈
+float32 distance_to_goal
+
+float32 current_vel
+
+float32 completion_percentage

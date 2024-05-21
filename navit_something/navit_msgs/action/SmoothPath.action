@@ -1,0 +1,16 @@
+# 待平滑的path
+nav_msgs/Path rough_path
+
+# 选择插件
+string smooth_path_plugin
+
+---
+# 是否成功
+bool smooth_success
+
+# 平滑后的path
+nav_msgs/Path smooth_path
+
+---
+
+# 反馈(暂无）

@@ -1,0 +1,16 @@
+# from current pose  -> dock_pose
+geometry_msgs/PoseStamped dock_pose
+
+# set flags
+bool rotate_in_place
+
+---
+# Are we successfully docked?
+bool docked
+
+---
+# For visualization only
+geometry_msgs/PoseStamped dock_pose_feedback
+
+# Plus the control output
+geometry_msgs/Twist command

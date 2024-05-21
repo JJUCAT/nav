@@ -1,0 +1,100 @@
+ekf_se_map:
+  frequency: 30
+  sensor_timeout: 0.5
+  two_d_mode: true
+  transform_time_offset: 0.0
+  transform_timeout: 0.0
+  print_diagnostics: true
+  debug: false
+
+  map_frame: map
+  odom_frame: odom
+  base_link_frame: base_link
+  world_frame: map
+
+  odom0: odometry/gps
+  odom0_config: [true,  true,  false,
+                 false, false, false,
+                 false, false, false,
+                 false, false, false,
+                 false, false, false]
+  odom0_queue_size: 10
+  odom0_nodelay: true
+  odom0_differential: false
+  odom0_relative: false
+
+  # 轮速信息，ekf里应该会转换到map坐标系下使用
+  odom1: odom #etry/filtered
+  odom1_config: [false, false, false,
+                 false, false, false,
+                 true, true, true,
+                 false, false, true,
+                 false, false, false]
+  odom1_queue_size: 10
+  odom1_nodelay: true
+  odom1_differential: false
+  odom1_relative: false
+
+  # fake imu数据
+  imu0: fake_imu/data
+  imu0_config: [false, false, false, # x, y, z
+                false, false, true,  # roll, pitch, yaw
+                false, false, false, # vx, vy, vz
+                false, false, false, # vroll, vpitch, vyaw
+                false, false, false] # ax, ay, az
+  imu0_queue_size: 10
+  imu0_nodelay: true
+  imu0_differential: false
+  imu0_relative: false
+
+  use_control: false
+  process_noise_covariance: [0.1,  0,    0,    0,    0,    0,    0,     0,     0,    0,    0,    0,    0,    0,    0,
+                             0,    0.1,  0,    0,    0,    0,    0,     0,     0,    0,    0,    0,    0,    0,    0,
+                             0,    0,    1e-3, 0,    0,    0,    0,     0,     0,    0,    0,    0,    0,    0,    0,
+                             0,    0,    0,    1e-3,  0,    0,    0,     0,     0,    0,    0,    0,    0,    0,    0,
+                             0,    0,    0,    0,    1e-3,  0,    0,     0,     0,    0,    0,    0,    0,    0,    0,
+                             0,    0,    0,    0,    0,    0.01, 0,     0,     0,    0,    0,    0,    0,    0,    0,
+                             0,    0,    0,    0,    0,    0,    0.5,   0,     0,    0,    0,    0,    0,    0,    0,
+                             0,    0,    0,    0,    0,    0,    0,     0.5,   0,    0,    0,    0,    0,    0,    0,
+                             0,    0,    0,    0,    0,    0,    0,     0,     1e-3,  0,    0,    0,    0,    0,    0,
+                             0,    0,    0,    0,    0,    0,    0,     0,     0,    1e-3,  0,    0,    0,    0,    0,
+                             0,    0,    0,    0,    0,    0,    0,     0,     0,    0,    1e-3,  0,    0,    0,    0,
+                             0,    0,    0,    0,    0,    0,    0,     0,     0,    0,    0,    1e-3,  0,    0,    0,
+                             0,    0,    0,    0,    0,    0,    0,     0,     0,    0,    0,    0,    1e-3,  0,    0,
+                             0,    0,    0,    0,    0,    0,    0,     0,     0,    0,    0,    0,    0,    1e-3,  0,
+                             0,    0,    0,    0,    0,    0,    0,     0,     0,    0,    0,    0,    0,    0,    1e-3]
+
+  initial_estimate_covariance: [10,  0,    0,    0,    0,    0,    0,    0,    0,    0,     0,     0,     0,    0,    0,
+                                0,    10,  0,    0,    0,    0,    0,    0,    0,    0,     0,     0,     0,    0,    0,
+                                0,    0,    1e-9, 0,    0,    0,    0,    0,    0,    0,     0,     0,     0,    0,    0,
+                                0,    0,    0,    1e-9,  0,    0,    0,    0,    0,    0,     0,     0,     0,    0,    0,
+                                0,    0,    0,    0,    1e-9,  0,    0,    0,    0,    0,     0,     0,     0,    0,    0,
+                                0,    0,    0,    0,    0,    1, 0,    0,    0,    0,     0,     0,     0,    0,    0,
+                                0,    0,    0,    0,    0,    0,    1.0,  0,    0,    0,     0,     0,     0,    0,    0,
+                                0,    0,    0,    0,    0,    0,    0,    1.0,  0,    0,     0,     0,     0,    0,    0,
+                                0,    0,    0,    0,    0,    0,    0,    0,    1e-9,  0,     0,     0,     0,    0,    0,
+                                0,    0,    0,    0,    0,    0,    0,    0,    0,    1e-9,   0,     0,     0,    0,    0,
+                                0,    0,    0,    0,    0,    0,    0,    0,    0,    0,     1e-9,   0,     0,    0,    0,
+                                0,    0,    0,    0,    0,    0,    0,    0,    0,    0,     0,     1.0,   0,    0,    0,
+                                0,    0,    0,    0,    0,    0,    0,    0,    0,    0,     0,     0,     1e-9,  0,    0,
+                                0,    0,    0,    0,    0,    0,    0,    0,    0,    0,     0,     0,     0,    1e-9,  0,
+                                0,    0,    0,    0,    0,    0,    0,    0,    0,    0,     0,     0,     0,    0,    1e-9]
+
+navsat_transform:
+  frequency: 15
+  delay: 0.0
+  zero_altitude: true
+  publish_filtered_gps: true
+  use_odometry_yaw: false
+  broadcast_utm_transform: true
+  broadcast_utm_transform_as_parent_frame: true
+
+  #  When this mode is used, the robot assumes that your robot’s world frame origin 
+  #  is at the specified latitude and longitude and with a heading of 0 (east).
+  wait_for_datum: true
+  
+  # 东莞测试场地的G2栋大厅，选为map在UTM中的原点，22.9033987，113.8646179 
+  #datum: [22.9033987, 113.8646179, 0.0] 
+
+  # 深圳市，万科云城的map原点，可以替换为slam里的原点，注意第三个量为方向，与正东的夹角
+  datum: [22.575166, 113.942826, 0.0] 

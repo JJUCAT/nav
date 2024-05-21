@@ -1,0 +1,15 @@
+<robot name="mycar">
+    <link name="base_link">
+        <visual>
+            <geometry>
+            <mesh filename="package://berxel_description/meshes/100msr.stl" />
+            </geometry>
+            <!-- xyz坐标 rpy翻滚俯仰与偏航角度(3.14=180度 1.57=90度) -->
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <!-- 颜色: r=red g=green b=blue a=alpha -->
+            <material name="black">
+                <color rgba="0.5 0.5 0.5 1.0" />
+            </material>
+        </visual>
+    </link>
+</robot>

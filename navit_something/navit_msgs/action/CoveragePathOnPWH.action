@@ -1,0 +1,34 @@
+geometry_msgs/Polygon coverage_area     # 包围的边界
+geometry_msgs/Polygon[] holes           # no go zone 禁行区、障碍物区域
+string plugin_name                      # 选择插件，同一个算法的不同配置可以用不同的name
+geometry_msgs/Pose start                # 指定起点
+geometry_msgs/Pose end                  # 指定终点(optional)
+
+---
+# 200 ~ 299 for polygon_coverage_planner
+uint16 STATUS_OK=0                              # OK
+uint16 STATUS_INVALID_PLANNER=201               # 非法规划插件
+uint16 STATUS_START_OUTSIDE_COVERAGE_AREA=202   # 起始点在边界地图之外
+uint16 STATUS_START_IN_FORBIDDEN_ZONE=203       # 起始点在禁行区域内
+uint16 STATUS_END_OUTSIDE_COVERAGE_AREA=204     # 终点在禁行区域内
+uint16 STATUS_END_IN_FORBIDDEN_ZONE=205         # 终点在边界地图之外
+uint16 STATUS_NO_COVERAGE_AREA=206              # 未指定覆盖区域/区域的点数少于3个
+uint16 STATUS_TIMEOUT=207                       # 计算超时
+uint16 STATUS_PLANNING_FAILED=208               # 规划失败
+uint16 STATUS_NO_PATH_FOUND=209                 # 未找到路径
+
+bool is_path_found  # 是否成功
+uint16 error_code   # 错误码
+string error_msg    # 错误信息
+
+nav_msgs/Path[] coverage_paths # 覆盖路径
+nav_msgs/Path[] contour_paths  # 沿边路径
+
+float32 length_path   # 覆盖路径长度(m)
+float32 area          # 待清扫区域面积(m^2)
+
+float32 planning_duration                       # 规划用时
+
+---
+
+# 反馈

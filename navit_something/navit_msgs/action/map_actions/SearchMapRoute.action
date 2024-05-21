@@ -1,0 +1,10 @@
+# goal
+string from #起点 如：LM1
+string to #终点 如：LM9
+---
+# result
+string[] route     #最短路径 [LM1, LM3, LM5, LM9]
+uint16 error_code
+string error_msg
+---
+# feedback

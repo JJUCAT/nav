@@ -1,0 +1,5 @@
+string area_name # 区域名
+---
+uint16 error_code
+string error_msg
+nav_msgs/Path path # 输出区域路径。

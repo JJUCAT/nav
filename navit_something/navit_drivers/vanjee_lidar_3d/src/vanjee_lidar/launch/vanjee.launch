@@ -1,0 +1,16 @@
+<!-- -*- mode: XML -*- -->
+<!-- run vanjee_lidar/CloudNodelet in a nodelet manager for an VANJEELIDAR720-->
+
+<launch>
+   <arg name="manager" default="vanjee_nodelet_manager" />
+
+  <!-- start nodelet manager and driver nodelets -->
+  <include file="$(find vanjee_driver)/launch/nodelet_manager.launch">
+    <arg name="manager" value="$(arg manager)" />
+</include>
+  <include file="$(find vanjee_lidar)/launch/cloud_nodelet.launch">
+    <arg name="manager" value="$(arg manager)" />
+  
+</include>
+
+</launch>

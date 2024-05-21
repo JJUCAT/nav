@@ -1,0 +1,9 @@
+int64 map_id
+string map_type
+string map_name
+geometry_msgs/PoseStamped min_pos
+geometry_msgs/PoseStamped max_pos
+DualGnssInfo gnss_info
+string pcd_save_path
+float32 resolution
+string version

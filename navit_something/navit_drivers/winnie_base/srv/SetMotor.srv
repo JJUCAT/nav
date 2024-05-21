@@ -1,0 +1,4 @@
+MotorCtrl[] motor
+uint32 motor_mask    # 要控制哪几个电机
+---
+bool succeed

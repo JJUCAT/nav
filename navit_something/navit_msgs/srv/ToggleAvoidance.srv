@@ -1,0 +1,4 @@
+bool use_avoidance  #false is disable avoidance, t
+
+---
+bool success

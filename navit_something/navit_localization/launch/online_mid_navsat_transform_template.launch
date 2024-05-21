@@ -1,0 +1,44 @@
+
+
+<launch>
+  <param name="/use_sim_time" value="true" />
+
+  <node pkg="navit_localization" type="navsat_transform_node" output="screen" name="navsat_transform_node" clear_params="true" >
+    <rosparam command="load" file="$(find navit_localization)/params/navsat_transform_template.yaml" />
+      <param name="yaw_offset" value="0"/>
+      <param name="use_odometry_yaw" value="true"/>
+
+      Placeholders for input remapping. Set your topic names as the "to" values.
+      <remap from="imu/data" to="/imu_data"/>
+      <!-- <remap from="odometry/filtered" to="/odom"/> -->
+      <remap from="gps/fix" to="/Novatel/Fix"/>
+     
+  </node>
+
+
+  <!-- ?????? urdf ????tf-->
+  <!-- <arg name = "model"/>
+  <param name = "robot_description" textfile = "$(find navit_localization)/urdf/j110.urdf"/>
+  <param name = "use_gui" value = "true"/>
+  <node name = "joint_state_publisher" pkg = "joint_state_publisher" type = "joint_state_publisher"/>
+  <node name = "robot_state_publisher" pkg = "robot_state_publisher" type = "robot_state_publisher"/> -->
+	<!-- <node name="odom2tf" pkg="navit_localization" type="odom2tf"   />
+
+  <!-- ? publish_tf ?false????? -->
+  <node name="odomekftf" pkg="robot_localization" type="odomekftf"/> -->
+
+  <node pkg="navit_localization" type="ekf_localization_node" name="ekf_se" output="screen" clear_params="true">
+    <rosparam command="load" file="$(find navit_localization)/params/online_mid_test_ekf_template.yaml" />
+  </node>
+  
+
+
+    <!--  Placeholder for output topic remapping
+    <remap from="odometry/filtered" to=""/>
+    <remap from="accel/filtered" to=""/>
+    -->
+
+
+
+</launch>
+

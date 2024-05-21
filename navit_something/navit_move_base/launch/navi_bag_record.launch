@@ -1,0 +1,45 @@
+<launch>
+
+  	<node pkg="rosbag" type="record" name="navi_bag_record"
+  	args="
+        /map
+        /initialpose
+
+        /imu
+        /pose
+        /odom
+        /cmd_vel
+        /move_base_cmd_vel
+
+        /scan_matched_points2
+        /scan
+        /tf
+        /tf_static
+
+        /move_base/cancel
+        /move_base/feedback
+        /move_base/goal
+        /move_base/current_goal
+        /move_base/recovery_status
+        /move_base/result
+        /move_base/status
+        /move_base_simple/goal
+
+        /move_base/local_costmap/costmap
+        /move_base/local_costmap/footprint
+
+        /move_base/NemGlobalPlannerROS/plan
+        /move_base/NemLocalPlannerROS/local_plan
+        /move_base/NemLocalPlannerROS/not_feasible_footprint
+
+        /nem_edges
+        /nem_nodes
+        /nem_nodes_id
+
+        /error_value
+        /pid_reset
+        /long_corridor_detection
+
+  	-j -o $(env HOME)/.ros/navi.bag"/>
+
+</launch>

@@ -1,0 +1,14 @@
+# calibrate perceted dock pose service
+# 假设充电桩位于充电口正前方1米的位置
+# 则
+# ground_truth_dock_pose.header.frame_id = "charge_port_link"
+# ground_truth_dock_pose.pose.position.x = 1.0
+# ground_truth_dock_pose.pose.orientation.w = 1.0
+geometry_msgs/PoseStamped ground_truth_dock_pose
+int64 state
+
+---
+# 修正的结果为charge_port_link到calibrated_charge_port_link的变换
+geometry_msgs/TransformStamped calibration_tf_msg
+geometry_msgs/PoseStamped percep_dock_pose
+geometry_msgs/PoseStamped calib_truth_dock_pose

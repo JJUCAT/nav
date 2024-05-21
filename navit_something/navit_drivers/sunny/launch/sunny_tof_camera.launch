@@ -1,0 +1,10 @@
+<launch>
+
+    <node pkg="nodelet" type="nodelet" name="nodelet_master" args="manager" output="screen"/>
+
+    <node pkg="nodelet" type="nodelet" name="sunny_tof_camera_node"
+          args="load nodelet_sunny_tof_camera/SunnyTofCamera nodelet_master"
+          output="screen">
+    </node>
+
+</launch>

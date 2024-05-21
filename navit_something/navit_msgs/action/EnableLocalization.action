@@ -1,0 +1,11 @@
+string plugin_name
+
+# not implemented yet
+nav_msgs/OccupancyGrid map
+geometry_msgs/PoseStamped initial_pose
+
+---
+bool enabled 
+
+---
+float32 localization_belief

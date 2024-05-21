@@ -1,0 +1,8 @@
+std_msgs/Duration time
+
+---
+
+std_msgs/Duration total_time
+
+---
+std_msgs/Duration left_time

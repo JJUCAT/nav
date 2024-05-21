@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<robot name="berxel_camera" xmlns:xacro="http://ros.org/wiki/xacro">
+  <xacro:include filename="$(find berxel_description)/urdf/_iHawk100M.urdf.xacro" />
+
+  <link name="base_link" />
+  <xacro:berxel_iHawk_100 parent="base_link">
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+  </xacro:berxel_iHawk_100>
+</robot>

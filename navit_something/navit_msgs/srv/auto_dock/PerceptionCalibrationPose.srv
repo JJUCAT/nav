@@ -1,0 +1,6 @@
+int64 state
+---
+# 修正的结果为charge_port_link到calibrated_charge_port_link的变换
+geometry_msgs/TransformStamped calibration_tf_msg
+geometry_msgs/PoseStamped percep_dock_pose
+geometry_msgs/PoseStamped calib_truth_dock_pose

@@ -1,0 +1,20 @@
+<class_libraries>
+    <library path="lib/libnodelet_collision_monitor">
+        <class name="nodelet_collision_monitor/CollisionMonitor"
+               type="nodelet_collision_monitor::CollisionMonitor"
+               base_class_type="nodelet::Nodelet">
+            <description>
+                Collision Monitor.
+            </description>
+        </class>
+    </library>
+    <library path="lib/libnodelet_collision_detector">
+        <class name="nodelet_collision_detector/CollisionDetector"
+               type="nodelet_collision_detector::CollisionDetector"
+               base_class_type="nodelet::Nodelet">
+            <description>
+                Collision Detector.
+            </description>
+        </class>
+    </library>
+</class_libraries>

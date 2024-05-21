@@ -1,0 +1,8 @@
+geometry_msgs/PoseWithCovarianceStamped pose
+uint32 mode
+
+uint32 FIXED_POINT = 1
+uint32 RANDOM_POINT = 2
+uint32 RANDOM_WITH_ROTATE = 3
+---
+bool is_init

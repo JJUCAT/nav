@@ -1,0 +1,29 @@
+###(draft) action name: follow_coverage_path 
+nav_msgs/Path path                     # 指定跟踪路径
+string plugin_name                       # 选用控制器
+
+# 用于确定环境信息
+geometry_msgs/Polygon coverage_area     # 包围的边界 
+geometry_msgs/Polygon[] holes           # 边界内的禁行区域
+
+---
+# 100 ~ 199 for follow_coverage_path
+uint16 OK=0                     # 没有错误
+uint16 INVALID_CONTROLLER=101   # 非法控制插件
+uint16 TF_ERROR=102             # tf树错误
+uint16 INVALID_PATH=103         # 非法的跟随路径
+uint16 PATIENCE_EXCEEDED=104    # 等待超时(由控制插件计算失败引发的等待）
+uint16 NO_VALID_CONTROL=105     # 控制插件计算控制量失败
+
+uint16 error_code
+string error_msg        
+
+nav_msgs/Path[] cleaned_paths              # 已经清扫的路径
+nav_msgs/Path[] uncleaned_paths            # 未扫过的区域(用于补扫)
+---
+# 实时反馈
+float32 completion_percentage              # 完成百分比
+nav_msgs/Path[] cleaned_paths              # 已经清扫的路径
+nav_msgs/Path[] uncleaned_paths            # 未扫过的区域(用于补扫)
+float32 distance_to_goal                   # 距离终点的距离
+float32 current_vel                        # 速度

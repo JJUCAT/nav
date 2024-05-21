@@ -1,0 +1,29 @@
+always_send_full_costmap: true
+map_type: costmap
+robot_radius: 0.35  #注意！！！点边模式下机器人footprint必须使用radius模式
+
+obstacle_layer:
+  enable: true
+  obstacle_range: 4.0
+  raytrace_range: 4.5
+  track_unknown_space: false
+  combination_method: 1
+  observation_sources: Hesai
+  inflation_radius: 0.2
+  Hesai:
+    data_type: LaserScan
+    topic: /base_scan
+    sensor_frame: base_laser_link
+    max_obstacle_height: 0.8
+    min_obstacle_height: 0.2
+    marking: true
+    clearing: true
+
+inflation_layer:
+  enabled:              true
+  cost_scaling_factor:  10.0  # exponential rate at which the obstacle cost drops off (default: 10)
+  inflation_radius:     0.5  # max. distance from an obstacle at which costs are incurred for planning paths.
+
+static_layer:
+  enabled:              true
+  map_topic:            "/map"

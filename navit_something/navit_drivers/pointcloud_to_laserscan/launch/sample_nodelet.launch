@@ -1,0 +1,60 @@
+<?xml version="1.0"?>
+
+<launch>
+
+    <arg name="camera" default="camera" />
+
+    <!-- push pointcloud_to_laserscan nodelet into sensor's nodelet manager-->
+    <node pkg="nodelet" type="nodelet" name="pointcloud_to_laserscan_1" args="load pointcloud_to_laserscan/pointcloud_to_laserscan_nodelet $(arg camera)_nodelet_manager">
+
+        <remap from="cloud_in" to="/front_livox_lidar"/>
+        <remap from="scan" to="/front_scan"/>
+        <rosparam>
+            target_frame: front_mid360      # Leave disabled to output scan in pointcloud frame
+            transform_tolerance: 0.01
+            min_height: 0.0
+            max_height: 1.5
+
+            angle_min: -1.5708 # -M_PI/2
+            angle_max: 1.5708 # M_PI/2
+            angle_increment: 0.0087 # M_PI/360.0
+            scan_time: 0.3333
+            range_min: 0.45
+            range_max: 4.0
+            use_inf: true
+
+            # Concurrency level, affects number of pointclouds queued for processing, thread number governed by nodelet manager
+            # 0 : Detect number of cores
+            # 1 : Single threaded
+            # 2->inf : Parallelism level
+            concurrency_level: 1
+        </rosparam>
+
+    </node>
+        <node pkg="nodelet" type="nodelet" name="pointcloud_to_laserscan" args="load pointcloud_to_laserscan/pointcloud_to_laserscan_nodelet $(arg camera)_nodelet_manager">
+
+        <remap from="cloud_in" to="/back_livox_lidar"/>
+        <remap from="scan" to="/back_scan"/>
+        <rosparam>
+            target_frame: back_mid360 # Leave disabled to output scan in pointcloud frame
+            transform_tolerance: 0.01
+            min_height: 0.0
+            max_height: 1.5
+
+            angle_min: -1.5708 # -M_PI/2
+            angle_max: 1.5708 # M_PI/2
+            angle_increment: 0.0087 # M_PI/360.0
+            scan_time: 0.3333
+            range_min: 0.45
+            range_max: 4.0
+            use_inf: true
+
+            # Concurrency level, affects number of pointclouds queued for processing, thread number governed by nodelet manager
+            # 0 : Detect number of cores
+            # 1 : Single threaded
+            # 2->inf : Parallelism level
+            concurrency_level: 1
+        </rosparam>
+
+    </node>
+</launch>

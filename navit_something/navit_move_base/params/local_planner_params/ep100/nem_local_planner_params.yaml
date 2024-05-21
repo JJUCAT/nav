@@ -1,0 +1,92 @@
+NemLocalPlannerROS:
+  minVx: 0.02
+  maxVx: 0.8
+  minVy: 0.02
+  maxVy: 0.1
+  minVr: 0.02
+  maxVr: 0.4
+  stricterOnLineJudgement: true   #是否使用更严格的跳点判断
+  pointOnOneLine: 0.035           #判断多点在同一直线的横向阈值
+  avoidance: true                 #是否避障(避障距离为避障轨迹个数乘以避障轨迹分辨率)
+  avoidance_num: 20               #避障轨迹个数
+  avoidance_res: 0.1              #避障轨迹分辨率
+  goDistGap: 10.0                 #若godist距离超过该阈值，则进行轨迹切分
+  angleThreshold: 0.1             #导航行驶前的角度阈值（单位:rad）
+  fineAngleThreshold: 0.01        #导航到位后旋转到点朝向的角度阈值（单位:rad）
+  fineAdjustDist: 0.01            #RobotGo调整的距离阈值(单位:m)
+
+  usePid: true                    #是否使用轨迹跟踪算法,若为false，则以下参数无意义
+  Kp: 1.5                         #6.0 #20.0
+  Ki: 0.0                         #0.0
+  Kd: 0.0                         #16.0 #50.0
+  max_angle_z: 0.2                #在直线行驶时下发的最大角速度
+  threshold_compensation: 0.05    #重复到位精度阈值补偿量
+  head_dist: 0.5                  #供purePursit算法使用的前视距离（当前跟踪算法为stanley，故该参数暂无作用）
+  acceleration: 0.15              #计算线速度时输入的理想线加速度量
+  angular_acceleration: 0.1       #计算原地旋转角加速度时的理想角加速度量,上限为acceleration / wheelbase
+  wheelbase: 0.61                 #差速轮间距
+  pose_topic: pose
+
+ControllerPathFollow:
+  robot:
+    global_frame: map
+    robot_frame: base_link
+    type: simple_car
+    diff:
+      max_vel_x: 0.3
+      max_vel_x_backwards: 0.2
+      max_vel_theta: 0.3
+      acc_lim_x: 0.0
+      dec_lim_x: 0.0
+      acc_lim_theta: 0.0
+
+    simple_car:
+      use_angular_vel: false
+      wheelbase: 0.4
+      max_vel_x: 0.8
+      max_vel_x_backwards: 0.2
+      max_steering_angle: 1.4
+      acc_lim_x: 0.0
+      dec_lim_x: 0.0
+      max_steering_rate: 0.5
+
+    dis_tolerance: 0.1
+    theta_tolerance: 0.2
+    robot_box:
+      front_left_x: 0.5
+      front_left_y: 0.4
+
+      front_right_x: 0.5
+      front_right_y: -0.4
+
+      rear_right_x: -0.5
+      rear_right_y: -0.4
+
+      rear_left_x: -0.5
+      rear_left_y:  0.4
+    use_avoidance: true
+  controller:
+    use_backup: false
+  astar_search:
+    path_frame: "map"
+    angle_size: 40
+    minimum_turning_radius: 0.4
+    obstacle_threshold: 15
+    goal_radius: 0.1
+    goal_angle: 180
+    use_back: false
+    robot_length: 1.2  #沿x轴方向
+    robot_width: 1.0
+    base2back: 0.5
+    curve_weight: 1.54
+    reverse_weight: 2.50
+    use_wavefront_heuristic: false
+    boundingbox_size: 3
+  avoidance:
+    max_allowed_time_to_collision: 2.
+    collision_check_box_sizes: 6   # 定义前视 check box 参数,该参数 > 5
+    box_interval: 50               # 0.02 * box_interval (m)
+    use_clear_costmap: true        # 控制器内部是否清除局部障碍物点云（如果不自动清除可以考虑在其他的node中清除）
+    clear_costmap_wait_time: 5.0   # [second], 用于清除障碍物点云
+    use_recovery: false            # 使用内部的脱困功能
+    use_eliminate_shocks: false    # 该功能主要用于消除局部地图更新/误差带来的抖动

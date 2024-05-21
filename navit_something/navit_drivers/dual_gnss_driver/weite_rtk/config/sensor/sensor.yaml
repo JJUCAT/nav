@@ -1,0 +1,53 @@
+## sensor configure:
+
+# If you use embedded equipment, it only support serial.
+multi_sensor_config:
+    # tcp, serial
+    connection_type: serial
+    # if tcp, "port" is 192.168.0.10:3456
+    # if serial, "port" is /dev/ttyS4
+    #port: 192.168.0.10:3456
+    #port: /dev/ttyUSB0
+    port: /dev/rtk
+    baudrate: 230400
+
+imu_config:
+    frame: imu_link
+    # topic: ky102n_a0/imu_data
+    topic: imu_data
+
+    port: /dev/ttyUSB1
+    baudrate: 230400
+    rate: 200
+
+novatel_config:
+    frame: gnss_link
+    topic: Novatel/PosVelHeadingData
+    #port: /dev/ttyUSB0
+    port: /dev/rtk
+    baudrate: 230400
+    rate: 200
+    publish_novatel_pose_vel: true
+    publish_novatel_positions: true
+    publish_novatel_xyz_positions: false
+    publish_novatel_velocity: false
+    publish_novatel_dual_antenna_heading: true
+    publish_gpchc: false
+    publish_gpgga: false
+    publish_gprmc: false
+    publish_navsatfix: true
+    publish_ref_station: false
+
+radio_config:
+    topic: Radio/RefStation
+
+# user can choose wheel data to fuse to integrated navigation, if wheel data done.
+wheel_config:
+    wheel_on: false
+    wheel_topic: odom_raw
+    wheel_scale_factor: 0.985
+
+velocity_confine_config:
+    vel_confined_on: false
+    vel_confined_dim: 2
+    vel_cov_coeff: 0.001

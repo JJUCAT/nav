@@ -1,0 +1,11 @@
+<launch>
+
+<!-- <arg name="camera" default=""/>
+<arg name="serial_no" default="" />
+
+<param name="camera" type="str" value="$(arg camera)" />
+<param name="serial_no" type="str" value="$(arg serial_no)" /> -->
+<param name="camera" type="str" value="berxel_camera" />
+<include file="$(find berxel_camera)/launch/include/berxel_camera_iHawk100E.launch.xml"/>
+
+</launch>

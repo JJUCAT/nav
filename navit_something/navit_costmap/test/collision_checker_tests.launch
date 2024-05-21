@@ -1,0 +1,19 @@
+<launch>
+  <node name="ms" pkg="map_server" type="map_server" args="$(find navit_costmap)/test/TenByTen.yaml"/>
+  <test time-limit="100" test-name="collision_checker_test" pkg="navit_costmap" type="collision_checker_tests">
+    <rosparam ns="test_costmap">
+      footprint_padding: 0
+      footprint: [[-0.1, -0.1], [-0.1, 0.1], [0.1, 0.1], [0.16, 0.0], [0.1, -0.1]]
+      global_frame: map
+      robot_base_frame: base_link
+      static_map: true
+      update_frequency: 5.0
+      publish_frequency: 0.0
+      transform_tolerance: 1.0
+      plugins:
+        - {name: static_layer, type: "navit_costmap::StaticLayer"}
+    </rosparam>
+
+  </test>
+
+</launch>

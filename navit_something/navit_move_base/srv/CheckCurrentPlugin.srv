@@ -1,0 +1,5 @@
+#CheckCurrentPlugin.srv return current move base global planner and local controller
+bool check_current_plugin
+---
+string global_planner_plugin
+string local_controller_plugin

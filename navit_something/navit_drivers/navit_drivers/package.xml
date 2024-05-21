@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>navit_drivers</name>
+  <version>0.0.0</version>
+  <description>The navit_drivers package</description>
+
+  <!-- One maintainer tag required, multiple allowed, one person per tag -->
+  <!-- Example:  -->
+  <!-- <maintainer email="jane.doe@example.com">Jane Doe</maintainer> -->
+  <maintainer email="yijiahe@todo.todo">yijiahe</maintainer>
+
+
+  <!-- One license tag required, multiple allowed, one license per tag -->
+  <!-- Commonly used license strings: -->
+  <!--   BSD, MIT, Boost Software License, GPLv2, GPLv3, LGPLv2.1, LGPLv3 -->
+  <license>TODO</license>
+
+
+  <buildtool_depend>catkin</buildtool_depend>
+  <exec_depend>navit_camera</exec_depend>
+  <exec_depend>winnie_base</exec_depend>
+  <exec_depend>livox_ros_driver2</exec_depend>
+  <exec_depend>serial</exec_depend>
+  <exec_depend>sinan_rtk</exec_depend>
+  <exec_depend>weite_rtk</exec_depend>
+  <exec_depend>bdf07_imu</exec_depend>
+  <exec_depend>pointcloud_to_laserscan</exec_depend>
+
+
+
+  <!-- The export tag contains other, unspecified, tags -->
+  <export>
+    <!-- Other tools can request additional information be placed here -->
+    <metapackage/>
+  </export>
+</package>

@@ -1,0 +1,13 @@
+std_msgs/Time time     #时间戳
+
+string command         # save switch begin 
+
+string map_path       # path_name：地图存储路径(/home/robot/resource/map/)
+
+string map_name       # map_name: map.pcd
+
+---
+
+bool success          # success：成功为true，失败为false;
+
+string error_msg      # error_msg:失败时返回错误信息

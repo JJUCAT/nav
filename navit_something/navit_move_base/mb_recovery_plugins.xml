@@ -1,0 +1,15 @@
+<library path="lib/libmovebase_recovery">
+
+    <class name="clear_costmap_recovery/ClearCostmapRecovery"
+           type="navit_move_base::recovery::ClearCostmapRecovery"
+           base_class_type="navit_move_base::recovery::RecoveryBehavior">
+           <description> clear costmap recovery </description>
+    </class>
+
+    <class name="rotate_recovery/RotateRecovery"
+           type="navit_move_base::recovery::RotateRecovery"
+           base_class_type="navit_move_base::recovery::RecoveryBehavior">
+           <description> rotate recovery </description>
+    </class>
+
+</library>

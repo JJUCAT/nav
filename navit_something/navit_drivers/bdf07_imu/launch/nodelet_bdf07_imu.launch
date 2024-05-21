@@ -1,0 +1,14 @@
+<launch>
+    <env name="ROSCONSOLE_CONFIG_FILE" value="$(find bdf07_imu)/config/roslog.config"/>
+
+    <node pkg="nodelet" type="nodelet" name="nodelet_master" args="manager" output="screen"/>
+    <node pkg="nodelet" type="nodelet" name="bdf07_imu_node"
+          args="load nodelet_bdf07_imu/Bdf07Imu nodelet_master"
+          required="true" output="screen">
+        <param name="port" value="/dev/ttyS5"/>
+        <param name="baudrate" value="115200"/>
+        <param name="frame_id" value="imu_link"/>
+        <param name="topic" value="imu_data"/>
+        <param name="yaw_change_threshold_param" value="0.1"/>
+    </node>
+</launch>

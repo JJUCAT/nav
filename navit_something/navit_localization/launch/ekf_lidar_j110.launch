@@ -1,0 +1,19 @@
+<!--
+	激光定位和轮速里程计融合的ekf, 发布map -> odom的tf
+-->
+
+<launch>
+  <rosparam command="load" file="$(find navit_localization)/params/ekf_lidar.yaml" />
+  <!-- hdl_localization -->
+  <node pkg="navit_localization" type="ekf_localization_node" name="ekf_se_map_lidar" clear_params="true">
+    <remap from="odometry/filtered" to="odometry/lidar_map"/>
+  </node>
+
+  <!-- transform gnss -->
+  <node pkg="navit_localization" type="navsat_transform_node" name="navsat_transform" clear_params="true" output="screen">
+    <remap from="odometry/filtered" to="odometry/lidar_map"/>
+    <!-- <remap from="/gps/fix" to="Novatel/Fix"/>
+    <remap from="/gps/heading" to="Novatel/PosVelHeadingData"/> -->
+  </node>
+
+</launch>

@@ -1,0 +1,11 @@
+<launch>
+    <!--  **************** Maps ****************  -->
+    <node name="navit_map_server_node" pkg="navit_map_server" type="navit_map_server_node"
+          args="$(find navit_map_server)/maps/default.json"
+          output="screen">
+    </node>
+
+    <!--  **************** Visualisation ****************  -->
+    <node name="rviz" pkg="rviz" type="rviz" args="-d $(find navit_map_server)/config/test.rviz"/>
+
+</launch>

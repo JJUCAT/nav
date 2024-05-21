@@ -1,0 +1,8 @@
+<launch>
+
+    <node pkg="nodelet" type="nodelet" name="sunny_tof_camera_node"
+          args="standalone nodelet_sunny_tof_camera/SunnyTofCamera"
+          output="screen">
+    </node>
+
+</launch>

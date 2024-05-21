@@ -1,0 +1,19 @@
+<library path="lib/libcamera_plugins">
+    <class name="navit_camera/FakeCamera"
+           type="navit_camera::FakeCamera"
+           base_class_type="navit_camera::CameraInterface" >
+           <description> 
+               Fake camera plugin
+           </description>
+    </class>
+
+    <class name="navit_camera/UvcCamera"
+           type="navit_camera::UvcCamera"
+           base_class_type="navit_camera::CameraInterface" >
+           <description> 
+               uvc camera plugin
+           </description>
+    </class>
+
+</library>
+

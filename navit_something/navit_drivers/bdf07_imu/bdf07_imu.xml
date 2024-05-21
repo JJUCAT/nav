@@ -1,0 +1,7 @@
+<library path="lib/libnodelet_bdf07_imu">
+    <class name="nodelet_bdf07_imu/Bdf07Imu"
+           type="nodelet_bdf07_imu::Bdf07Imu"
+           base_class_type="nodelet::Nodelet">
+        <description>bdf07_imu</description>
+    </class>
+</library>

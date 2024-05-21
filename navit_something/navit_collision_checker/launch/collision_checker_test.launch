@@ -1,0 +1,34 @@
+<launch>
+
+<param name="/use_sim_time" value="true"/>
+
+<node name="map_server" pkg="map_server" type="map_server" args="$(find navit_planner)/stage/maps/willow-empty.pgm 0.025" />
+
+<node pkg="stage_ros" type="stageros" name="stageros" args="$(find navit_planner)/stage/willow.world"/>
+
+<node name="fake_localization" pkg="fake_localization" type="fake_localization" respawn="false" />
+
+<node pkg="navit_collision_checker"
+      type="navit_collision_checker_test_node"
+      name="collision_checker_test" 
+      output="screen" />
+
+<node pkg="navit_controller"
+      type="navit_controller_node"
+      name="controller_server" 
+      output="screen">
+      <rosparam 
+      file="$(find navit_collision_checker)/config/controller_server.yaml"
+      command="load" />
+
+      <rosparam
+      file="$(find navit_collision_checker)/config/costmap_params.yaml"
+      command="load" />
+</node>
+
+
+<node name="rviz" 
+      pkg="rviz" 
+      type="rviz" 
+      args="-d $(find navit_collision_checker)/rviz/collision_checker.rviz"/>
+</launch>

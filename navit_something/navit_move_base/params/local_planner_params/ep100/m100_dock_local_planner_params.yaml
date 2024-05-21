@@ -1,0 +1,7 @@
+M100DockLocalPlannerROS:
+  Kp: 0.5
+  max_vel: 0.1
+  min_vel: 0.05
+  global_frame: map #局部规划器所在的坐标系
+  tolerance: 0.01
+

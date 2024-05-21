@@ -1,0 +1,6 @@
+<launch>
+  <node name="ms" pkg="map_server" type="map_server" args="$(find navit_costmap)/test/TenByTen.yaml"/>
+  <test time-limit="300" test-name="inflation_tests" pkg="navit_costmap" type="inflation_tests">
+    <param name="inflation/cost_scaling_factor" value="1" />
+  </test>
+</launch>

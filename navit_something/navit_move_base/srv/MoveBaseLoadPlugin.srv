@@ -1,0 +1,5 @@
+#MoveBaseLoadPlugin.srv
+string plugin_name  #插件名
+---
+int32 error_code    #0:正常; -1:异常，切换失败; 1:目前非空闲状态，暂不能切换插件
+string message      #反馈结果

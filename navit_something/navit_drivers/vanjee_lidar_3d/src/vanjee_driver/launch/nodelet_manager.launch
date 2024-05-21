@@ -1,0 +1,15 @@
+<!-- -*- mode: XML -*- -->
+<!-- start vanjee_driver/DriverNodelet in a nodelet manager -->
+
+<launch>
+  <arg name="manager" default="vanjee_nodelet_manager" />
+  
+  <!-- start nodelet manager -->
+  <node pkg="nodelet" type="nodelet" name="$(arg manager)" args="manager" output="screen"/>
+
+  <!-- load driver nodelet into it -->
+  <node pkg="nodelet" type="nodelet" name="$(arg manager)_driver"
+        args="load vanjee_driver/DriverNodelet $(arg manager)" output="screen">
+ </node>    
+
+</launch>

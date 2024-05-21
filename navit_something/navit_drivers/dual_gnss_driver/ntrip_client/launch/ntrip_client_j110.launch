@@ -1,0 +1,10 @@
+<?xml version="1.1"?>
+<launch>
+  <!-- ****************************************************************** -->
+  <!-- NTRIP Client Node -->
+  <!-- ****************************************************************** -->
+  <node name="ntrip_client_node" pkg="ntrip_client" type="ntrip_ros.py" output="screen" ns="ntrip_client">
+      <rosparam command="load" file="$(find ntrip_client)/config/j110_witmotion.yaml" />
+  </node>
+
+</launch>

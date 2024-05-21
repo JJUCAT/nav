@@ -1,0 +1,54 @@
+lidar:
+
+  - driver:
+      lidartype: wlr720
+      min_angle: 0
+      max_angle: 360
+      pcap: nothing
+      read_fast: true
+      read_once: false
+      repeat_delay: 0.0
+      time_mode: false
+      multicast: false
+      axisoffset: 270
+      pointSplitflag: 2
+      calibration: Vanjee16-carside7200014.csv
+      calibutfipath: SN720C223400030001.txt
+    ros_topic:
+      ros_recv_packet_topic: vanjee_packets
+      ros_send_imu_topic: wlr_720/imu
+      imu_frame_id: wlr_720imu
+      ros_send_point_cloud_topic: rslidar_points
+      point_frame_id: rslidar
+    proto:
+      lidar_ip: 192.168.1.108
+      dest_ip: 224.1.1.1
+      #dest_ip: 224.1.1.1
+      dest_port: 3001
+      # local_ip: 192.168.1.102
+      local_ip: 192.168.1.102
+
+  # - driver:
+  #     lidartype: wlr720
+  #     min_angle: 0
+  #     max_angle: 360
+  #     pcap: /home/peng/pcap/720D.pcap
+  #     read_fast: true
+  #     read_once: false
+  #     repeat_delay: 0.0
+  #     time_mode: false
+  #     multicast: false
+  #     axisoffset: 0
+  #     calibration: Vanjee16-carside3455.csv
+  #     calibutfipath: SN720C223400030065.txt
+  #   ros_topic:
+  #     ros_recv_packet_topic: vanjee_packetss
+  #     ros_send_imu_topic: wlr_720/imus
+  #     imu_frame_id: wlr_720imus
+  #     ros_send_point_cloud_topic: wlr_720/cloud_pointss
+  #     point_frame_id: wlr_720s
+  #   proto:
+  #     lidar_ip: 192.168.2.86
+  #     dest_ip: 192.68.2.88
+  #     #dest_ip: 224.1.1.1
+  #     dest_port: 3001

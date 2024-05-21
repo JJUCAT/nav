@@ -1,0 +1,9 @@
+<library path="lib/libnodelet_winnie_base">
+    <class name="nodelet_winnie_base/WinnieBase"
+           type="nodelet_winnie_base::WinnieBase"
+           base_class_type="nodelet::Nodelet">
+        <description>
+            blocking and rotate robot 180 deg
+        </description>
+    </class>
+</library>

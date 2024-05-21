@@ -1,0 +1,13 @@
+image: gudao.pgm
+resolution: 0.05
+origin: [-8.699554443359375, -33.42116622924805, 0]
+occupied_thresh: 0.51
+free_thresh: 0.49
+negate: 0
+left: -8.699554443359375
+right: 37.15044784545898
+top: 15.5288345336914
+bottom: -33.42116622924805
+start_posx: 0
+start_posy: 0
+start_posr: 0

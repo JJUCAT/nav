@@ -1,0 +1,9 @@
+# goal
+string[] waypoints #路点 first起点 last终点
+---
+# result
+string[] route     #最优的访问顺序
+uint16 error_code
+string error_msg
+---
+# feedback

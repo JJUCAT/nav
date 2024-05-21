@@ -1,0 +1,6 @@
+MapBasicInfo info
+int64 area_id
+string name
+---
+bool success
+string message

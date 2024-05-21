@@ -1,0 +1,12 @@
+<launch>
+
+    <node pkg="nodelet" type="nodelet" name="nodelet_master" args="manager" output="screen"/>
+
+    <node pkg="nodelet" type="nodelet" name="winnie_base_node" args="load nodelet_winnie_base/WinnieBase nodelet_master"
+          output="screen">
+        <rosparam file="$(find winnie_base)/config/winnie_base_params.yaml" command="load"/>
+        <!-- <remap from="/imu" to="/imu/data_raw"/> -->
+        <!-- <remap from="/imu/data_raw" to="/imu"/> -->
+    </node>
+
+</launch>

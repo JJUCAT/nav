@@ -1,0 +1,5 @@
+private_msgs 用于只对navit_stack 内部使用的接口
+
+public_msgs 用于可以对外的接口
+
+目前采用对外提供单元模块而不是封装好的模块

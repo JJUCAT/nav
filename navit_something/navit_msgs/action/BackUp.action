@@ -1,0 +1,12 @@
+# current version will only use simple P control
+float32 backup_distance # m
+
+float32 speed # m/s
+---
+
+std_msgs/Duration total_time
+
+---
+
+float32 distance_traveled
+

@@ -1,0 +1,125 @@
+syntax = "proto3";
+package navit.protocol.map_info;
+
+// 属性信息
+message Property {
+  string key = 1;
+  string type = 2;
+  string value = 3;
+  string desc = 4;
+}
+
+// 点坐标
+message Point {
+  double x = 1;
+  double y = 2;
+  double z = 3;
+  double rx = 4;
+  double ry = 5;
+  double rz = 6;
+}
+
+// 地图基本信息
+message MapBasicInfo {
+  int64 map_id = 1;     // 地图id
+  string map_name = 2;  // name of map: the map name
+  string map_type = 3;  // type of map: 2D-Map or 3D-Map or RTK
+  Point min_pos = 4;
+  Point max_pos = 5;
+  double resolution = 6; // unit: m
+  string version = 7;
+}
+
+// 站点信息
+message MapPoint {
+  // 站点类型
+  enum PointType {
+    POINT_TYPE_DEFAULT = 0; // proto3版本中，首成员必须为0，成员不应有相同的值
+    POINT_TYPE_COMMON_STATION = 1; // CommonStation 普通站点
+    POINT_TYPE_CHARGE_PILE_STATION = 2; // ChargePileStation 充电桩点
+  }
+
+  int64 id = 1;
+  string name = 2;
+  PointType type = 3;
+  Point point = 4;
+  bool ignore_dir = 5;
+  repeated Property property = 6;
+}
+
+// 线信息
+// 线无方向属性，双向边时添加两条路径
+message MapLine {
+  // 线类型。
+  // 站点连接、区域连接的边类型。
+  enum LineType {
+    LINE_TYPE_DEFAULT = 0; // proto3版本中，首成员必须为0，成员不应有相同的值
+    LINE_TYPE_BEZIER = 1; // BezierPath 贝塞尔
+    LINE_TYPE_DISCRETE = 2; // discrete 离散点包含直线
+    LINE_TYPE_ARC = 3; // ArcPath 圆弧
+  }
+
+  int64 id = 1;
+  string name = 2;
+  LineType type = 3;
+  int64 start_point_id = 4;
+  int64 end_point_id = 5;
+  repeated Point path = 6;
+  repeated Property property = 7;
+}
+
+// 区域信息
+message MapArea {
+  // 区域类型
+  enum AreaType {
+    AREA_TYPE_DEFAULT = 0; // proto3版本中，首成员必须为0，成员不应有相同的值
+    AREA_TYPE_FULL_COVERAGE = 1; // 全覆盖区域
+
+    AREA_TYPE_FORBIDDEN_AREA = 10; // ForbiddenArea 禁止通行区域
+    AREA_TYPE_FORBIDDEN_TURN_AREA = 11; // ForbiddenTurnArea 禁止掉头区域
+    AREA_TYPE_SLOW_DOWN_AREA = 12; // SlowDownArea 减速区域
+    AREA_TYPE_FORBIDDEN_BYPASS_OBS_AREA = 13; // ForbiddenBypassObsArea 禁止饶障区域
+  }
+
+  int64 id = 1;
+  string name = 2;
+  AreaType type = 3;
+  int64 parent_id = 4;
+  repeated Point path = 5;
+  repeated Property property = 6;
+}
+
+
+// 一张地图信息
+message MapInfo {
+
+  // 地图基本信息
+  MapBasicInfo map_basic_info = 1;
+
+  // 地图站点信息
+  repeated MapPoint map_points = 11;
+
+  // 地图站点连接信息
+  repeated MapLine map_lines = 12;
+
+  // 地图区域信息
+  repeated MapArea map_areas = 13;
+
+  // 地图禁行线信息
+  repeated MapLine map_forbidden_lines = 21;
+}
+
+// 地图连接信息
+message MapConnectionInfo {
+  string from_map_id = 1;
+  string from_map_point_id = 2;
+  string to_map_id = 3;
+  string to_map_point_id = 4;
+  double cost = 5;
+}
+
+// 地图总信息
+message TotalMapInfo {
+  repeated MapInfo map_infos = 1;
+  repeated MapConnectionInfo map_connection_infos = 2;
+}

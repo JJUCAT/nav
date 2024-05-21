@@ -1,0 +1,32 @@
+#winnie_base params
+device_url: serial:/dev/ttyS7:921600 #串口通信
+#device_url: udpm:239.255.76.67:7667 #网络UDP多播通信
+wheel_radius: 0.0935      # 轮径
+wheel_distance: 0.346     # 轮距
+reduction_ratio: 1.0      # 减速比
+
+# odom yaw from imu
+odom_use_imu_yaw: true
+imu_topic_name: /imu
+imu_yaw_by_integral: false # true:通过积分计算yaw角，false:直接使用imu的yaw角
+imu_odom_tf_rpy: [ 1, 0.0, 0.5 ] # 实际值会乘以π，[1,0,0.5] --> [ 3.1415926, 0.0, 1.5708 ]
+
+# DI DO AI AO
+num_DI: 1 # DI数量
+num_DO: 1 # DO数量
+num_AI: 1 # AI数量
+num_AO: 1 # AO数量
+
+
+# wheel_speed_left_rpm
+# wheel_speed_right_rpm
+# mow_speed_rpm
+
+plugins:
+  # - { name: "rtk", type: "winnie_base::DeviceRtk" }
+  #  - { name: "agv", type: "winnie_base::DeviceAgv" }
+  - { name: "imu", type: "winnie_base::DeviceImu" }
+  #  - { name: "odom", type: "winnie_base::DeviceOdom" }
+  - { name: "motor", type: "winnie_base::DeviceMotor" }
+  - { name: "io", type: "winnie_base::DeviceIo" }
+  - { name: "battery", type: "winnie_base::DeviceBattery" }

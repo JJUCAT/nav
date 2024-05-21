@@ -1,0 +1,5 @@
+<launch>
+        <arg name="model" />
+        <param name="robot_description" textfile="$(find berxel_description)/urdf/display_urdf.urdf" />
+        <node name="rviz" pkg="rviz" type="rviz" args="-d $(find berxel_description)/rviz/display_test.rviz" required="true" />
+</launch>

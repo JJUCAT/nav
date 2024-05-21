@@ -1,0 +1,118 @@
+@startuml winnie_sdk
+
+package hardware{
+
+class HardwareInterface{
+  virtual bool Init() = 0;
+  virtual int Read(uint8_t *buf, int len) = 0;
+  virtual int Write(const uint8_t *buf, int len) = 0;
+}
+
+class SerialDevice{}
+class UdpDevice{}
+SerialDevice -up-|> HardwareInterface
+UdpDevice -up-|> HardwareInterface
+
+}
+
+
+package protocol{
+
+class Protocol{
+  bool SendResponse();
+  bool SendRequest();
+  bool SendMessage();
+  bool SendCMD();
+  bool SendACK();
+}
+
+}
+
+package dispatch{
+
+'Handle
+class Handle{
+
+  std::shared_ptr<Subscription<Cmd>> CreateSubscriber();
+  std::shared_ptr<Publisher<Cmd>> CreatePublisher();
+  std::shared_ptr<Service<Cmd, Ack>> CreateServer();
+  std::shared_ptr<Client<Cmd, Ack>> CreateClient();
+
+  std::vector<std::shared_ptr<SubscriptionBase>> subscription_factory_;
+  //! vector of publisher base_node.py pointers
+  std::vector<std::shared_ptr<PublisherBase>> publisher_factory_;
+  //! vector of service base_node.py pointers
+  std::vector<std::shared_ptr<ServiceBase>> service_factory_;
+  //! vector of client base_node.py pointers
+  std::vector<std::shared_ptr<ClientBase>> client_factory_;
+}
+Handle --* SubscriptionBase
+Handle --* PublisherBase
+Handle ---* ServiceBase
+Handle ---* ClientBase
+Handle --up--* "1" HardwareInterface
+Handle --up--* "1" Protocol
+Handle -right-* "1" Executor
+
+'Executor
+class Executor{
+  void ExecuteSubscription(const std::shared_ptr<SubscriptionBase>& subscription);
+  void ExecuteService(const std::shared_ptr<ServiceBase>& service);
+  void ExecuteClient(const std::shared_ptr<ClientBase>& client);
+}
+
+'SubscriptionCallback
+class "SubscriptionCallback<Cmd>" as SubCB
+{
+}
+
+'ServiceCallback
+class "ServiceCallback<Cmd, Ack>" as SerCB
+{
+}
+
+'Subscription
+class SubscriptionBase{
+  virtual std::shared_ptr<void> CreateMessage() = 0;
+  virtual void HandleMessage(std::shared_ptr<MessageHeader> message_header,
+  std::shared_ptr<void> message) = 0;
+}
+class "Subscription<Cmd>" as SubT{}
+SubT -up-|> SubscriptionBase
+SubT --* SubCB
+
+
+'Publisher
+class PublisherBase{
+  std::shared_ptr<Handle> GetHandle();
+  std::shared_ptr<CommandInfo> GetCommandInfo();
+}
+class "Publisher<Cmd>" as PubT{
+  void Publish(Cmd &message);
+}
+PubT -up-|> PublisherBase
+
+'Client
+class ClientBase{
+  virtual std::shared_ptr<void> CreateResponse() = 0;
+  virtual void HandleResponse(std::shared_ptr<MessageHeader> request_header,
+                              std::shared_ptr<void> response) = 0;
+}
+class "Client<Cmd, Ack>" as Client{
+  SharedFuture AsyncSendRequest();
+}
+Client -up-|> ClientBase
+
+'Service
+class ServiceBase{
+  virtual std::shared_ptr<void> CreateRequest() = 0;
+  virtual void HandleRequest(std::shared_ptr<MessageHeader> request_header,
+      std::shared_ptr<void> request) = 0;
+}
+class "Service<Cmd, Ack>" as Service{
+  void SendResponse();
+}
+Service -up-|> ServiceBase
+Service --* SerCB
+}
+@enduml

@@ -1,0 +1,7 @@
+
+string frame_id                     # optional, defaults to "map"
+string label                         
+geometry_msgs/Polygon[] polygons
+
+---
+bool success

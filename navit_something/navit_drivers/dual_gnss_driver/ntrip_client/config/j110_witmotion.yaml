@@ -1,0 +1,21 @@
+# 中国移动CORS服务，ntrip caster的服务器地址
+host: "120.253.226.97"
+
+# 8001： CGCS 2000坐标系
+# 8002： WGS84坐标系
+port: 8002 
+
+# RTCM33_GRCEJ 五星十六频
+# RTCM33_GRCE  四星十一频
+# RTCM33_GRC   三星八频
+# RTCM33_GR    双星仪器使用
+mountpoint: "RTCM33_GRCEJ" 
+
+# 测试用的，实际使用需要确认账号密码是否能用
+authenticate: "true" 
+username: "cedr13828" 
+password: "3w8tv8a4" 
+
+# RTK模组的输入端口号，用于获取RTK模块输出的GPGGA数据，以及输入来自ntrip服务器的RTCM数据
+# 实际使用的时候，需要绑定设备的端口号，再做一个软链，例如/dev/rtk_input --> /dev/ttyUSB0
+rtk_input_port: "/dev/rtk_input"

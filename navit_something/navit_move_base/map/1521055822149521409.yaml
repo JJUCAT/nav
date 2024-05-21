@@ -1,0 +1,13 @@
+image: 1521055822149521409.pgm
+resolution: 0.05
+origin: [-35.36972808837891, -36.77977752685547, 0]
+occupied_thresh: 0.51
+free_thresh: 0.49
+negate: 0
+left: -35.36972808837891
+right: 132.8802719116211
+top: 11.72022247314453
+bottom: -36.77977752685547
+start_posx: 0
+start_posy: 0
+start_posr: 0

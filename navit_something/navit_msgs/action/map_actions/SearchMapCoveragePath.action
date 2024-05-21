@@ -1,0 +1,12 @@
+# goal
+string name # 要获取路径的全覆盖区域名
+---
+# result
+uint16 error_code
+string error_msg
+nav_msgs/Path coverage_path # 全覆盖路径
+nav_msgs/Path wall_path # 沿边路径
+nav_msgs/Path full_path # 全路径 = 沿边路径 + 全覆盖路径
+---
+# feedback
+# 反馈(暂无）

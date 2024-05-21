@@ -1,0 +1,11 @@
+<launch>
+    <!--  **************** Maps ****************  -->
+    <node name="navit_map_server_geojson_loader" pkg="navit_map_server" type="geojson_loader.py"
+          args="$(find navit_map_server)/maps/dongguan_task.geojson"
+          output="screen">
+    </node>
+
+    <!--  **************** Visualisation ****************  -->
+    <node name="rviz" pkg="rviz" type="rviz" args="-d $(find navit_map_server)/config/geojson_task.rviz"/>
+
+</launch>

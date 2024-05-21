@@ -1,0 +1,24 @@
+# for perception
+geometry_msgs/PoseStamped expected_dock_pose
+
+string controller_plugin_name
+string perception_plugin_name
+string filter_plugin_name
+
+# 感知充电桩位置反算出的pre_dock_pose
+# 这个值永远为正，表示感知pose的负x方向
+float64 percepted_pose_offset
+
+---
+# Are we successfully docked?
+bool reached
+geometry_msgs/PoseStamped dock_pose
+---
+# Feedback is the detected pose of the dock.
+# 感知到的充电桩pose
+# 和final dock无关
+geometry_msgs/PoseStamped dock_pose
+
+# 感知充电桩pose反算出的approach dock的目标pose
+# 和final dock无关
+geometry_msgs/PoseStamped target_pose

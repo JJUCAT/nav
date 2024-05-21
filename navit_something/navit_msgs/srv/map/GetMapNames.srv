@@ -1,0 +1,5 @@
+
+---
+uint16 error_code
+string error_msg
+string[] map_names #地图名列表 如：["default_map", "5f_map", "10f_map"]

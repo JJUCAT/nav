@@ -1,0 +1,13 @@
+image: quyu.pgm
+resolution: 0.05
+origin: [-10.95577278137207, -17.49275245666504, 0]
+occupied_thresh: 0.51
+free_thresh: 0.49
+negate: 0
+left: -10.95577278137207
+right: 25.09422645568848
+top: 28.5572467803955
+bottom: -17.49275245666504
+start_posx: 0
+start_posy: 0
+start_posr: 0

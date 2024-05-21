@@ -1,0 +1,14 @@
+float32 timeout # 超时时间 [s]
+float32 free # 认为脱困的地图值，只检查车头，车尾两点的值
+float32 v # 线速度 [m/s]
+float32 w # 角速度 [rad/s]
+float32 r # 最小转弯半径 [m]
+
+---
+
+bool is_excape # 脱困成功否
+std_msgs/Duration total_time # 结束用时
+
+---
+
+float32 elapsed_time # 耗时 [s]

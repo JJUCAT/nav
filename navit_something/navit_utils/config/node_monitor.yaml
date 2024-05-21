@@ -1,0 +1,3 @@
+process_names: [navit_utils_node,navit_move_base_node,navit_routing_node,map_server,rviz]
+monitor_frequency: 0.5
+cpu_nums: 16

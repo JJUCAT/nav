@@ -1,0 +1,7 @@
+<!-- Launch file for ekf_test -->
+
+<launch>
+
+    <test test-name="test_rle" pkg="navit_localization" type="test_navit_localization_estimator" clear_params="true" time-limit="100.0" />
+
+</launch>

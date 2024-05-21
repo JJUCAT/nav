@@ -1,0 +1,5 @@
+string polygon_json_path
+
+---
+bool success
+string message

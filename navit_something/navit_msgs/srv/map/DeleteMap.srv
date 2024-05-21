@@ -1,0 +1,4 @@
+string map_name #地图名 如："default_map"
+---
+uint16 error_code
+string error_msg

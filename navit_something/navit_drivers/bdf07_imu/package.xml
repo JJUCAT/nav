@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<package format="2">
+    <name>bdf07_imu</name>
+    <version>1.0.0</version>
+
+    <description>The bdf07 imu ros package</description>
+    <maintainer email="loveredhome@126.com">kuangxionghui</maintainer>
+
+    <license>TODO</license>
+
+    <buildtool_depend>catkin</buildtool_depend>
+    <build_depend>roscpp</build_depend>
+    <build_depend>std_msgs</build_depend>
+    <build_export_depend>roscpp</build_export_depend>
+    <build_export_depend>std_msgs</build_export_depend>
+
+    <depend>nodelet</depend>
+    <depend>pluginlib</depend>
+
+    <export>
+        <nodelet plugin="${prefix}/bdf07_imu.xml"/>
+    </export>
+
+</package>

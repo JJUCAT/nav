@@ -1,0 +1,39 @@
+<launch>
+    <!-- 开流模式 :  1. 单开-->
+    <param name="stream_flag" type="int" value="1" />
+	<!-- 流类型 :2. 深度-->
+    <param name="stream_type" type="int" value="2" />
+    <!--深度分辨率-->
+    <param name="depth_width" type="int" value="640" />
+    <param name="depth_height" type="int" value="400" />
+    <!-- 深度帧率，VGA和QVGA支持5，10，15，20，25，30   HD模式仅支持10-->
+    <param name="depth_fps" type="int" value="30" />
+    <!--深度数据发布方式 0:depth 1:depth_original_raw-->
+    <param name="publish_depth_original_raw" type="int" value="0" />
+    <!--点云发布开关 0:off 1:on-->
+    <param name="publish_cloud_point" type="int" value="0" />
+    <!--点云类型 0: 无序点云  1: 有序点云-->
+    <param name="ordered_cloud" type="int" value="1" />
+    <!--Cam_link坐标系参数-->
+    <param name="camera_link_x" type="double" value="0" />
+    <param name="camera_link_y" type="double" value="0.0125000" />
+    <param name="camera_link_z" type="double" value="0.0141500" />
+    <param name="camera_link_roll" type="double" value="0" />
+    <param name="camera_link_pitch" type="double" value="0" />
+    <param name="camera_link_yaw" type="double" value="0" />
+    <!--深度相机坐标系参数-->
+    <param name="camera_depth_frame_x" type="double" value="-0.008" />
+    <param name="camera_depth_frame_y" type="double" value="0" />
+    <param name="camera_depth_frame_z" type="double" value="0" />
+    <param name="camera_depth_frame_roll" type="double" value="0" />
+    <param name="camera_depth_frame_pitch" type="double" value="0" />
+    <param name="camera_depth_frame_yaw" type="double" value="0" />
+    <!--深度相机图像坐标系参数-->
+    <param name="camera_depth_optical_frame_x" type="double" value="0" />
+    <param name="camera_depth_optical_frame_y" type="double" value="0" />
+    <param name="camera_depth_optical_frame_z" type="double" value="0" />
+    <param name="camera_depth_optical_frame_roll" type="double" value="-0.5" />
+    <param name="camera_depth_optical_frame_pitch" type="double" value="0" />
+    <param name="camera_depth_optical_frame_yaw" type="double" value="-0.5" />
+    <node pkg="berxel_camera" type="berxel_camera" name="berxel_camera" respawn="false" output="screen"/>
+</launch>

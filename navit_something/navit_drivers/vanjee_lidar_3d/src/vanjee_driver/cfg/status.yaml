@@ -1,0 +1,4 @@
+module_name lidar_3d 1
+#fatal固定从0到23
+0 fatal lidar_disconnect
+1 fatal publish_error

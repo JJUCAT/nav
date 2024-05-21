@@ -1,0 +1,13 @@
+#goal definition
+nav_msgs/Path plan  # 待检测路径
+float32 check_distance # 检测长度，@ <0：全路径检测；
+uint32 start # 检测起点下标
+
+---
+#result definition
+bool collised # 是否碰撞
+uint32[] collised_indexes # 碰撞的下标
+
+---
+#feedback
+

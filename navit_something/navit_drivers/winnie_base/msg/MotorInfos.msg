@@ -1,0 +1,1 @@
+MotorInfo[] infos

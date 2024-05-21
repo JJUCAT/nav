@@ -1,0 +1,5 @@
+<launch>
+  <node name="ms" pkg="map_server" type="map_server" args="$(find navit_costmap)/test/TenByTen.yaml"/>
+  <test time-limit="300" test-name="obstacle_tests" pkg="navit_costmap" type="obstacle_tests" />
+
+</launch>

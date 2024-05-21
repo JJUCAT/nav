@@ -1,0 +1,68 @@
+@startuml base_graph_search
+
+struct Point{
+    int id;
+    double x;
+    double y;
+}
+
+struct Edge{
+    int id;
+    int from;
+    int to;
+    double cost;
+}
+
+struct Graph{
+  void add_point(int id, double x, double y);
+  void add_edge(int id, int from, int to);  // 自动计算cost
+  void add_edge(int id, int from, int to, double cost);
+
+  double calc_cost(int from, int to);
+  std::map<int, Point> points;
+  std::map<int, Edge> edges;
+}
+Graph .up.> Edge
+Graph .up.> Point
+
+struct SearchResultPath
+{
+  double cost;            // 代价
+  std::vector<int> path;  // 输出路径。 path = from + ... + to
+}
+
+struct SearchResultRoute
+{
+  double cost;                          // 代价
+  std::vector<int> via_points_order;    // 经过点顺序。via_points_order = from + via_points_ + to
+  std::vector<SearchResultPath> route;  // route = path1 + path2 + path...
+}
+
+SearchResultRoute  -up-*  SearchResultPath
+
+class BaseGraphSearch{
+  +virtual void initialize(const std::string& name, const std::shared_ptr<Graph>& graph);
+  +virtual bool search(int from, int to, SearchResultPath& out_result) = 0;
+  +bool search(int from, int to, const std::vector<int>& via_points, SearchResultRoute& out_result);
+
+  #std::string name_;
+  #std::shared_ptr<Graph> graph_;
+}
+
+BaseGraphSearch .up.> Graph
+BaseGraphSearch .up.> SearchResultRoute
+
+class BaseTspSearch{
+  +virtual void initialize(const std::string& name, const std::shared_ptr<Graph>& graph);
+  +virtual bool search(int from, int to, const std::vector<int>& via_points, SearchResultRoute& out_result) = 0;
+
+  #std::string name_;
+  #std::shared_ptr<Graph> graph_;
+}
+
+BaseTspSearch .up.> Graph
+BaseTspSearch .up.> SearchResultRoute
+
+BaseGraphSearch -[hidden]right- BaseTspSearch
+
+@enduml

@@ -1,0 +1,20 @@
+
+<!-- 
+  launch文件一般以.launch或.xml结尾.
+  指定启动的package、参数和一些管理控制的命令，对需要运行的程序打包，通过一句命令来启动。
+  launch文件是描述一组节点及其话题重映射和参数的XML文件。根据规范，这些文件的后缀都是.launch
+-->
+
+<launch>
+
+  <!-- name="NODE_NAME"：为节点指派名称，这将会覆盖掉ros::init()定义的node_name -->
+  <!-- pkg="PACKAGE_NAME"： 节点所在的包名 -->
+  <!-- type="FILE_NAME"：执行文件的名称如果是用Python编写的就填写xxx.py，如果是cpp就写编译生成的可执行文件名 -->
+  <!-- output="screen"	：终端输出转储在当前的控制台上，而不是在日志文件中 -->
+  <!-- respawn="true"：当roslaunch启动完所有该启动的节点之后，会监测每一个节点，保证它们正常的运行状态。对于任意节点，当它终止时，roslaunch 会将该节点重启 -->
+  <!-- required="true"：当被此属性标记的节点终止时，roslaunch会将其他的节点一并终止。注意此属性不可以与respawn="true"一起描述同一个节点 -->
+
+  <node name="publisher_node" pkg="tof_dev_sdk_demo" type="publisher_demo" output="screen">
+  </node>
+  
+</launch>

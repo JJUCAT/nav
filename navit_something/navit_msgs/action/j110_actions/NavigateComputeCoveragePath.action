@@ -1,0 +1,29 @@
+uint16 SCENE_BOUSTROPHEDON = 0                  # 蛇形覆盖
+uint16 SCENE_CONTOUR = 1                        # 回字型覆盖
+
+
+#goal definition
+geometry_msgs/Polygon coverage_area     # 包围的边界
+geometry_msgs/Polygon[] holes           # no go zone 禁行区、障碍物区域
+geometry_msgs/Pose start                # 指定起点(optional)
+geometry_msgs/Pose end                  # 指定终点(optional)
+uint16 working_scene
+float32 sweep_distance
+
+---
+bool is_path_found  # 是否成功
+uint16 error_code   # 错误码
+string error_msg    # 错误信息
+
+nav_msgs/Path[] coverage_paths # 覆盖路径
+nav_msgs/Path[] contour_paths  # 沿边路径
+
+float32 length_path            # 覆盖路径长度(m)
+float32 area                   # 待清扫区域面积(m^2)
+float32 planning_duration      # 规划用时
+
+---
+# #feedback
+float32 planning_progress      # 规划进度，0 ~ 1
+uint32 status_code             # 状态码
+string status_msg              # 状态信息

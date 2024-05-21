@@ -1,0 +1,6 @@
+uint32 set_DO
+uint32 set_DO_mask
+float32[] set_AO
+uint32 set_AO_mask
+---
+bool succeed

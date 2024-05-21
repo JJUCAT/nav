@@ -1,0 +1,82 @@
+#laser near bottom
+
+define block model
+(
+  size [0.500 0.500 5.000]
+  gui_nose 0
+)
+
+define laser ranger
+(
+  sensor
+  (
+    range [0.0 30.0]
+    fov 360.0
+    samples 1081
+  )
+  # generic model properties
+  color "green"
+  size [ 0.100 0.100 0.100 ]
+)
+
+define M100 position
+(
+  odom_error [0.03 0.03 999999 999999 999999 0.02]
+  size [0.400 0.400 5.000]
+  # origin [-0.4 0 0 0]
+  origin [0.000 0.000 0.000 0.000]
+  gui_nose 0.3
+  # drive "car"   # 阿克曼模型
+  drive "diff"  
+  # wheelbase 2   # 2 轴距
+  laser(pose [0.000 0.000 -4.500 0.000]) # 传感器位置
+)
+
+define floorplan model
+(
+  # sombre, sensible, artistic
+  color "gray30"
+
+  # most maps will need a bounding box
+  boundary 1
+
+  gui_nose 0.3
+  gui_grid 0
+#gui_movemask 0
+  gui_outline 0
+  gripper_return 0
+  fiducial_return 0
+  laser_return 1
+)
+
+# set the resolution of the underlying raytrace model in meters
+resolution 0.05
+
+interval_sim 100  # simulation timestep in milliseconds
+#interval_real 100  # real-time interval between simulation updates in milliseconds
+
+# stage 窗口的大小
+window
+( 
+  size [ 1106 692 ]
+  rotate [ 0.000 0.000 ]
+  scale 32.999
+)
+
+# load an environment bitmap
+# 导入的地图在 stage 中的大小和位姿
+floorplan
+( 
+  name "test"
+  bitmap "../map/test_empty.pgm"
+  # 地图的大小, 可在 rviz 中进行测量获取
+  size [100.000 100.000 1.000] # test.pgm
+  # 地图中心在 stage 中的坐标和朝向
+  pose [0.000 0.000 0.000 0.000]  # test.pgm
+)
+
+
+# throw in a robot
+# 机器人在 stage 中的位置
+M100( pose [6.769 4.058 0.000 -135.550] name "M100" color "yellow")
+block( pose [5.665 2.981 0.000 0.000 ] color "red")

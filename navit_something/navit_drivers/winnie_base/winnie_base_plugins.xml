@@ -1,0 +1,38 @@
+<class_libraries>
+    <library path="libwinnie_device_rtk">
+        <class type="winnie_base::DeviceRtk" base_class_type="winnie_base::DeviceBase">
+            <description>winnie_base::DeviceRtk .</description>
+        </class>
+    </library>
+    <library path="libwinnie_device_agv">
+        <class type="winnie_base::DeviceAgv" base_class_type="winnie_base::DeviceBase">
+            <description>winnie_base::DeviceAgv .</description>
+        </class>
+    </library>
+    <library path="libwinnie_device_imu">
+        <class type="winnie_base::DeviceImu" base_class_type="winnie_base::DeviceBase">
+            <description>winnie_base::DeviceImu .</description>
+        </class>
+    </library>
+    <library path="libwinnie_device_odom">
+        <class type="winnie_base::DeviceOdom" base_class_type="winnie_base::DeviceBase">
+            <description>winnie_base::DeviceOdom .</description>
+        </class>
+    </library>
+    <library path="libwinnie_device_motor">
+        <class type="winnie_base::DeviceMotor" base_class_type="winnie_base::DeviceBase">
+            <description>winnie_base::DeviceMotor .</description>
+        </class>
+    </library>
+    <library path="libwinnie_device_io">
+        <class type="winnie_base::DeviceIo" base_class_type="winnie_base::DeviceBase">
+            <description>winnie_base::DeviceIo .</description>
+        </class>
+    </library>
+    <library path="libwinnie_device_battery">
+        <class type="winnie_base::DeviceBattery" base_class_type="winnie_base::DeviceBase">
+            <description>winnie_base::DeviceBattery .</description>
+        </class>
+    </library>
+</class_libraries>
+

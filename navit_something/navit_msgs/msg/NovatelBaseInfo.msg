@@ -1,0 +1,9 @@
+uint8 satellites
+string sol_status
+string pos_type
+string battery1
+string battery2
+string base_status
+string radio_status
+string diff_status
+string sat_status

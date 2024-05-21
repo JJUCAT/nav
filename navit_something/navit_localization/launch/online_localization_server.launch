@@ -1,0 +1,27 @@
+<launch>
+
+	<rosparam command="load" file="$(find navit_localization)/params/test_navit_localization_server.yaml" />
+	<!-- <node pkg="navit_localization" type="ekf_localization_node" name="ekf_odom" clear_params="true"/> -->
+
+	<node pkg="navit_localization" type="navit_localization_server_node" name="navit_localizaition_server_node" output="screen" >
+    	<remap from="odometry/filtered" to="odometry/filtered_map"/>
+	</node>
+
+	<node pkg="navit_localization" type="navsat_transform_node" name="navsat_transform" clear_params="true" output="screen">
+		<remap from="odometry/filtered" to="odometry/filtered_map"/>
+		<remap from="/gps/fix" to="Novatel/Fix"/>
+		<remap from="/gps/heading" to="Novatel/PosVelHeadingData"/>
+	</node>
+
+
+	<!-- 测试用的数据和配置-->
+	<!-- 东莞测试场地的G2栋大厅，选为map在UTM中的原点，22.9033987，113.8646179 -->
+	<!-- <include file="$(find j110_description)/launch/j110_description.launch" />
+	<node pkg="rviz" type="rviz" name="rviz" args="-d /home/yijiahe/Desktop/loc.rviz" /> -->
+
+	<!-- 测试用的数据和配置
+	<node pkg="rosbag" type="play" name="player" args="/home/yijiahe/Downloads/navit_localization_test_2.bag -r 10" />
+	-->
+	<!-- <node pkg="rosbag" type="play" name="player" args="/home/yijiahe/data/mid360/1222_ekf_rtk/2023-12-22-12-02-11.bag -r 2" /> -->
+
+</launch>
