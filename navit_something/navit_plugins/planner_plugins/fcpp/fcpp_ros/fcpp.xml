@@ -1,0 +1,5 @@
+<library path="lib/libfcpp_ros">
+  <class name="fcpp_ros/FcppAction" type="fcpp_ros::FcppAction" base_class_type="navit_core::CoveragePlanner">
+	  <description>complete coverage path planner</description>
+  </class>
+</library>

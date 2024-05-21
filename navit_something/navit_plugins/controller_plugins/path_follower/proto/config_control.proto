@@ -1,0 +1,38 @@
+syntax = "proto3";
+
+package proto;
+
+message PidParam {
+  // pid param
+  float kp = 1;
+  float ki = 2;
+  float kd = 3;
+  // 2dof pid param
+  float kt = 4;
+  float wp = 5;
+  float tau = 6;
+  // integral saturation
+  float saturation = 7;
+}
+
+message PreviewPoint {
+  float slope = 1;
+  float vel_low = 2;
+  float vel_up = 3;
+}
+
+message ConfigControlLateral {
+  float forward_len = 1;
+
+  // feedback preview points
+  PreviewPoint fb_preview_point = 2;
+  PidParam fb_pid_param = 3;
+  float fb_gain = 4;
+}
+
+message ConfigControlRotation {
+  PidParam rotation_pid_parameter = 1;
+  double rotation_fb_gain = 2;
+  double rotation_threshold = 3;
+  double max_rotation_speed = 4; // in m/s
+}

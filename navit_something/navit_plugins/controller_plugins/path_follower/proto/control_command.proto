@@ -1,0 +1,34 @@
+syntax = "proto3";
+
+package proto;
+
+import "robot_state.proto";
+
+message ControlCommand {
+  sfixed64 time_meas = 1;  // in us
+
+  float front_wheel_angle = 2;  // in rad
+
+  float front_wheel_angle_rate = 3;  // in rad/s
+
+  float speed = 4; // in m/s
+
+  float left_wheel_speed = 5; // in m/s
+
+  float right_wheel_speed = 6; // in m/s
+
+   RobotState.GearStatus gear = 7;
+
+  enum ControlError {
+  	VALID = 0;
+  	PATH_INVALID = 1;
+  	SPEED_INVALID = 2;
+  	FIND_POINT_INVALID = 3;
+  	CHARGING_CONTROLLER = 4;
+  	ABORT_PLANNER = 5;
+  	ABORT_CONTROLLER = 6;
+  	ROBOT_STATE_INVALID = 7;
+  }
+
+  repeated ControlError control_errors = 8;
+}

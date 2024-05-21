@@ -1,0 +1,11 @@
+# robot
+robot_radius: 0.3
+coverage_radius: 1.0
+
+# map correction
+# ==============
+# Applies a closing operation to neglect inaccessible areas and map errors/artifacts if the map_correction_closing_neighborhood_size parameter is larger than 0.
+# The parameter then specifies the iterations (or neighborhood size) of that closing operation.
+# int
+map_correction_closing_neighborhood_size: 2
+

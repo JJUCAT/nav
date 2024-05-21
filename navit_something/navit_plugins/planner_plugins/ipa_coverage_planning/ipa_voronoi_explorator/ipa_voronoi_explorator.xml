@@ -1,0 +1,7 @@
+<library path="lib/libipa_voronoi_explorator">
+    <class name="ipa_voronoi_explorator/VoronoiExploratorRos"
+           type="ipa_voronoi_explorator::VoronoiExploratorRos"
+           base_class_type="navit_core::CoveragePlanner">
+        <description>ipa_voronoi_explorator coverage path planner</description>
+    </class>
+</library>

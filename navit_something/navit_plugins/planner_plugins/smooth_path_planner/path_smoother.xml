@@ -1,0 +1,9 @@
+<library path="lib/libpath_smoother">
+  <class name="path_smoother/PathGslSpline" type="navit_planner::PathGslSpline" base_class_type="navit_core::SmoothPathPlanner">
+    <description>2D version of the SMAC Planner</description>
+  </class>
+
+  <class name="path_smoother/PathGslSpline" type="navit_planner::PathGslSpline" base_class_type="navit_core::SmoothPathPlanner">
+      <description>SE2 version of the SMAC planner</description>
+  </class>
+</library>

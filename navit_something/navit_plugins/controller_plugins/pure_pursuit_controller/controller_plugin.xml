@@ -1,0 +1,11 @@
+<library path="lib/libpure_pursuit_controller">
+
+    <class name="PurePursuitController"
+           type="nav2_regulated_pure_pursuit_controller::RegulatedPurePursuitController"
+           base_class_type="navit_core::Controller">
+        <description>
+            ported from nav2
+        </description>
+    </class>
+           
+</library>

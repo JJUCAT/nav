@@ -1,0 +1,9 @@
+<library path="lib/libdock_fake_perception">
+    <class name="dock_fake_perception/FakePerception"
+           type="dock_fake_perception::FakePerception"
+           base_class_type="navit_auto_dock::plugins::ApproachDockPerception">
+        <description>
+            fake perception for control debug
+        </description>
+    </class>
+</library>

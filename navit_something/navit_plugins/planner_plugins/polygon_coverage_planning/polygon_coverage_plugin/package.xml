@@ -1,0 +1,42 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>polygon_coverage_plugin</name>
+  <version>0.0.0</version>
+  <description>The polygon_coverage_plugin package</description>
+
+  <!-- One maintainer tag required, multiple allowed, one person per tag -->
+  <!-- Example:  -->
+  <!-- <maintainer email="jane.doe@example.com">Jane Doe</maintainer> -->
+  <maintainer email="yjh@todo.todo">yjh</maintainer>
+
+
+  <!-- One license tag required, multiple allowed, one license per tag -->
+  <!-- Commonly used license strings: -->
+  <!--   BSD, MIT, Boost Software License, GPLv2, GPLv3, LGPLv2.1, LGPLv3 -->
+  <license>TODO</license>
+
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <depend>roscpp</depend>
+  <depend>pluginlib</depend>
+  <depend>navit_msgs</depend>
+  <depend>navit_core</depend>
+  <depend>cgal</depend>
+  <depend>nav_msgs</depend>
+  <depend>geometry_msgs</depend>
+  <depend>trajectory_msgs</depend>
+  <depend>visualization_msgs</depend>
+  <depend>std_srvs</depend>
+  <depend>eigen_conversions</depend>
+
+  <depend>polygon_coverage_msgs</depend>
+  <depend>polygon_coverage_geometry</depend>
+  <depend>polygon_coverage_planners</depend>
+  <depend>polygon_coverage_solvers</depend>
+
+  <export>
+    <!-- Other tools can request additional information be placed here -->
+      <navit_core plugin="${prefix}/polygon_coverage_plugin.xml" />
+  </export>
+</package>

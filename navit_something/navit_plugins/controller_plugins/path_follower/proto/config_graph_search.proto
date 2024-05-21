@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+package proto;
+
+message ConfigGraphSearch {
+  bool use_2dnav_goal = 1;
+  string path_frame = 2;
+  int32 angle_size = 3;
+  double minimum_turning_radius = 4;
+  int32 obstacle_threshold = 5;
+  double goal_radius = 6;
+  double goal_angle = 7;
+  bool use_back = 8;
+  double robot_length = 9;
+  double robot_width = 10;
+  double base2back = 11;
+  double curve_weight = 12;
+  double reverse_weight = 13;
+  bool use_wavefront_heuristic = 14;
+  string map_topic = 15;
+}

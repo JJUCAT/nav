@@ -1,0 +1,10 @@
+<library path="lib/libdock_carlike_nmpc_controller">
+    <class name="dock_carlike_nmpc_controller/CarlikeNmpcController"
+           type="dock_carlike_nmpc_controller::CarlikeNmpcController"
+           base_class_type="navit_auto_dock::plugins::ApproachDockController">
+           <description> 
+               nmpc based on OpEn 
+           </description>
+    </class>
+</library>
+

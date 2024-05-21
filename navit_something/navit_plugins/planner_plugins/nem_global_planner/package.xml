@@ -1,0 +1,35 @@
+<?xml version="1.0"?>
+<!-- <?xml-model href="http://download.ros.org/schema/package_format2.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?> -->
+<package format="2">
+    <name>nem_global_planner</name>
+    <version>1.17.1</version>
+    <description>
+        A global_path_plan library and node.
+    </description>
+    <maintainer email="dingzhiyu@yijiahe.com">dingzhiyu</maintainer>
+    <maintainer email="yangchuan@yijiahe.com">yangchuan</maintainer>
+    <maintainer email="xuemantian@yijiahe.com">yangchuan</maintainer>
+    <license>BSD</license>
+
+    <author>dingzhiyu</author>
+
+    <buildtool_depend>catkin</buildtool_depend>
+
+    <build_depend>tf2_geometry_msgs</build_depend>
+
+    <depend>navit_costmap</depend>
+
+    <depend>navfn</depend>
+    <depend>roscpp</depend>
+    <depend>tf2_ros</depend>
+    <depend>navit_core</depend>
+    <depend>nav_msgs</depend>
+    <depend>pluginlib</depend>
+    <depend>geometry_msgs</depend>
+    <depend>dynamic_reconfigure</depend>
+
+    <export>
+        <navit_core plugin="${prefix}/nem_global_planner_plugin.xml"/>
+    </export>
+
+</package>

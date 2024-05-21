@@ -1,0 +1,67 @@
+syntax = "proto3";
+
+package proto;
+
+import "geometry.proto";
+
+message PathFollowCfg {
+  SimpleCar simple_car = 1;
+
+  Diff diff_car = 2;
+
+  KinematicModel type = 3;
+
+  GoalTolerance goal_tolerance = 4;
+
+  string global_frame = 5;
+
+  string robot_frame = 6;
+
+  enum KinematicModel {
+    DIFF = 0;
+    SIMPLE_CAR = 1;
+  }
+}
+
+message SimpleCar {
+  float max_vel_x = 1;            // in m/s
+  float max_vel_x_backwards = 2;  // in m/s
+  float max_vel_theta = 3;        // in rad/s
+
+  float acc_lim_x = 4;            // in m/s^2
+  float dec_lim_x = 5;            // in m/s^2
+  float acc_lim_theta = 6;        // in rad/s^2
+
+  bool use_angular_vel = 7;
+}
+
+message Diff {
+  float max_vel_x = 1;            // in m/s
+  float max_vel_x_backwards = 2;  // in m/s
+  float max_vel_theta = 3;        // in rad/s
+
+  float acc_lim_x = 4;            // in m/s^2
+  float dec_lim_x = 5;            // in m/s^2
+  float acc_lim_theta = 6;        // in rad/s^2
+
+  float wheel_base = 7;           // in m
+}
+message GoalTolerance {
+  float dis_tolerance = 1;        // in m
+  float theta_tolerance = 2;      // in rad
+}
+
+message AnchorBox {
+  repeated Pose anchor_pose = 1;
+}
+message Pose {
+  uint32 index = 1;
+  Vector3f pose = 2;
+  Quaternionf qua = 3;
+}
+message ReplanPose {
+  Pose start = 1;
+  Pose goal = 2;
+}
+
+

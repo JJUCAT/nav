@@ -1,0 +1,7 @@
+<library path="lib/libipa_boustrophedon_explorator">
+    <class name="ipa_boustrophedon_explorator/BoustrophedonExploratorRos"
+           type="ipa_boustrophedon_explorator::BoustrophedonExploratorRos"
+           base_class_type="navit_core::CoveragePlanner">
+        <description>ipa_boustrophedon_explorator coverage path planner</description>
+    </class>
+</library>

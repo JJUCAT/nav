@@ -1,0 +1,42 @@
+boustrophedon_explorator_test:
+  boustrophedon_exploration_algorithm: 2
+  robot_radius: 0.3
+  coverage_radius: 0.2
+  map_correction_closing_neighborhood_size: 2
+  min_cell_area: 200.0      #10.0
+  path_eps: 6.0
+  grid_obstacle_offset: 0     #0.101        #0.251
+  max_deviation_from_track: -1
+  cell_visiting_order: 1
+
+ccpp_costmap:
+  global_frame: map
+  robot_base_frame: base_footprint
+  update_frequency: 0.5
+  publish_frequency: 0.5
+
+  width: 100
+  height: 100
+  resolution: 0.1
+
+  transform_tolerance: 0.5
+  #rolling_window: true
+  plugins:
+    - { name: static_layer,            type: "navit_costmap::StaticLayer" }
+    #    - {name: obstacle_layer,          type: "navit_costmap::VoxelLayer"}
+    #    - { name: prohibition_layer,        type: "costmap_prohibition_layer_namespace::CostmapProhibitionLayer" }
+    - {name: inflation_layer,         type: "navit_costmap::InflationLayer"}
+
+  prohibition_layer:
+    prohibition_areas: []
+
+  inflation_layer:
+    inflation_radius: 0.3
+    cost_scaling_factor: 1.0
+
+
+
+
+
+
+

@@ -1,0 +1,40 @@
+<?xml version="1.0"?>
+<launch>
+
+        <!--  ************** Global Parameters ***************  -->
+        <param name="/use_sim_time" value="false"/>
+
+		<!--  ****** Maps *****  -->
+	<node name="map_server" pkg="map_server" type="map_server" args="$(find navit_bt_navigator)/maps/dgsmall/dgsmall.yaml" output="screen"/>
+
+	<!--node name="fake_localization" pkg="fake_localization" type="fake_localization" respawn="false" /-->
+
+    <!--  ************** Navigation ***************  -->
+	<node pkg="navit_planner" type="navit_planner_node" name="navit_planner_node" output="screen" respawn="true">
+  	  	<!--rosparam file="$(find navit_planner)/config/test.yaml" command="load" /-->
+  	 	<!--rosparam file="$(find navit_planner)/config/costmap_params.yaml" command="load"/-->
+	</node> 
+
+	<node pkg="navit_controller" type="navit_controller_node" name="navit_controller_node" output="screen" respawn="true">
+		<!--rosparam file="$(find navit_controller)/config/pure_pursuit_controller/pure_pursuit_test.yaml" command="load"/-->
+		<rosparam file="$(find navit_controller)/config/test.yaml" command="load"/>
+  	 	<rosparam file="$(find navit_controller)/config/costmap_params.yaml" command="load"/>
+	</node>
+
+    <node pkg="teb_local_planner" type="test_path_follow_node" name="test_path_follow_node" output="screen" respawn="true">
+	</node>
+
+	<rosparam file="$(find navit_bt_navigator)/cfg/simple_nav_pure_pursuit.yaml" command="load"/>
+	<node pkg="navit_bt_navigator" type="simple_navigator" name="simple_navigator" output="screen"> launch-prefix="xterm -e gdb -ex run --args "
+	</node>
+
+			<!--  ****** Recovery *****  -->
+	<node pkg="navit_recovery" type="navit_recovery_node" name="navit_recovery_node" output="screen">
+  	  	<rosparam file="$(find navit_recovery)/config/test.yaml" command="load"/>
+	</node>
+
+	<!--  **************** Visualisation ****************  -->
+	<node name="rviz" pkg="rviz" type="rviz" args="-d $(find navit_example)/config/navigation.rviz"/>
+	
+
+</launch>

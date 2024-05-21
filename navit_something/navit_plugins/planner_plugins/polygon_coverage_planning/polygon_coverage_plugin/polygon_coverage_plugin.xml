@@ -1,0 +1,7 @@
+<library path="lib/libpolygon_coverage_plugin">
+    <class name="polygon_coverage_planning/PolygonCoveragePlanner"
+           type="polygon_coverage_planning::PolygonCoveragePlanner"
+           base_class_type="navit_core::CoveragePlanner">
+        <description>polygon_coverage_planning</description>
+    </class>
+</library>

@@ -1,0 +1,56 @@
+syntax = "proto3";
+
+package proto;
+
+message Vector3d {
+  double x = 1;
+  double y = 2;
+  double z = 3;
+}
+
+message Vector3f {
+  float x = 1;
+  float y = 2;
+  float z = 3;
+}
+
+message Quaterniond {
+  double w = 1;
+  double x = 2;
+  double y = 3;
+  double z = 4;
+}
+
+message Quaternionf {
+  float w = 1;
+  float x = 2;
+  float y = 3;
+  float z = 4;
+}
+
+message Transformation3d {
+  Vector3d position = 1;
+  Quaterniond orientation = 2;
+}
+
+message Transformation3f {
+  Vector3f position = 1;
+  Quaternionf orientation = 2;
+}
+
+/* A polygon consisting of non-intersecting line segments.
+   Points must be clockwise and is expected to have a close end, the last point should always repeat the first point i.e..
+   Polygon represents a 2D shape, The height is ignored.
+*/
+message Polygon {
+  repeated Vector3f points = 1;
+}
+
+message BoundingBox {
+  repeated Vector3f points = 1;
+}
+
+message Polyline {
+  repeated Vector3f points = 1;
+}
+

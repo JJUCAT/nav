@@ -1,0 +1,5 @@
+<library path="libsmac_planner">
+	<class name="nav2_smac_planner/SmacPlannerHybrid" type="nav2_smac_planner::SmacPlannerHybrid" base_class_type="navit_core::GlobalPlanner">
+	  <description>Hybrid-A* SMAC planner</description>
+	</class>
+</library>

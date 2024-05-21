@@ -1,0 +1,35 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>dock_plugins</name>
+  <version>0.0.0</version>
+  <description>The dock_plugins package</description>
+
+  <!-- One maintainer tag required, multiple allowed, one person per tag -->
+  <!-- Example:  -->
+  <!-- <maintainer email="jane.doe@example.com">Jane Doe</maintainer> -->
+  <maintainer email="yijiahe@todo.todo">yijiahe</maintainer>
+
+
+  <!-- One license tag required, multiple allowed, one license per tag -->
+  <!-- Commonly used license strings: -->
+  <!--   BSD, MIT, Boost Software License, GPLv2, GPLv3, LGPLv2.1, LGPLv3 -->
+  <license>TODO</license>
+
+
+  <buildtool_depend>catkin</buildtool_depend>
+  <!-- <exec_depend>dock_carlike_nmpc_controller</exec_depend> -->
+  <!-- <exec_depend>dock_diff_graceful_controller</exec_depend> -->
+  <exec_depend>dock_diff_purepursuit_pid_controller</exec_depend>
+  <!-- <exec_depend>dock_external_perception</exec_depend> -->
+  <exec_depend>dock_fake_perception</exec_depend>
+  <exec_depend>dock_fg100_controller</exec_depend>
+  <exec_depend>dock_perception</exec_depend>
+  <!-- <exec_depend>dock_visual_perception</exec_depend> -->
+
+
+  <!-- The export tag contains other, unspecified, tags -->
+  <export>
+    <!-- Other tools can request additional information be placed here -->
+    <metapackage/>
+  </export>
+</package>

@@ -1,0 +1,6 @@
+<launch>
+
+    <test test-name="slic3r_coverage_planner" pkg="slic3r_coverage_planner" type="test_slic3r_coverage_planner" clear_params="true" time-limit="100.0" />
+
+</launch>
+

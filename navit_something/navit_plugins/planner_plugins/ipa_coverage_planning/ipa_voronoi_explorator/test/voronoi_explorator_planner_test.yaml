@@ -1,0 +1,86 @@
+nav_planner:
+  #- {name: topoint, type: global_planner/GlobalPlanner}
+  - { name: topoint, type: navfn/NavfnROS }
+
+coverage_planner:
+  - name: voronoi
+    type: ipa_voronoi_explorator/VoronoiExploratorRos
+
+smooth_path_planner:
+  - name: test_4
+    type: path_smoother/PathGslSpline
+
+voronoi:
+  robot_radius: 0.3
+  coverage_radius: 0.3
+  map_correction_closing_neighborhood_size: 3
+
+test_4:
+  step_points: 5                    # interval of picking up keypoints in rough path.
+  step_s: 0.02                      # [m], default = 0.02, interval of two points in smooth path.
+
+
+planner_costmap:
+  global_frame: map
+  robot_base_frame: base_footprint
+  update_frequency: 0.5
+  publish_frequency: 0.5
+
+  width: 100
+  height: 100
+  resolution: 0.1
+
+  transform_tolerance: 0.5
+  #rolling_window: true
+  plugins:
+    - { name: static_layer,            type: "navit_costmap::StaticLayer" }
+    #      - {name: obstacle_layer,          type: "navit_costmap::VoxelLayer"}
+    - { name: prohibition_layer,        type: "costmap_prohibition_layer_namespace::CostmapProhibitionLayer" }
+    - { name: inflation_layer,         type: "navit_costmap::InflationLayer" }
+
+  inflation_layer:
+    inflation_radius: 5.5
+    cost_scaling_factor: 1.5
+
+ccpp_costmap:
+  global_frame: map
+  robot_base_frame: base_footprint
+  update_frequency: 0.5
+  publish_frequency: 0.5
+
+  width: 100
+  height: 100
+  resolution: 0.1
+
+  transform_tolerance: 0.5
+  #rolling_window: true
+  plugins:
+    - { name: static_layer,            type: "navit_costmap::StaticLayer" }
+    #    - {name: obstacle_layer,          type: "navit_costmap::VoxelLayer"}
+    #    - {name: prohibition_layer,        type: "costmap_prohibition_layer_namespace::CostmapProhibitionLayer" }
+    #    - {name: inflation_layer,         type: "navit_costmap::InflationLayer"}
+
+  prohibition_layer:
+    prohibition_areas:
+      # point
+      - [ 18,12 ]
+
+      # line
+      - [ [ 8,2 ], [ 8,22 ] ]
+
+      # polygons
+      - [ [ 1, 3 ],
+          [ 1, 1 ],
+          [ 3, 1 ],
+          [ 3, 3 ] ]
+      - [ [ 5, 7 ],
+          [ 5, 5 ],
+          [ 7, 5 ],
+          [ 7, 7 ] ]
+
+
+
+
+
+
+

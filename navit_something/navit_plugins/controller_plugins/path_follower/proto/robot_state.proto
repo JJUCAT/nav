@@ -1,0 +1,52 @@
+/*
+* @Author: czk
+* @Date:   2022-10-02 12:03:58
+* @Last Modified by:   chenzongkui
+* @Last Modified time: 2022-10-02 12:12:54
+*/
+
+syntax = "proto3";
+
+package proto;
+
+import "geometry.proto";
+import "time_stamp.proto";
+
+message RobotState {
+    TimeStamp time = 1;  // in us
+
+    // Position of the vehicle in global frame in m.
+    Vector3f position = 2;
+
+    // Velocity of the robot in global frame in m/s.
+    Vector3f velocity_enu = 3;
+
+    // Velocity of the robot in local frame in m/s
+    Vector3f velocity_flu = 4;
+
+    // Angle of the robot in global fram in rad
+    Vector3f roll_pitch_yaw = 5;
+
+    // Quaternion of the robot in global frame
+    Quaterniond quaternion = 6;
+
+    // Angular velocity in rad/s
+    Vector3f angular_velocity_flu = 7;
+
+    Vector3f acceleration_flu = 8;
+
+    float front_wheel_angle = 9;
+
+    float speed = 10;
+
+  enum GearStatus {
+    INVALID = 0;
+    PARK = 1;
+    DRIVE = 2;
+    REVERSE = 3;
+  }
+
+   GearStatus gear = 11;
+
+   string map_label = 12;
+}

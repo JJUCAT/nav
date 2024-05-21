@@ -1,0 +1,41 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>planner_plugins</name>
+  <version>0.0.0</version>
+  <description>The planner_plugins package</description>
+
+  <!-- One maintainer tag required, multiple allowed, one person per tag -->
+  <!-- Example:  -->
+  <!-- <maintainer email="jane.doe@example.com">Jane Doe</maintainer> -->
+  <maintainer email="yijiahe@todo.todo">yijiahe</maintainer>
+
+
+  <!-- One license tag required, multiple allowed, one license per tag -->
+  <!-- Commonly used license strings: -->
+  <!--   BSD, MIT, Boost Software License, GPLv2, GPLv3, LGPLv2.1, LGPLv3 -->
+  <license>TODO</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+  <exec_depend>complete_coverage_planner</exec_depend>
+  <exec_depend>global_planner</exec_depend>
+  <exec_depend>navfn</exec_depend>
+  <exec_depend>smac_planner</exec_depend>
+  <exec_depend>ipa_boustrophedon_explorator</exec_depend>
+  <exec_depend>ipa_voronoi_explorator</exec_depend>
+  <exec_depend>smooth_path_planner</exec_depend>
+  <exec_depend>fcpp_algorithm</exec_depend>
+
+  <!-- 暂时不需要编译的插件	 last update: 2023/12/4
+  <exec_depend>nem_global_planner</exec_depend>
+  <exec_depend>visibility_graph_planner</exec_depend>
+  <exec_depend>prm_planner</exec_depend>
+  <exec_depend>fcpp_ros</exec_depend> 
+
+  -->
+
+  <!-- The export tag contains other, unspecified, tags -->
+  <export>
+    <!-- Other tools can request additional information be placed here -->
+    <metapackage/>
+  </export>
+</package>

@@ -1,0 +1,8 @@
+<library path="lib/libm100_dock_local_planner">
+    <class name="m100_dock_local_planner/M100DockLocalPlannerROS" type="m100_dock_local_planner::M100DockLocalPlannerROS"
+           base_class_type="navit_core::Controller">
+        <description>
+            A local planner for m100 dock.
+        </description>
+    </class>
+</library>

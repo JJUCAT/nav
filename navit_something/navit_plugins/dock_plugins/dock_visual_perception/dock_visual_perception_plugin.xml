@@ -1,0 +1,7 @@
+<library path="lib/libdock_visual_perception">
+    <class name="dock_visual_perception/VisualPerception" 
+        type="dock_visual_perception::VisualPerception" 
+        base_class_type="navit_auto_dock::plugins::ApproachDockPerception">
+        <description> This is a visual perception plugin. </description>
+     </class>
+</library>

@@ -1,0 +1,5 @@
+<library path="lib/libcomplete_coverage_planner">
+  <class name="complete_coverage_planner/CompleteCoveragePlanner" type="complete_coverage_planner::CompleteCoveragePlanner" base_class_type="navit_core::CoveragePlanner">
+	  <description>complete coverage path planner</description>
+  </class>
+</library>

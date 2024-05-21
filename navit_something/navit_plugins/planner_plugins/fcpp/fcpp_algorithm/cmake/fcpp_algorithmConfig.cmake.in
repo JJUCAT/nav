@@ -1,0 +1,22 @@
+@PACKAGE_INIT@
+
+get_filename_component(fcpp_algorithm_CMAKE_DIR "${CMAKE_CURRENT_LIST_FILE}" PATH)
+include(CMakeFindDependencyMacro)
+
+find_dependency(Eigen3 REQUIRED)
+find_dependency(OpenCV 4 REQUIRED)
+find_dependency(CGAL QUIET COMPONENTS Core)
+
+if(NOT TARGET fcpp_algorithm::fcpp_algorithm)
+    include("${fcpp_algorithmCMAKE_DIR}/fcpp_algorithm-targets.cmake")
+endif()
+
+check_required_components(fcpp_algorithm)
+
+
+
+
+
+
+
+

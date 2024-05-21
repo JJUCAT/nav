@@ -1,0 +1,10 @@
+<library path="lib/libdock_external_perception">
+    <class name="dock_external_perception/ExternalPerception"
+           type="dock_external_perception::ExternalPerception"
+           base_class_type="navit_auto_dock::plugins::ApproachDockPerception">
+           <description>
+               perception should be based on apriltag_ros package
+           </description>
+    </class>
+</library>
+

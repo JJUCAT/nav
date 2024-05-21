@@ -1,0 +1,9 @@
+<library path="lib/libslic3r_coverage_planner" >
+    <class name="slic3r/Slic3rCoveragePlanner"
+           type="slic3r_coverage_planner::Slic3rCoveragePlanner"
+           base_class_type="navit_core::CoveragePlanner">
+    <description> Slic3r Coverage Planner, based on Slic3r library </description>
+
+</class>
+</library>
+

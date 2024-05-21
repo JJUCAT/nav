@@ -1,0 +1,5 @@
+<library path="lib/libpath_follower">
+  <class name="control/ControllerPathFollow" type="control::ControllerPathFollow" base_class_type="navit_core::Controller">
+    <description>2D version of the Path Follow Controller</description>
+  </class>
+</library>

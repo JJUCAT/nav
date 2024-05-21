@@ -1,0 +1,28 @@
+<library path="lib/libdock_perception">
+    <class name="dock_perception/Perception" 
+        type="dock_perception::Perception" 
+        base_class_type="navit_auto_dock::plugins::ApproachDockPerception">
+        <description>
+                dock detector
+        </description>
+     </class>
+</library>
+
+<library path="lib/libdock_shapes">
+    <class name="dock_perception/DockShapeV" 
+        type="dock_perception::DockShapeV" 
+        base_class_type="dock_perception::DockShapeBase">
+        <description>
+                V shaped Dock ideal cloud 
+        </description>
+     </class>
+    
+     <class name="dock_perception/DockShapeMir" 
+        type="dock_perception::DockShapeMir" 
+        base_class_type="dock_perception::DockShapeBase">
+        <description>
+                V shaped Dock ideal cloud 
+        </description>
+     </class>
+
+</library>

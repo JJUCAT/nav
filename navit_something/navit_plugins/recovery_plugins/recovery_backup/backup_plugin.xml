@@ -1,0 +1,10 @@
+<library path="lib/librecovery_backup">
+
+    <class name="recovery_backup/RecoveryBackUp"
+        type="recovery_backup::RecoveryBackUp"
+        base_class_type="navit_core::Recovery">
+        <description> 
+            backup for a certain distance roughly
+        </description>
+    </class>
+</library>

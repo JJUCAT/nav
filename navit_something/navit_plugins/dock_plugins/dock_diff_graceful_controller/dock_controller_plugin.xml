@@ -1,0 +1,9 @@
+<library path="lib/libdock_diff_graceful_controller">
+    <class name="dock_diff_graceful_controller/Controller" 
+        type="dock_diff_graceful_controller::Controller" 
+        base_class_type="navit_auto_dock::plugins::ApproachDockController">
+        <description>
+                dock controller 
+        </description>
+     </class>
+</library>

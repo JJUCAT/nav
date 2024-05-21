@@ -1,0 +1,35 @@
+<?xml version="1.0"?>
+<package format="2">
+	<name>ipa_boustrophedon_explorator</name>
+	<version>0.1.2</version>
+	<description>
+		This package plans the navigation in a room such that the floor of this room gets inspected completely for dirt.
+	</description>
+	<author email="florian.jordan@ipa.fraunhofer.de">Florian Jordan</author>
+	<maintainer email="richard.bormann@ipa.fraunhofer.de">Richard Bormann</maintainer>
+	<license>LGPL for academic and non-commercial use; for commercial use, please contact Fraunhofer IPA</license>
+	<url>http://ros.org/wiki/ipa_boustrophedon_explorator</url>
+
+	<buildtool_depend>catkin</buildtool_depend>
+
+	<depend>boost</depend>
+	<depend>dynamic_reconfigure</depend>
+	<depend>eigen_conversions</depend>
+	<depend>geometry_msgs</depend>
+	<depend>libopencv-dev</depend>
+	<depend>nav_msgs</depend>
+	<depend>roscpp</depend>
+	<depend>roslib</depend>
+	<depend>std_msgs</depend>
+	<depend>navit_core</depend>
+	<depend>navit_utils</depend>
+	<depend>navit_msgs</depend>
+
+
+	<!-- The export tag contains other, unspecified, tags -->
+	<export>
+		<!-- Other tools can request additional information be placed here -->
+		<navit_core plugin="${prefix}/ipa_boustrophedon_explorator.xml" />
+	</export>
+
+</package>

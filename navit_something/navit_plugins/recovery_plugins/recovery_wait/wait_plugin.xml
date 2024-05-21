@@ -1,0 +1,9 @@
+<library path="lib/librecovery_wait">
+    <class name="recovery_wait/RecoveryWait"
+           type="recovery_wait::RecoveryWait"
+           base_class_type="navit_core::Recovery">
+           <description> wait plugin </description>
+
+   </class>
+
+</library>

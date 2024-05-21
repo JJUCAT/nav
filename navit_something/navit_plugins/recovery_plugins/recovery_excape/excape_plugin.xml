@@ -1,0 +1,9 @@
+<library path="lib/librecovery_excape">
+    <class name="recovery_excape/RecoveryExcape"
+        type="recovery_excape::RecoveryExcape"
+        base_class_type="navit_core::Recovery">
+        <description> 
+            excape from dilemma
+        </description>
+    </class>
+</library>

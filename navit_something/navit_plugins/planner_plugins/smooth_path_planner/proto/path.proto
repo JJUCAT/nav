@@ -1,0 +1,74 @@
+/*
+* @Author: czk
+* @Date:   2022-10-02 12:03:58
+* @Last Modified by:   chenzongkui
+* @Last Modified time: 2022-10-02 12:12:54
+*/
+
+syntax = "proto3";
+
+package proto;
+
+import "geometry.proto";
+
+message PathPoint {
+	// position of the path point in global frame in m
+  Vector3f position = 1;
+
+  // tangential direction on path in rad
+  float theta = 2;
+
+  // curvature of the path point in rad/m
+  float curvature = 3;
+
+  // longitudinal displacement along the center line in m
+  float s = 4;
+
+  // lateral displacement from the center line in m
+  float l = 5;
+
+  // first order derivative of lateral displacement
+  float dl = 6;
+
+  // second order derivative of lateral displacement
+  float ddl = 7;
+
+  // speed stamp on the path point in m/s
+  float speed = 8;
+
+  // acceleration on the path point in m/s^2
+  float acceleration = 9;
+
+  // speed limit on the path point in m/s
+  float speed_limit = 10;
+
+  // driving direction, true for forward driving, false for backward driving
+  bool forward_driving = 11;
+}
+
+message Path {
+  sfixed64 time_meas = 1;  // in us
+
+  enum Type {
+    INVALID = 0;
+    PATH_FOLLOW = 1;
+    ROTATION = 2;
+    AUTO_CHARGING = 3;
+    SMOOTH_STOP = 4;
+    EMERGENCY_STOP = 5;
+    INVALID_MAP = 6;
+    INVALID_NAV_PATH = 7;
+  }
+
+  Type type = 2;
+
+  repeated PathPoint path_points = 3;
+
+  Vector3d target_point = 4; // pose.x, pose.y, yaw
+
+  double target_s = 5; // distance between current pose to target pose
+
+  string label = 6; // path label of nav_points in task_map
+
+  string map_name = 7; // name of world_map
+}

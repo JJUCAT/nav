@@ -1,0 +1,23 @@
+<launch>
+
+    <arg name="output" default="screen"/>
+    <arg name="rviz" default="true"/>
+    <arg name="test" default="no_test"/>
+    <arg name="record" default="true"/>
+
+    <!--  ************** Global Parameters ***************  -->
+    <!--    <param name="/use_sim_time" value="true"/>-->
+
+    <node name="map_server" pkg="map_server" type="map_server"
+          args="$(find ipa_boustrophedon_explorator)/maps/yjh_test_3.png 0.05"/>
+
+    <node pkg="tf" type="static_transform_publisher" name="base_footprint_to_map_tf" output="screen"
+          args="0 0 0 0 0 0 map base_footprint 100"/>
+
+    <node pkg="ipa_voronoi_explorator" type="voronoi_explorator_test" name="voronoi_explorator_test"
+          output="$(arg output)">
+        <rosparam file="$(find ipa_voronoi_explorator)/test/voronoi_explorator_test.yaml"
+                  command="load"/>
+    </node>
+
+</launch>

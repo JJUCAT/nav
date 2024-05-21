@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<package format="3">
+  <name>fcpp_algorithm</name>
+  <version>1.0.0</version>
+  <description>full complete path planning core alghrithm</description>
+
+  <maintainer email="mayonghao@yijiahe.com">mayonghao</maintainer>
+
+  <!-- One license tag required, multiple allowed, one license per tag -->
+  <license>TODO</license>
+
+  <buildtool_depend condition="$ROS_VERSION == 1">catkin</buildtool_depend>
+  <build_depend condition="$ROS_VERSION == 1">cmake_modules</build_depend>
+
+  <build_depend>glog</build_depend>
+  <build_depend>libopencv-dev</build_depend>
+  <build_depend>libgmp-dev</build_depend>
+  <build_depend>libmpfr-dev</build_depend>
+  <!-- The export tag contains other, unspecified, tags -->
+  <export>
+    <build_type condition="$ROS_VERSION == 1">catkin</build_type>
+  </export>
+</package>

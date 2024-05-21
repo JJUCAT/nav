@@ -1,0 +1,16 @@
+/*
+* @Author: czk
+* @Date:   2022-10-02 12:03:58
+* @Last Modified by:   chenzongkui
+* @Last Modified time: 2022-10-02 12:12:54
+*/
+
+syntax = "proto3";
+
+package proto;
+
+// unix time
+message TimeStamp {
+  uint32 sec = 1;
+  uint32 nsec = 2;
+}

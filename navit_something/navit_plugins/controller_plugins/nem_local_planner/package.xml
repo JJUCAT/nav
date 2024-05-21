@@ -1,0 +1,40 @@
+<?xml version="1.0"?>
+<package format="2">
+    <name>nem_local_planner</name>
+    <version>1.17.1</version>
+    <description>
+        Local_planner based on behavior states and velocity adjustments
+    </description>
+    <maintainer email="dingzhiyu@yijiahe.com">dingzhiyu</maintainer>
+    <maintainer email="yangchuan@yijiahe.com">yangchuan</maintainer>
+    <maintainer email="xuemantian@yijiahe.com">yangchuan</maintainer>
+    <license>BSD</license>
+
+    <author>dingzhiyu</author>
+
+    <buildtool_depend>catkin</buildtool_depend>
+
+    <build_depend>angles</build_depend>
+    <build_depend>cmake_modules</build_depend>
+
+    <depend>tf2</depend>
+    <depend>eigen</depend>
+    <depend>roscpp</depend>
+    <depend>tf2_ros</depend>
+    <depend>navit_core</depend>
+    <depend>nav_msgs</depend>
+    <depend>pluginlib</depend>
+    <depend>navit_costmap</depend>
+    <depend>sensor_msgs</depend>
+    <depend>geometry_msgs</depend>
+    <depend>tf2_geometry_msgs</depend>
+    <depend>teb_local_planner</depend>
+    <depend>nem_global_planner</depend>
+    <depend>dynamic_reconfigure</depend>
+
+    <export>
+        <navit_core plugin="${prefix}/nem_local_planner_plugin.xml"/>
+    </export>
+
+</package>
+

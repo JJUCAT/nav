@@ -1,0 +1,5 @@
+<library path="lib/libdummy_controller">
+    <class name="dummy_controller/DummyController"
+           type="dummy_controller::DummyController"
+           base_class_type="navit_core::Controller" />
+</library>

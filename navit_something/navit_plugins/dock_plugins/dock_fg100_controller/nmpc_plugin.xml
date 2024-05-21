@@ -1,0 +1,10 @@
+<library path="lib/libdock_fg100_controller">
+    <class name="dock_fg100_controller/FgController"
+           type="dock_fg100_controller::FgController"
+           base_class_type="navit_auto_dock::plugins::ApproachDockController">
+           <description> 
+               use control_box_rst to do nmpc for fg100 robot docking
+           </description>
+    </class>
+</library>
+

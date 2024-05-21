@@ -1,0 +1,8 @@
+<library path="lib/libnem_local_planner">
+    <class name="nem_local_planner/NemLocalPlannerROS" type="nem_local_planner::NemLocalPlannerROS"
+           base_class_type="navit_core::Controller">
+        <description>
+            A implementation of a local planner based on behavior states and velocity adjustments
+        </description>
+    </class>
+</library>

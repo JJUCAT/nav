@@ -1,0 +1,10 @@
+<library path="lib/librecovery_spin">
+
+    <class name="recovery_spin/RecoverySpin"
+        type="recovery_spin::RecoverySpin"
+        base_class_type="navit_core::Recovery">
+        <description> 
+            rotate for a certain angular roughly
+        </description>
+    </class>
+</library>

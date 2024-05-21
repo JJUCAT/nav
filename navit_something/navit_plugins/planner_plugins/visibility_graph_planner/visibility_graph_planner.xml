@@ -1,0 +1,5 @@
+<library path="lib/libprm_planner">
+  <class name="navit_planner/PRM" type="navit_planner::PRM" base_class_type="navit_core::GlobalPlanner">
+    <description>a sampling-base plannerr</description>
+  </class>
+</library>

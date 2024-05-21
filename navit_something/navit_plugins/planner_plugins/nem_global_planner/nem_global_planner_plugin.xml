@@ -1,0 +1,8 @@
+<library path="lib/libnem_global_planner">
+    <class name="nem_global_planner/NemGlobalPlannerROS" type="nem_global_planner::NemGlobalPlannerROS"
+           base_class_type="navit_core::GlobalPlanner">
+        <description>
+            A implementation of a node+edge based planner using floyd
+        </description>
+    </class>
+</library>
