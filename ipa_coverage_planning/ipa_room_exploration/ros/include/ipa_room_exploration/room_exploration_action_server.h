@@ -122,6 +122,7 @@ protected:
 
 	ros::Publisher path_pub_; // a publisher sending the path as a nav_msgs::Path before executing
 	ros::Publisher poses_pub_, start_end_pub_;
+  ros::Publisher cells_pub_;
 
 	GridPointExplorator grid_point_planner; // object that uses the grid point method to plan a path trough a room
 	BoustrophedonExplorer boustrophedon_explorer_; // object that uses the boustrophedon exploration method to plan a path trough the room
@@ -282,6 +283,8 @@ protected:
 	ros::NodeHandle node_handle_;
 	actionlib::SimpleActionServer<ipa_building_msgs::RoomExplorationAction> room_exploration_server_;
 	dynamic_reconfigure::Server<ipa_room_exploration::RoomExplorationConfig> room_exploration_dynamic_reconfigure_server_;
+
+  void PubCells(const std::vector<geometry_msgs::Polygon>& cells);
 
 public:
 	enum PlanningMode {PLAN_FOR_FOOTPRINT=1, PLAN_FOR_FOV=2};

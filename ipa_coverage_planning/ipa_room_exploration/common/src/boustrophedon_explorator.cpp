@@ -1,3 +1,4 @@
+#include "geometry_msgs/Polygon.h"
 #include <ipa_room_exploration/boustrophedon_explorator.h>
 
 //#define DEBUG_VISUALIZATION
@@ -44,7 +45,7 @@ BoustrophedonExplorer::BoustrophedonExplorer()
 //		middlepoint s.t. the distance to the last robot position is minimized. If this is not wanted one has to set the
 //		corresponding Boolean to false (shows that the path planning should be done for the robot footprint).
 // room_map = expects to receive the original, not inflated room map
-void BoustrophedonExplorer::getExplorationPath(const cv::Mat& room_map, std::vector<geometry_msgs::Pose2D>& path,
+void BoustrophedonExplorer::getExplorationPath(const cv::Mat& room_map, std::vector<geometry_msgs::Pose2D>& path, std::vector<geometry_msgs::Polygon>& cells,
 		const float map_resolution, const cv::Point starting_position, const cv::Point2d map_origin,
 		const double grid_spacing_in_pixel, const double grid_obstacle_offset, const double path_eps, const int cell_visiting_order,
 		const bool plan_for_footprint, const Eigen::Matrix<float, 2, 1> robot_to_fov_vector, const double min_cell_area, const int max_deviation_from_track)
@@ -61,6 +62,7 @@ void BoustrophedonExplorer::getExplorationPath(const cv::Mat& room_map, std::vec
 	cv::Rect bbox;
 	cv::Mat rotated_room_map;
 	std::vector<GeneralizedPolygon> cell_polygons;
+  std::vector<std::vector<cv::Point>> polygons; // 单元区域
 	std::vector<cv::Point> polygon_centers;
 	computeCellDecompositionWithRotation(room_map, map_resolution, min_cell_area, min_cell_width, 0., R, bbox, rotated_room_map, cell_polygons, polygon_centers);
 	// does not work so well: findBestCellDecomposition(room_map, map_resolution, min_cell_area, R, bbox, rotated_room_map, cell_polygons, polygon_centers);
@@ -124,6 +126,7 @@ void BoustrophedonExplorer::getExplorationPath(const cv::Mat& room_map, std::vec
 	std::vector<cv::Point2f> fov_middlepoint_path;	// this is the trajectory of centers of the robot footprint or the field of view
 	for(size_t cell=0; cell<cell_polygons.size(); ++cell)
 	{
+    polygons.push_back(cell_polygons[optimal_order[cell]].getVertices());
 		computeBoustrophedonPath(rotated_room_map, map_resolution, cell_polygons[optimal_order[cell]], fov_middlepoint_path,
 				robot_pos, grid_spacing_as_int, half_grid_spacing_as_int, path_eps, max_deviation_from_track, grid_obstacle_offset/map_resolution);
 	}
@@ -132,6 +135,24 @@ void BoustrophedonExplorer::getExplorationPath(const cv::Mat& room_map, std::vec
 	RoomRotator room_rotation;
 	std::vector<geometry_msgs::Pose2D> fov_poses;	// this is the trajectory of poses of the robot footprint or the field of view, in [pixels]
 	room_rotation.transformPathBackToOriginalRotation(fov_middlepoint_path, fov_poses, R);
+
+  // 转换单元区域
+  for (auto ploygon : polygons) {
+    std::vector<cv::Point2f> polygon2f;
+    for (auto p : ploygon) polygon2f.push_back(cv::Point2f(p.x, p.y));
+
+    std::vector<geometry_msgs::Pose2D> poses;
+    room_rotation.transformPathBackToOriginalRotation(polygon2f, poses, R);
+    
+    geometry_msgs::Polygon plgn;
+    geometry_msgs::Point32 p32;
+    for (auto p : poses) {
+      p32.x = p.x, p32.y = p.y;
+      plgn.points.push_back(p32);
+    }
+    cells.push_back(plgn);
+  }
+
 #ifdef DEBUG_VISUALIZATION
 	std::cout << "printing path" << std::endl;
 	cv::Mat room_map_path = room_map.clone();
