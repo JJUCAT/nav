@@ -53,7 +53,7 @@ Visualization Manager:
       Buffer Length: 1
       Class: rviz/Path
       Color: 25; 255; 0
-      Enabled: false
+      Enabled: true
       Head Diameter: 0.30000001192092896
       Head Length: 0.20000000298023224
       Length: 0.30000001192092896
@@ -72,14 +72,14 @@ Visualization Manager:
       Shaft Length: 0.10000000149011612
       Topic: /room_exploration/room_exploration_server/coverage_path
       Unreliable: false
-      Value: false
+      Value: true
     - Alpha: 1
       Arrow Length: 0.5
       Axes Length: 0.30000001192092896
       Axes Radius: 0.009999999776482582
       Class: rviz/PoseArray
       Color: 255; 25; 0
-      Enabled: false
+      Enabled: true
       Head Length: 0.07000000029802322
       Head Radius: 0.029999999329447746
       Name: ccpp_poses
@@ -89,14 +89,14 @@ Visualization Manager:
       Shape: Arrow (Flat)
       Topic: /room_exploration/room_exploration_server/coverage_poses
       Unreliable: false
-      Value: false
+      Value: true
     - Alpha: 1
       Arrow Length: 1
       Axes Length: 0.30000001192092896
       Axes Radius: 0.009999999776482582
       Class: rviz/PoseArray
       Color: 114; 159; 207
-      Enabled: false
+      Enabled: true
       Head Length: 0.30000001192092896
       Head Radius: 0.10000000149011612
       Name: ccpp_start_end
@@ -106,7 +106,7 @@ Visualization Manager:
       Shape: Arrow (3D)
       Topic: /room_exploration/room_exploration_server/coverage_start_end
       Unreliable: false
-      Value: false
+      Value: true
     - Alpha: 0.699999988079071
       Class: rviz/Map
       Color Scheme: map
@@ -140,7 +140,7 @@ Visualization Manager:
       Marker Topic: /room_exploration/room_exploration_server/cell_centers
       Name: cell_centers
       Namespaces:
-        {}
+        center: true
       Queue Size: 100
       Value: true
   Enabled: true

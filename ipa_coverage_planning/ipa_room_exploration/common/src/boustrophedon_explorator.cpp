@@ -51,9 +51,9 @@ void BoustrophedonExplorer::getExplorationPath(const cv::Mat& room_map, std::vec
 		const bool plan_for_footprint, const Eigen::Matrix<float, 2, 1> robot_to_fov_vector, const double min_cell_area, const int max_deviation_from_track)
 {
 	ROS_INFO("Planning the boustrophedon path trough the room.");
-	const int grid_spacing_as_int = (int)std::floor(grid_spacing_in_pixel); // convert fov-radius to int
-	const int half_grid_spacing_as_int = (int)std::floor(0.5*grid_spacing_in_pixel); // convert fov-radius to int
-	const int min_cell_width = half_grid_spacing_as_int + 2.*grid_obstacle_offset/map_resolution;
+	const int grid_spacing_as_int = (int)std::floor(grid_spacing_in_pixel); // convert fov-radius to int 机器覆盖栅格大小，单位像素
+	const int half_grid_spacing_as_int = (int)std::floor(0.5*grid_spacing_in_pixel); // convert fov-radius to int 半个机器覆盖栅格大小
+	const int min_cell_width = half_grid_spacing_as_int + 2.*grid_obstacle_offset/map_resolution; // 为什么
 
 	// *********************** I. Find the main directions of the map and rotate it in this manner. ***********************
 	// *********************** II. Sweep a slice trough the map and mark the found cell boundaries. ***********************

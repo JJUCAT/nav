@@ -354,7 +354,7 @@ void RoomExplorationServer::exploreRoom(const ipa_building_msgs::RoomExploration
 	int area_px = 0;		// room area in pixels
 	for (int v=0; v<room_map.rows; ++v)
 		for (int u=0; u<room_map.cols; ++u)
-			if (room_map.at<uchar>(v,u) >= 250)
+			if (room_map.at<uchar>(v,u) >= 250) // 大于该值认为是自由空间
 				area_px++;
 	std::cout << "### room area = " << area_px*map_resolution*map_resolution << " m^2" << std::endl;
 
@@ -389,6 +389,7 @@ void RoomExplorationServer::exploreRoom(const ipa_building_msgs::RoomExploration
 	}
 
 	// get the grid size, to check the areas that should be revisited later
+  // 计算机器的覆盖栅格大小，单位是米
 	double grid_spacing_in_meter = 0.0;		// is the square grid cell side length that fits into the circle with the robot's coverage radius or fov coverage radius
 	float fitting_circle_radius_in_meter = 0;
 	Eigen::Matrix<float, 2, 1> fitting_circle_center_point_in_meter;	// this is also considered the center of the field of view, because around this point the maximum radius incircle can be found that is still inside the fov
@@ -408,6 +409,7 @@ void RoomExplorationServer::exploreRoom(const ipa_building_msgs::RoomExploration
 		grid_spacing_in_meter = goal->coverage_radius*std::sqrt(2);
 	}
 	// map the grid size to an int in pixel coordinates, using floor method
+  // 机器的覆盖栅格，单位是地图图片像素
 	const double grid_spacing_in_pixel = grid_spacing_in_meter/map_resolution;		// is the square grid cell side length that fits into the circle with the robot's coverage radius or fov coverage radius, multiply with sqrt(2) to receive the whole working width
   std::cout << "coverage radius: " << goal->coverage_radius << " m" << std::endl;
 	std::cout << "grid size: " << grid_spacing_in_meter << " m   (" << grid_spacing_in_pixel << " px)" << std::endl;

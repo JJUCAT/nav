@@ -21,7 +21,7 @@ display_trajectory: false
 # if the map_correction_closing_neighborhood_size parameter is larger than 0.
 # The parameter then specifies the iterations (or neighborhood size) of that closing operation.
 # int
-map_correction_closing_neighborhood_size: 4
+map_correction_closing_neighborhood_size: 2
 
 
 # parameters specific to the navigation of the robot along the computed coverage trajectory
