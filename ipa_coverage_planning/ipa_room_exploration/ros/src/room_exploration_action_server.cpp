@@ -202,6 +202,7 @@ RoomExplorationServer::RoomExplorationServer(ros::NodeHandle nh, std::string nam
 	poses_pub_ = node_handle_.advertise<geometry_msgs::PoseArray>("coverage_poses", 1);
   start_end_pub_ = node_handle_.advertise<geometry_msgs::PoseArray>("coverage_start_end", 1);
   cells_pub_ = node_handle_.advertise<visualization_msgs::MarkerArray>("cells_polygon", 1);
+  centers_pub_ = node_handle_.advertise<visualization_msgs::MarkerArray>("cell_centers", 1);
 	//Start action server
 	room_exploration_server_.start();
 
@@ -420,7 +421,8 @@ void RoomExplorationServer::exploreRoom(const ipa_building_msgs::RoomExploration
 	Eigen::Matrix<float, 2, 1> zero_vector;
 	zero_vector << 0, 0;
 	std::vector<geometry_msgs::Pose2D> exploration_path;
-  std::vector<geometry_msgs::Polygon> cells;
+  std::vector<geometry_msgs::Polygon> cells; // 牛耕法单元区域
+  std::vector<geometry_msgs::Pose2D> cell_centers; // 牛耕法单元中心
 	if (room_exploration_algorithm_ == 1) // use grid point explorator
 	{
 		// plan path
@@ -433,9 +435,9 @@ void RoomExplorationServer::exploreRoom(const ipa_building_msgs::RoomExploration
 	{
 		// plan path
 		if(planning_mode_ == PLAN_FOR_FOV)
-			boustrophedon_explorer_.getExplorationPath(room_map, exploration_path, cells, map_resolution, starting_position, map_origin, grid_spacing_in_pixel, grid_obstacle_offset_, path_eps_, cell_visiting_order_, false, fitting_circle_center_point_in_meter, min_cell_area_, max_deviation_from_track_);
+			boustrophedon_explorer_.getExplorationPath(room_map, exploration_path, cells, cell_centers, map_resolution, starting_position, map_origin, grid_spacing_in_pixel, grid_obstacle_offset_, path_eps_, cell_visiting_order_, false, fitting_circle_center_point_in_meter, min_cell_area_, max_deviation_from_track_);
 		else
-			boustrophedon_explorer_.getExplorationPath(room_map, exploration_path, cells, map_resolution, starting_position, map_origin, grid_spacing_in_pixel, grid_obstacle_offset_, path_eps_, cell_visiting_order_, true, zero_vector, min_cell_area_, max_deviation_from_track_);
+			boustrophedon_explorer_.getExplorationPath(room_map, exploration_path, cells, cell_centers, map_resolution, starting_position, map_origin, grid_spacing_in_pixel, grid_obstacle_offset_, path_eps_, cell_visiting_order_, true, zero_vector, min_cell_area_, max_deviation_from_track_);
 	}
 	else if (room_exploration_algorithm_ == 3) // use neural network explorator
 	{
@@ -560,9 +562,9 @@ void RoomExplorationServer::exploreRoom(const ipa_building_msgs::RoomExploration
 	{
 		// plan path
 		if(planning_mode_ == PLAN_FOR_FOV)
-			boustrophedon_variant_explorer_.getExplorationPath(room_map, exploration_path, cells, map_resolution, starting_position, map_origin, grid_spacing_in_pixel, grid_obstacle_offset_, path_eps_, cell_visiting_order_, false, fitting_circle_center_point_in_meter, min_cell_area_, max_deviation_from_track_);
+			boustrophedon_variant_explorer_.getExplorationPath(room_map, exploration_path, cells, cell_centers, map_resolution, starting_position, map_origin, grid_spacing_in_pixel, grid_obstacle_offset_, path_eps_, cell_visiting_order_, false, fitting_circle_center_point_in_meter, min_cell_area_, max_deviation_from_track_);
 		else
-			boustrophedon_variant_explorer_.getExplorationPath(room_map, exploration_path, cells, map_resolution, starting_position, map_origin, grid_spacing_in_pixel, grid_obstacle_offset_, path_eps_, cell_visiting_order_, true, zero_vector, min_cell_area_, max_deviation_from_track_);
+			boustrophedon_variant_explorer_.getExplorationPath(room_map, exploration_path, cells, cell_centers, map_resolution, starting_position, map_origin, grid_spacing_in_pixel, grid_obstacle_offset_, path_eps_, cell_visiting_order_, true, zero_vector, min_cell_area_, max_deviation_from_track_);
 	}
 
 	// display finally planned path
@@ -660,7 +662,10 @@ void RoomExplorationServer::exploreRoom(const ipa_building_msgs::RoomExploration
     start_end_pub_.publish(pa);
 
     // 牛耕法显示单元分区
-    if (room_exploration_algorithm_ == 8) PubCells(cells);
+    if (room_exploration_algorithm_ == 8 || room_exploration_algorithm_ == 2) {
+      PubCells(cells);
+      PubCellCenters(cell_centers);
+    }
 	}
 
 	// ***************** III. Navigate trough all points and save the robot poses to check what regions have been seen *****************
@@ -679,31 +684,71 @@ void RoomExplorationServer::exploreRoom(const ipa_building_msgs::RoomExploration
 
 void RoomExplorationServer::PubCells(const std::vector<geometry_msgs::Polygon>& cells)
 {
+  // rgb 红->绿->蓝 颜色渐变
+  auto GetRGB=[](const float total, const float piece, float& r, float& g, float& b) {
+    double pose = piece / total;
+    if (pose < 0.5) { r = 1-2*pose; g = 2*pose; b = 0.0; }
+    else { r= 0.0; g = 1-2*pose; b = 2*pose; }
+  };
+
   visualization_msgs::MarkerArray marker_array;
   visualization_msgs::Marker marker;
   marker.header.frame_id = "map";
   marker.header.stamp = ros::Time::now();
-  marker.ns = "polygon";
+  marker.ns = "cell";
   marker.id = 0;
   marker.type = visualization_msgs::Marker::LINE_STRIP;
   marker.action = visualization_msgs::Marker::ADD;
   marker.pose.orientation.w = 1.0;
-  marker.scale.x = 0.1;
-  marker.color.r = 1.0;
+  marker.scale.x = 0.05;
   marker.color.a = 1.0;
-  
-  for (auto cell : cells) {
+
+  for (int c=0; c < cells.size(); c ++) {
     marker.points.clear();
-    for(int i = 0; i < cell.points.size(); i++) {
+    for(int i = 0; i < cells[c].points.size(); i++) {
       geometry_msgs::Point p;
-      p.x = cell.points[i].x;
-      p.y = cell.points[i].y;
+      p.x = cells[c].points[i].x;
+      p.y = cells[c].points[i].y;
       p.z = 0.0;
+      GetRGB(float(cells.size()-1),float(c),marker.color.r,marker.color.g, marker.color.b);
       marker.points.push_back(p);
     }
     marker_array.markers.push_back(marker);
+    marker.id ++;
   }
   cells_pub_.publish(marker_array);
+}
+
+void RoomExplorationServer::PubCellCenters(const std::vector<geometry_msgs::Pose2D>& centers)
+{
+  // rgb 红->绿->蓝 颜色渐变
+  auto GetRGB=[](const float total, const float piece, float& r, float& g, float& b) {
+    double pose = piece / total;
+    if (pose < 0.5) { r = 1-2*pose; g = 2*pose; b = 0.0; }
+    else { r= 0.0; g = 1-2*pose; b = 2*pose; }
+  };
+
+  visualization_msgs::MarkerArray marker_array;
+  visualization_msgs::Marker marker;
+  marker.header.frame_id = "map";
+  marker.header.stamp = ros::Time::now();
+  marker.ns = "center";
+  marker.id = 0;
+  marker.type = visualization_msgs::Marker::TEXT_VIEW_FACING;
+  marker.action = visualization_msgs::Marker::ADD;
+  marker.pose.orientation.w = 1.0;
+  marker.scale.z = 0.9;
+  marker.color.a = 1.0;
+
+  for (int c=0; c < centers.size(); c ++) {
+    marker.pose.position.x = centers[c].x;
+    marker.pose.position.y = centers[c].y;
+    marker.text=std::to_string(c);
+    GetRGB(float(centers.size()-1),float(c),marker.color.r,marker.color.g, marker.color.b);
+    marker_array.markers.push_back(marker);
+    marker.id ++;
+  }
+  centers_pub_.publish(marker_array);
 }
 
 	// remove unconnected, i.e. inaccessible, parts of the room (i.e. obstructed by furniture), only keep the room with the largest area

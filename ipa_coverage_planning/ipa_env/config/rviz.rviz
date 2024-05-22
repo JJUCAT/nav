@@ -53,7 +53,7 @@ Visualization Manager:
       Buffer Length: 1
       Class: rviz/Path
       Color: 25; 255; 0
-      Enabled: true
+      Enabled: false
       Head Diameter: 0.30000001192092896
       Head Length: 0.20000000298023224
       Length: 0.30000001192092896
@@ -72,14 +72,14 @@ Visualization Manager:
       Shaft Length: 0.10000000149011612
       Topic: /room_exploration/room_exploration_server/coverage_path
       Unreliable: false
-      Value: true
+      Value: false
     - Alpha: 1
       Arrow Length: 0.5
       Axes Length: 0.30000001192092896
       Axes Radius: 0.009999999776482582
       Class: rviz/PoseArray
       Color: 255; 25; 0
-      Enabled: true
+      Enabled: false
       Head Length: 0.07000000029802322
       Head Radius: 0.029999999329447746
       Name: ccpp_poses
@@ -89,14 +89,14 @@ Visualization Manager:
       Shape: Arrow (Flat)
       Topic: /room_exploration/room_exploration_server/coverage_poses
       Unreliable: false
-      Value: true
+      Value: false
     - Alpha: 1
       Arrow Length: 1
       Axes Length: 0.30000001192092896
       Axes Radius: 0.009999999776482582
       Class: rviz/PoseArray
       Color: 114; 159; 207
-      Enabled: true
+      Enabled: false
       Head Length: 0.30000001192092896
       Head Radius: 0.10000000149011612
       Name: ccpp_start_end
@@ -106,7 +106,7 @@ Visualization Manager:
       Shape: Arrow (3D)
       Topic: /room_exploration/room_exploration_server/coverage_start_end
       Unreliable: false
-      Value: true
+      Value: false
     - Alpha: 0.699999988079071
       Class: rviz/Map
       Color Scheme: map
@@ -131,6 +131,14 @@ Visualization Manager:
       Enabled: true
       Marker Topic: /room_exploration/room_exploration_server/cells_polygon
       Name: cells
+      Namespaces:
+        cell: true
+      Queue Size: 100
+      Value: true
+    - Class: rviz/MarkerArray
+      Enabled: true
+      Marker Topic: /room_exploration/room_exploration_server/cell_centers
+      Name: cell_centers
       Namespaces:
         {}
       Queue Size: 100
@@ -181,7 +189,7 @@ Visualization Manager:
       Near Clip Distance: 0.009999999776482582
       Pitch: 1.5697963237762451
       Target Frame: <Fixed Frame>
-      Yaw: 1.5703964233398438
+      Yaw: 1.5953963994979858
     Saved: ~
 Window Geometry:
   Displays:
