@@ -256,6 +256,7 @@ public:
 	// half_grid_spacing = the rounded half distance between two grid cell centers (the user shall define how it is rounded), in [pixels]
 	// grid_spacing_horizontal = this value allows to specify the horizontal basic distance between two grid cell centers, it can be set to grid_spacing if the basic horizontal spacing shall be identical to the vertical spacing, in [pixels]
 	// max_deviation_from_track = maximal allowed shift off the track to both sides for avoiding obstacles on track, setting max_deviation_from_track=grid_spacing is usually a good choice, for negative values max_deviation_from_track is set to grid_spacing, in [pixels]
+  // 
 	static void generateBoustrophedonGrid(const cv::Mat& room_map, cv::Mat& inflated_room_map, const int map_inflation_radius,
 			BoustrophedonGrid& grid_points, const cv::Vec4i& min_max_map_coordinates, const int grid_spacing, const int half_grid_spacing,
 			const int grid_spacing_horizontal, int max_deviation_from_track = -1)
@@ -326,7 +327,7 @@ public:
 				//      d) but some point below and above are --> valid points are added to upper_line and lower_line, respectively
 
 				// 1. check accessibility on regular location
-				if (inflated_room_map.at<uchar>(y,x)==255)
+				if (inflated_room_map.at<uchar>(y,x)==255) // 自由空间
 				{
 					if (squaredPointDistance(last_added_grid_point_above,cv::Point(x,y))>=squared_grid_spacing_horizontal)
 					{

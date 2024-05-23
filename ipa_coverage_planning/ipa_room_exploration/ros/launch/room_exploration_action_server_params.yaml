@@ -118,7 +118,7 @@ path_eps: 6.0 # 路径点间距，单位是 pixel
 # more than the standard half_grid_size from obstacles
 # [m]
 # double
-grid_obstacle_offset: 0.251     #0.101        #0.251 # TODO@LMR
+grid_obstacle_offset: 0.251     #0.101        #0.251 # 类似障碍物膨胀，增加安全距离。至少是机器半径-半个覆盖栅格，否则路径可能不安全。
 
 # maximal allowed shift off the ideal boustrophedon track to both sides for
 # avoiding obstacles on track
@@ -135,7 +135,7 @@ max_deviation_from_track: 0 # 遇到障碍物，覆盖路径区域的最大偏�
 #   2 = alternative ordering from left to right (measured on y-coordinates of the cells),
 #   visits the cells in a more obvious fashion to the human observer (though it is not optimal)
 # int
-cell_visiting_order: 2
+cell_visiting_order: 1
 
 # parameters specific for the neural network explorator, see "A Neural Network Approach to
 # Complete Coverage Path Planning" from Simon X. Yang and Chaomin Luo

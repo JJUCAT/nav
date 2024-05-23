@@ -132,7 +132,7 @@ Visualization Manager:
       Marker Topic: /room_exploration/room_exploration_server/cells_polygon
       Name: cells
       Namespaces:
-        cell: true
+        {}
       Queue Size: 100
       Value: true
     - Class: rviz/MarkerArray
@@ -140,7 +140,7 @@ Visualization Manager:
       Marker Topic: /room_exploration/room_exploration_server/cell_centers
       Name: cell_centers
       Namespaces:
-        center: true
+        {}
       Queue Size: 100
       Value: true
   Enabled: true
