@@ -398,8 +398,10 @@ void RoomExplorationServer::exploreRoom(const ipa_building_msgs::RoomExploration
 	if(planning_mode_ == PLAN_FOR_FOV) // read out the given fov-vectors, if needed
 	{
 		// Get the size of one grid cell s.t. the grid can be completely covered by the field of view (fov) from all rotations around it.
-		for(int i = 0; i < 4; ++i)
-			fov_corners_meter[i] << goal->field_of_view[i].x, goal->field_of_view[i].y;
+		for(int i = 0; i < 4; ++i) {
+      std::cout << "field view [" << i << "],[" << goal->field_of_view[i].x << "," <<goal->field_of_view[i].y << "]" << std::endl;
+      fov_corners_meter[i] << goal->field_of_view[i].x, goal->field_of_view[i].y;
+    }
 		computeFOVCenterAndRadius(fov_corners_meter, fitting_circle_radius_in_meter, fitting_circle_center_point_in_meter, fov_resolution);
 		// get the edge length of the grid square that fits into the fitting_circle_radius
 		grid_spacing_in_meter = fitting_circle_radius_in_meter*std::sqrt(2);

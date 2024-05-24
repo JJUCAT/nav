@@ -8,7 +8,7 @@
 # 7 = voronoi explorator # voronoi 覆盖
 # 8 = boustrophedon variant explorator # 牛耕法变种
 # int
-room_exploration_algorithm: 2 # 探索/覆盖算法
+room_exploration_algorithm: 3 # 探索/覆盖算法
 
 # display final trajectory plan step by step
 # bool
@@ -167,11 +167,11 @@ delta_theta_weight: 0.15
 # (this parameter is only relevant to the algorithms #4 = convexSPP explorator, #5 = flowNetwork explorator,
 #  the other methods utilize the computed optimal maximum grid size)
 # int
-cell_size: 0       #4      #7
+cell_size: 7       #4      #7
 
 # angular sampling step when creating possible sensing poses, in [rad]
 # double
-delta_theta: 0.78539816339      #1.570796
+delta_theta: 1.570796  #0.78539816339    #1.570796
 
 # parameters specific for the flowNetwork explorator
 # ==================================================
