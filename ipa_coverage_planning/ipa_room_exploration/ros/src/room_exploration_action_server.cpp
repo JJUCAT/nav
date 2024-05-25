@@ -377,7 +377,6 @@ void RoomExplorationServer::exploreRoom(const ipa_building_msgs::RoomExploration
     cv::imshow("dilate operation", room_map);
     cv::waitKey();
   }
-
 	// remove unconnected, i.e. inaccessible, parts of the room (i.e. obstructed by furniture), only keep the room with the largest area
 	const bool room_not_empty = removeUnconnectedRoomParts(room_map);
 	if (room_not_empty == false)
@@ -387,7 +386,6 @@ void RoomExplorationServer::exploreRoom(const ipa_building_msgs::RoomExploration
 		room_exploration_server_.setAborted(action_result);
 		return;
 	}
-
 	// get the grid size, to check the areas that should be revisited later
   // 计算机器的覆盖栅格大小，单位是米
 	double grid_spacing_in_meter = 0.0;		// is the square grid cell side length that fits into the circle with the robot's coverage radius or fov coverage radius
