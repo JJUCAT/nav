@@ -118,6 +118,13 @@ void BoustrophedonExplorer::getExplorationPath(const cv::Mat& room_map, std::vec
 		return;
 	}
 
+  if (0) {
+    std::cout << "exploration show before boustrophedon map" << std::endl;
+    cv::namedWindow("before map", cv::WINDOW_NORMAL);
+    cv::resizeWindow("before map", 1400, 1000);
+    cv::imshow("before map", rotated_room_map);
+    cv::waitKey();
+  }
 	// go trough the cells [in optimal visiting order] and determine the boustrophedon paths
 	ROS_INFO("Starting to get the paths for each cell, number of cells: %d", (int)cell_polygons.size());
 	std::cout << "Boustrophedon grid_spacing_as_int=" << grid_spacing_as_int << std::endl;
@@ -271,7 +278,13 @@ void BoustrophedonExplorer::computeCellDecompositionWithRotation(const cv::Mat& 
 	RoomRotator room_rotation;
 	room_rotation.computeRoomRotationMatrix(room_map, R, bbox, map_resolution, 0, rotation_offset);
 	room_rotation.rotateRoom(room_map, rotated_room_map, R, bbox);
-
+  if (0) {
+    std::cout << "exploration show rotate map" << std::endl;
+    cv::namedWindow("rotate", cv::WINDOW_NORMAL);
+    cv::resizeWindow("rotate", 1400, 1000);
+    cv::imshow("rotate", rotated_room_map);
+    cv::waitKey();
+  }
 #ifdef DEBUG_VISUALIZATION
 //	// testing
 //	cv::Mat room_map_disp = room_map.clone();
@@ -747,8 +760,28 @@ void BoustrophedonExplorer::computeBoustrophedonPath(const cv::Mat& room_map, co
 	// get a map that has only the current cell drawn in
 	//	Remark:	single cells are obstacle free so it is sufficient to use the cell to check if a position can be reached during the
 	//			execution of the coverage path
+  if (0) {
+    cv::Mat cell_map_polygon;
+    cell.drawPolygon(cell_map_polygon);
+    // 显示单元区域地图的轮廓
+    std::cout << "exploration show cell polygon" << std::endl;
+    cv::namedWindow("cell polygon", cv::WINDOW_NORMAL);
+    cv::resizeWindow("cell polygon", 1400, 1000);
+    cv::imshow("cell polygon", cell_map_polygon);
+    cv::waitKey();
+  }
+
 	cv::Mat cell_map;
 	cell.drawPolygon(cell_map, cv::Scalar(255));
+  if (0) {
+    // 显示单元区域地图
+    cv::Mat rotated_cell_map_disp = cell_map.clone();
+    std::cout << "exploration show cell map" << std::endl;
+    cv::namedWindow("cell map", cv::WINDOW_NORMAL);
+    cv::resizeWindow("cell map", 1400, 1000);
+    cv::imshow("cell map", rotated_cell_map_disp);
+    cv::waitKey();
+  }
 
 	// align the longer dimension of the cell horizontally with the x-axis
 	cv::Point cell_center = cell.getBoundingBoxCenter();
@@ -763,6 +796,16 @@ void BoustrophedonExplorer::computeBoustrophedonPath(const cv::Mat& room_map, co
 	//  --> used later for checking accessibility of Boustrophedon path inside the cell
 	cv::Mat inflated_room_map, rotated_inflated_room_map;
 	cv::erode(room_map, inflated_room_map, cv::Mat(), cv::Point(-1, -1), half_grid_spacing_as_int+grid_obstacle_offset);
+  if (0) {
+    // 显示单元区域膨胀地图
+    cv::Mat rotated_cell_map_disp = inflated_room_map.clone();
+    std::cout << "exploration show inflated cell map" << std::endl;
+    cv::namedWindow("inflated cell map", cv::WINDOW_NORMAL);
+    cv::resizeWindow("inflated cell map", 1400, 1000);
+    cv::imshow("inflated cell map", rotated_cell_map_disp);
+    cv::waitKey();
+  }
+
 	cell_rotation.rotateRoom(inflated_room_map, rotated_inflated_room_map, R_cell, cell_bbox);
 	cv::Mat rotated_inflated_cell_map = rotated_cell_map.clone();
 	for (int v=0; v<rotated_inflated_cell_map.rows; ++v)

@@ -8,7 +8,7 @@
 # 7 = voronoi explorator # voronoi 覆盖
 # 8 = boustrophedon variant explorator # 牛耕法变种
 # int
-room_exploration_algorithm: 3 # 探索/覆盖算法
+room_exploration_algorithm: 2 # 探索/覆盖算法
 
 # display final trajectory plan step by step
 # bool
@@ -135,7 +135,7 @@ max_deviation_from_track: 0 # 遇到障碍物，覆盖路径区域的最大偏�
 #   2 = alternative ordering from left to right (measured on y-coordinates of the cells),
 #   visits the cells in a more obvious fashion to the human observer (though it is not optimal)
 # int
-cell_visiting_order: 1
+cell_visiting_order: 2
 
 # parameters specific for the neural network explorator, see "A Neural Network Approach to
 # Complete Coverage Path Planning" from Simon X. Yang and Chaomin Luo

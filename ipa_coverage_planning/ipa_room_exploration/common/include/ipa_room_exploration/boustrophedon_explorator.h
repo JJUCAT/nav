@@ -198,6 +198,20 @@ public:
 		image = black_image.clone();
 	}
 
+	void drawPolygon(cv::Mat& image) const
+	{
+		auto color = cv::Scalar(255);
+		cv::Mat black_image = cv::Mat(max_y_+10, max_x_+10, CV_8UC1, cv::Scalar(0));
+#if CV_MAJOR_VERSION<=3
+		cv::drawContours(black_image, std::vector<std::vector<cv::Point> >(1,vertices_), -1, color);
+#else
+		cv::drawContours(black_image, std::vector<std::vector<cv::Point> >(1,vertices_), -1, color);
+#endif
+
+		// assign drawn map
+		image = black_image.clone();
+	}
+
 	void getMinMaxCoordinates(int& min_x, int& max_x, int& min_y, int& max_y)
 	{
 		min_x = min_x_;
