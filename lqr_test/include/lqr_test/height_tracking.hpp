@@ -1,28 +1,73 @@
 #ifndef HEIGHT_TRACKING_HPP_
 #define HEIGHT_TRACKING_HPP_
 
+#include "geometry_msgs/PoseStamped.h"
 #include <random>
 #include <ros/ros.h>
-
+#include <nav_msgs/Path.h>
 
 namespace lqr_test {
 
 class Height_tracker
 {
  public:
-  Height_tracker() {
+  Height_tracker(ros::NodeHandle* n) {
     std::random_device rd;
     std::mt19937 gen(rd());
     std::uniform_real_distribution<double> dist(0.0, 10.0);
     height_ = dist(gen);
+    ROS_INFO("height init %f", height_);
 
     std::uniform_real_distribution<double> dist0(0.0, 5.0);
     tracker_ = dist0(gen);
+    ROS_INFO("tracker init %f", tracker_);
 
     P_ = Q_;
+
+    height_pub_ = n->advertise<nav_msgs::Path>("height", 1);
+    tracker_pub_ = n->advertise<nav_msgs::Path>("tracker", 1);
+    height_path_.header.frame_id = "map";
+    tracker_path_.header = height_path_.header;
   };
 
-  // 更新目标高度
+
+  /**
+   * @brief  测试 LQR 跟随
+   * @param  dt  控制时间
+   * @return double 
+   */
+  bool Run(const double dt, const double err) {
+    UpdateHeight(1.0);
+    double u = GetTrackerU(100, dt);
+    UpdateTracker(dt, u);
+    UpdateConsume(dt, u);
+    ROS_INFO("J : %.3f", J_);
+    timestamp_ += dt;
+
+    geometry_msgs::PoseStamped ps;
+    ps.header = height_path_.header;
+    ps.pose.position.y = timestamp_;
+    ps.pose.position.x = height_;
+    ps.pose.position.z = 0;
+    height_path_.poses.push_back(ps);
+    ps.pose.position.x = tracker_;
+    tracker_path_.poses.push_back(ps);
+    height_pub_.publish(height_path_);
+    tracker_pub_.publish(tracker_path_);
+
+    // if (fabs(tracker_ - height_) < err) {
+    //   ROS_ERROR("tracker finished !");
+    //   return true;
+    // }
+    return false;
+  };
+
+
+  /**
+   * @brief  更新目标高度，[m]
+   * @param  step 更新的高度步进范围,[m]
+   * @return double 
+   */
   double UpdateHeight(const double step=0.5) {
     std::random_device rd;
     std::mt19937 gen(rd());
@@ -32,37 +77,68 @@ class Height_tracker
     return height_;
   };
 
+
   /**
-   * @brief  
-   * @param  acc              My Param doc
-   * @return double 
+   * @brief  更新跟踪器高度，[m]
+   * @param  dt  控制时间，[s]
+   * @param  u  加速度控制，[m/(s^2)]
+   * @return double
    */
-  double GetConsume(const double acc) {
-    double consume = fabs(acc) * 0.2 + 0.3;
-    return consume;
+  double UpdateTracker(const double dt, const double u) {
+    tracker_ += 0.5*u*dt*dt;
+    return tracker_;
   };
 
-  // 系统状态方程，跟随器高度 h_{k+1} = 1 * h_{k} + dt * acc
-  // 系统性能/代价方程，J = 状态代价：跟随器和目标高度差 0.5*dh^2 + 控制代价：由 GetConsume() 提供
-  double GetTrackerU(const double dt) {
-    double A = 1, B = dt;
-    double P = Q_ + A*P_*A - (A*P_*B)/(R_+B*P_*B)*(B*P_*A);
-    double K = (B*P*A)/(R_+B*P*B);
+
+  /**
+   * @brief  更新总消耗
+   * @param  dt  控制的时间
+   * @param  u  控制量
+   * @return double 
+   */
+  double UpdateConsume(const double dt, double u) {
+    double c = fabs(u) * dt + 0.3;
+    J_ += c;
+    return J_;
+  };
+
+
+  /**
+   * @brief  计算控制量
+   *         系统状态方程，跟随器高度 h_{k+1} = 1 * h_{k} + 0.5*dt*dt * acc
+   *         系统性能/代价方程，J = 状态代价：跟随器和目标高度差 0.5*dh^2 + 控制代价：由 GetConsume() 提供
+   * @param  dt  控制时间长度
+   * @return double，加速度
+   */
+  double GetTrackerU(int loop, const double dt) {
+    double A = tracker_-height_, B = 0.5*dt*dt;    
+    double P = P_;
+    while (loop-- > 0) {
+      P = Q_ + A*P_*A - (A*P_*B)/(R_+B*P_*B)*(B*P_*A);
+      if (fabs(P-P_) < 0.0001) break;
+    }    
+    double K = (B*P_*A)/(R_+B*P_*B);
     double u = -K*tracker_;
-    ROS_INFO("A:%f, B:%f, P:%f, K:%f, u:%f", A, B, P, K, u);
+    ROS_INFO("A:%f, B:%f, P:%f, K:%f, u:%f", A, B, P_, K, u);
     return u;
   };
 
 
  private:
+
   double height_; // 目标高度
   double tracker_; // 跟随器高度
   double acc_ = 3.0; // 最大加速度
-  double Q_ = 1;
-  double R_ = 1;
+  double J_ = 0.0;
+  double Q_ = 130; // Q矩阵元素变大意味着希望跟踪偏差能够快速趋近于零
+  double R_ = 1; // R矩阵元素变大意味着希望控制输入能够尽可能小
   double P_ = 1;
+  double timestamp_ = 0.0;
 
-
+  ros::Publisher height_pub_;
+  ros::Publisher tracker_pub_;
+  nav_msgs::Path height_path_;
+  nav_msgs::Path tracker_path_;
 }; // Height_tracker
 
 } // namespace lqr_test
