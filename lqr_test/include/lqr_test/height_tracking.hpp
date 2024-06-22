@@ -21,13 +21,16 @@ class Height_tracker
     std::uniform_real_distribution<double> dist0(0.0, 5.0);
     tracker_ = dist0(gen);
     ROS_INFO("tracker init %f", tracker_);
+    if (fabs(height_-tracker_)<5) height_ += 5;
 
     P_ = Q_;
 
     height_pub_ = n->advertise<nav_msgs::Path>("height", 1);
     tracker_pub_ = n->advertise<nav_msgs::Path>("tracker", 1);
+    J_pub_ = n->advertise<nav_msgs::Path>("J", 1);
     height_path_.header.frame_id = "map";
     tracker_path_.header = height_path_.header;
+    J_path_.header = height_path_.header;
   };
 
 
@@ -40,22 +43,24 @@ class Height_tracker
     UpdateHeight(1.0);
     double u = GetTrackerU(100, dt);
     UpdateTracker(dt, u);
-    UpdateConsume(dt, u);
+    UpdateConsume(tracker_, dt, u);
     ROS_INFO("J : %.3f", J_);
     timestamp_ += dt;
 
     geometry_msgs::PoseStamped ps;
     ps.header = height_path_.header;
-    ps.pose.position.y = timestamp_;
-    ps.pose.position.x = height_;
+    ps.pose.position.x = timestamp_;
+    ps.pose.position.y = height_;
     ps.pose.position.z = 0;
     height_path_.poses.push_back(ps);
-    ps.pose.position.x = tracker_;
+    ps.pose.position.y = tracker_;
     tracker_path_.poses.push_back(ps);
+    ps.pose.position.y = J_;
+    J_path_.poses.push_back(ps);
     height_pub_.publish(height_path_);
     tracker_pub_.publish(tracker_path_);
-
-    // if (fabs(tracker_ - height_) < err) {
+    J_pub_.publish(J_path_);
+    // if (fabs(tracker_ - height_) <= err) {
     //   ROS_ERROR("tracker finished !");
     //   return true;
     // }
@@ -96,8 +101,8 @@ class Height_tracker
    * @param  u  控制量
    * @return double 
    */
-  double UpdateConsume(const double dt, double u) {
-    double c = fabs(u) * dt + 0.3;
+  double UpdateConsume(const double h, const double dt, double u) {
+    double c = 0.005 * fabs(h) + 0.1 * fabs(u) * dt;
     J_ += c;
     return J_;
   };
@@ -105,7 +110,7 @@ class Height_tracker
 
   /**
    * @brief  计算控制量
-   *         系统状态方程，跟随器高度 h_{k+1} = 1 * h_{k} + 0.5*dt*dt * acc
+   *         系统状态方程，跟随器高度 h_{k+1} = 1 * h_{k} + 0.5 * dt * dt * acc
    *         系统性能/代价方程，J = 状态代价：跟随器和目标高度差 0.5*dh^2 + 控制代价：由 GetConsume() 提供
    * @param  dt  控制时间长度
    * @return double，加速度
@@ -131,14 +136,16 @@ class Height_tracker
   double acc_ = 3.0; // 最大加速度
   double J_ = 0.0;
   double Q_ = 130; // Q矩阵元素变大意味着希望跟踪偏差能够快速趋近于零
-  double R_ = 1; // R矩阵元素变大意味着希望控制输入能够尽可能小
+  double R_ = 30; // R矩阵元素变大意味着希望控制输入能够尽可能小
   double P_ = 1;
   double timestamp_ = 0.0;
 
   ros::Publisher height_pub_;
   ros::Publisher tracker_pub_;
+  ros::Publisher J_pub_;
   nav_msgs::Path height_path_;
   nav_msgs::Path tracker_path_;
+  nav_msgs::Path J_path_;
 }; // Height_tracker
 
 } // namespace lqr_test

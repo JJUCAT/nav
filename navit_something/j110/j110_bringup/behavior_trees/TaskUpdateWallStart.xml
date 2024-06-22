@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<root main_tree_to_execute="BehaviorTree">
+    <BehaviorTree ID="BehaviorTree">
+        <RetryUntilSuccessful num_attempts="30">
+            <Sequence>
+                <Action ID="ActionGetWallStart"/>
+                <Fallback>
+                    <Action ID="ActionA2BPathPlanning" plugin_name="topoint" use_start="false"/>
+                    <ForceFailure>
+                        <Action ID="ActionUpdateWallStart" step="1.0"/>
+                    </ForceFailure>
+                </Fallback>
+            </Sequence>
+        </RetryUntilSuccessful>
+    </BehaviorTree>
+
+    <TreeNodesModel>
+        <Action ID="ActionA2BPathPlanning">
+            <input_port default="topoint" name="plugin_name"/>
+            <input_port default="false" name="use_start"/>
+        </Action>
+        <Action ID="ActionGetWallStart"/>
+        <Action ID="ActionUpdateWallStart">
+            <input_port default="1.0" name="step"/>
+        </Action>
+    </TreeNodesModel>
+</root>

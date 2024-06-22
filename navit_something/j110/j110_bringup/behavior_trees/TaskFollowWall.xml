@@ -1,0 +1,105 @@
+<?xml version="1.0"?>
+<root main_tree_to_execute="BehaviorTree">
+    <!-- ////////// -->
+    <BehaviorTree ID="BehaviorTree">
+        <SequenceStar>
+            <SetBlackboard output_key="follow_path_finish" value="false"/>
+            <Fallback>
+                <Sequence>
+                    <SubTree ID="SubTreeTrimFollow" __shared_blackboard="false"/>
+                    <SetBlackboard output_key="follow_path_finish" value="true"/>
+                </Sequence>
+                <ForceSuccess>
+                    <KeepRunningUntilFailure>
+                        <Sequence>
+                            <SubTree ID="SubTreeObstaclePathPlanning" __shared_blackboard="false"/>
+                            <Inverter>
+                                <Sequence>
+                                    <SubTree ID="SubTreeTrimFollow" __shared_blackboard="false"/>
+                                    <SetBlackboard output_key="follow_path_finish" value="true"/>
+                                </Sequence>
+                            </Inverter>
+                        </Sequence>
+                    </KeepRunningUntilFailure>
+                </ForceSuccess>
+            </Fallback>
+            <BlackboardCheckString return_on_mismatch="FAILURE" value_A="{follow_path_finish}" value_B="true">
+                <AlwaysSuccess/>
+            </BlackboardCheckString>
+        </SequenceStar>
+    </BehaviorTree>
+    <!-- ////////// -->
+    <BehaviorTree ID="SubTreeObstaclePathPlanning">
+        <Sequence>
+            <SetBlackboard output_key="path_forward_step" value="true"/>
+            <ForceSuccess>
+                <KeepRunningUntilFailure>
+                    <Sequence>
+                        <Fallback>
+                            <Action ID="ActionObstaclePathForwardStep"/>
+                            <ForceFailure>
+                                <SetBlackboard output_key="path_forward_step" value="false"/>
+                            </ForceFailure>
+                        </Fallback>
+                        <Inverter>
+                            <Fallback>
+                                <Action ID="ActionA2BPathPlanningObstacle" plugin_name="topoint" use_start="false"/>
+                                <Condition ID="IsFollowPathArrival" distance_threshold="1.0"/>
+                            </Fallback>
+                        </Inverter>
+                    </Sequence>
+                </KeepRunningUntilFailure>
+            </ForceSuccess>
+            <Sequence>
+                <BlackboardCheckString return_on_mismatch="FAILURE" value_A="{path_forward_step}" value_B="true">
+                    <AlwaysSuccess/>
+                </BlackboardCheckString>
+                <Action ID="ActionObstaclePathUpdate"/>
+            </Sequence>
+        </Sequence>
+    </BehaviorTree>
+    <!-- ////////// -->
+    <BehaviorTree ID="SubTreeTrimFollow">
+        <ReactiveSequence>
+            <Action ID="ActionTrimGlobalPath"/>
+            <Fallback>
+                <Action ID="ActionFollowPathAsy" plugin_name="slp"/>
+                <Condition ID="IsFollowPathArrival" distance_threshold="1.0"/>
+            </Fallback>
+        </ReactiveSequence>
+    </BehaviorTree>
+    <!-- ////////// -->
+    <TreeNodesModel>
+        <Action ID="ActionA2BPathPlanning">
+            <input_port default="topoint" name="plugin_name"/>
+            <input_port default="false" name="use_start"/>
+        </Action>
+        <Action ID="ActionA2BPathPlanningObstacle">
+            <input_port default="topoint" name="plugin_name"/>
+            <input_port default="false" name="use_start"/>
+        </Action>
+        <Action ID="ActionBackup">
+            <input_port default="0.5" name="distance"/>
+            <input_port default="0.1" name="speed"/>
+        </Action>
+        <Action ID="ActionCoveragePathPlanning"/>
+        <Action ID="ActionFollowPathAsy">
+            <input_port default="slp" name="plugin_name"/>
+        </Action>
+        <Action ID="ActionObstaclePathForwardStep"/>
+        <Action ID="ActionObstaclePathPlanningInit"/>
+        <Action ID="ActionObstaclePathUpdate"/>
+        <Action ID="ActionSmoothPath"/>
+        <Action ID="ActionTrimGlobalPath"/>
+        <Condition ID="IsFollowPathArrival">
+            <input_port default="2.0" name="distance_threshold"/>
+        </Condition>
+        <SubTree ID="SubTreeObstaclePathPlanning">
+            <input_port default="false" name="__shared_blackboard">If false (default), the Subtree has an isolated blackboard and needs port remapping</input_port>
+        </SubTree>
+        <SubTree ID="SubTreeTrimFollow">
+            <input_port default="false" name="__shared_blackboard">If false (default), the Subtree has an isolated blackboard and needs port remapping</input_port>
+        </SubTree>
+    </TreeNodesModel>
+    <!-- ////////// -->
+</root>

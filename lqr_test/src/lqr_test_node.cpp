@@ -13,8 +13,15 @@ int main(int argc, char** argv) {
   ros::Rate r(5);
   double dt = r.expectedCycleTime().toSec();
   ROS_INFO("lqr test loop ..., dt:%f", dt);
+  int sleep = 5*3;
   while(ros::ok()) {
-    if (ht.Run(dt, 0.005)) break;
+    if (sleep--) break;
+    r.sleep();
+    ros::spinOnce();
+  }
+
+  while(ros::ok()) {
+    if (ht.Run(dt, 0.01)) break;
     r.sleep();
     ros::spinOnce();
   }
