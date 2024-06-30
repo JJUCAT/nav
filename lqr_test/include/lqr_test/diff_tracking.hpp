@@ -27,12 +27,12 @@ class Diff_tracker
     ROS_INFO("tracker init [%f, %f]", tracker_x_, tracker_y_);
 
     // 矩阵初始化
-    Q_ << 1, 1, 1,
-          1, 1, 1,
-          1, 1, 1;
-    R_ << 1, 1, 1,
-          1, 1, 1,
-          1, 1, 1;
+    Q_ << 1, 0, 0,
+          0, 1, 0,
+          0, 0, 1;
+    R_ << 1, 0, 0,
+          0, 1, 0,
+          0, 0, 0;
     P_ = Q_;
 
     target_pub_ = n->advertise<nav_msgs::Path>("diff_target", 1);
@@ -130,20 +130,22 @@ class Diff_tracker
     B << -0.5*dt*cos(tracker_theta_), -0.5*dt*sin(tracker_theta_), 0,
          -0.5*dt*cos(tracker_theta_), -0.5*dt*sin(tracker_theta_), 0,
          dt*D_, -dt*D_, 0;
- 
+
     Eigen::Matrix3d P = P_;
     while (loop-- > 0) {
       P = A.transpose()*P_*A - (A.transpose()*P_*B)*(R_+B.transpose()*P_*B).reverse()*(B.transpose()*P_*A) + Q_;
       Eigen::Matrix3d diff = P-P_;
       Eigen::Matrix3d abs = diff.array().abs();
-      ROS_INFO_STREAM("ABS:" << abs);
-      if (abs.maxCoeff() < 1000) break;
+      if (abs.maxCoeff() < 500) {
+        ROS_INFO_STREAM("ABS:" << std::endl << abs);
+        break;
+      }
     }
     P_ = P;
     Eigen::Matrix3d K = (R_+B.transpose()*P_*B).reverse()*(B.transpose()*P_*A);
     Eigen::Vector3d xk(tracker_x_, tracker_y_, tracker_theta_);
     Eigen::Vector3d u = -K*xk;
-    ROS_INFO_STREAM("A:" << A << ",B:" << B << "P:" << P_ << "K:" << K << "u:" << u);
+    ROS_INFO_STREAM("u:" << std::endl << u);
     return u;
   };
 
