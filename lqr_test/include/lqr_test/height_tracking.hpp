@@ -2,6 +2,7 @@
 #define HEIGHT_TRACKING_HPP_
 
 #include "geometry_msgs/PoseStamped.h"
+#include <cmath>
 #include <random>
 #include <ros/ros.h>
 #include <nav_msgs/Path.h>
@@ -23,9 +24,9 @@ class Height_tracker
     ROS_INFO("tracker init %f", tracker_);
     if (fabs(height_-tracker_)<5) height_ += 5;
 
-    P_ = Q_;
+    Pf_ = Q_;
 
-    height_pub_ = n->advertise<nav_msgs::Path>("height", 1);
+    height_pub_ = n->advertise<nav_msgs::Path>("target", 1);
     tracker_pub_ = n->advertise<nav_msgs::Path>("tracker", 1);
     J_pub_ = n->advertise<nav_msgs::Path>("J", 1);
     height_path_.header.frame_id = "map";
@@ -41,7 +42,7 @@ class Height_tracker
    */
   bool Run(const double dt, const double err) {
     UpdateHeight(1.0);
-    double u = GetTrackerU(100, dt);
+    double u = GetTrackerU(1000, dt);
     UpdateTracker(dt, u);
     UpdateConsume(tracker_, dt, u);
     ROS_INFO("J : %.3f", J_);
@@ -116,15 +117,19 @@ class Height_tracker
    * @return double，加速度
    */
   double GetTrackerU(int loop, const double dt) {
-    double A = tracker_-height_, B = 0.5*dt*dt;    
-    double P = P_;
+    double A = height_-tracker_, B = -0.5*dt*dt;    
+    double P = Pf_;
+    double diffP;
     while (loop-- > 0) {
-      P = Q_ + A*P_*A - (A*P_*B)/(R_+B*P_*B)*(B*P_*A);
-      if (fabs(P-P_) < 0.0001) break;
-    }    
-    double K = (B*P_*A)/(R_+B*P_*B);
+      double tP = A*P*A - (A*P*B)/(R_+B*P*B)*(B*P*A) + Q_;
+      // 当迭代插值小的时候可以结束计算，但是这个需要先测试判断。
+      diffP = fabs(tP-P);
+      if (diffP < 500) { P = tP; break; }
+      P = tP;
+    }
+    double K = (B*P*A)/(R_+B*P*B);
     double u = -K*tracker_;
-    ROS_INFO("A:%f, B:%f, P:%f, K:%f, u:%f", A, B, P_, K, u);
+    ROS_INFO("A:%f, B:%f, P:%f, K:%f, u:%f, diffP:%f", A, B, P, K, u, diffP);
     return u;
   };
 
@@ -135,9 +140,9 @@ class Height_tracker
   double tracker_; // 跟随器高度
   double acc_ = 3.0; // 最大加速度
   double J_ = 0.0;
-  double Q_ = 130; // Q矩阵元素变大意味着希望跟踪偏差能够快速趋近于零
-  double R_ = 30; // R矩阵元素变大意味着希望控制输入能够尽可能小
-  double P_ = 1;
+  double Q_ = 20; // Q矩阵元素变大意味着希望跟踪偏差能够快速趋近于零
+  double R_ = 1; // R矩阵元素变大意味着希望控制输入能够尽可能小
+  double Pf_ = 1;
   double timestamp_ = 0.0;
 
   ros::Publisher height_pub_;

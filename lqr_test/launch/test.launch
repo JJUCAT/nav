@@ -1,5 +1,6 @@
 <?xml version="1.0"?>
 <launch>
+    <arg name="mode" default="height"/>
     <node name="rviz" pkg="rviz" type="rviz" args="-d $(find lqr_test)/config/rviz.rviz"/>
-    <node name="lqr" pkg="lqr_test" type="lqr_test_node" output="screen"/>
+    <node name="lqr" pkg="lqr_test" type="lqr_test_node" args="$(arg mode)" output="screen"/>
 </launch>
