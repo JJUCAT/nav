@@ -1,0 +1,212 @@
+#ifndef __EIGEN3_TEST_H__
+#define __EIGEN3_TEST_H__
+
+
+#include <Eigen/Core>
+#include <Eigen/Dense>
+#include <complex>
+#include <eigen3/Eigen/src/Core/util/Constants.h>
+#include <iostream>
+
+
+namespace Eigen3_Test_ns {
+
+void TestStorageOrder()
+{
+  setlocale(LC_ALL, "zh_CN.UTF-8"); // 支持 ros 打印中文
+
+  Eigen::Matrix<int, 3, 3, Eigen::RowMajor> rowmajorm;
+  rowmajorm << 0, 1, 2,
+               3, 4, 5,
+               6, 7, 8;
+  ROS_INFO_STREAM("矩阵:" << std::endl << rowmajorm);
+
+  int* rowmajorm_data = rowmajorm.data(); // 获取矩阵系数数据存储地址
+  ROS_INFO_STREAM("行优先存储在内存上数据分布:");
+  for (size_t i = 0; i < rowmajorm.size(); i++) {
+    ROS_INFO_STREAM("index[" << i << "]:" << rowmajorm_data[i]);
+  }
+
+  Eigen::Matrix<int, 3, 3, Eigen::ColMajor> colmajorm;
+  colmajorm = rowmajorm;
+  int* colmajorm_data = colmajorm.data();
+  ROS_INFO_STREAM("列优先存储在内存上数据分布:");
+  for (size_t i = 0; i < colmajorm.size(); i++) {
+    ROS_INFO_STREAM("index[" << i << "]:" << colmajorm_data[i]);
+  }
+}
+
+
+void TestAlign()
+{
+  setlocale(LC_ALL, "zh_CN.UTF-8"); // 支持 ros 打印中文
+
+  Eigen::Matrix<int, 3, 3, Eigen::AutoAlign> autoalignm;
+  autoalignm.Random(3, 3);
+  ROS_INFO_STREAM("自动对齐矩阵:" << std::endl << autoalignm);
+
+  Eigen::Matrix<int, 3, 3, Eigen::DontAlign> dontalignm;
+  dontalignm = autoalignm;
+  ROS_INFO_STREAM("不对齐矩阵:" << std::endl << dontalignm);
+}
+
+
+void TestDynamic()
+{
+  setlocale(LC_ALL, "zh_CN.UTF-8"); // 支持 ros 打印中文
+
+  Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> dynamicm(2, 3); // 行列初始化
+  dynamicm.Random(2, 3);
+  ROS_INFO_STREAM("动态矩阵, 随机赋值:" << std::endl << dynamicm);
+
+
+  dynamicm << 1.2, 2.3, 3.4,
+              4.5, 5.6, 6.7;
+  ROS_INFO_STREAM("动态矩阵，赋值:" << std::endl << dynamicm);
+
+
+  ROS_INFO_STREAM("动态矩阵，系数访问[0,2]:" << dynamicm(0,2));
+  dynamicm(0,2) = 233;
+  ROS_INFO_STREAM("动态矩阵，系数访问[0,2]:" << dynamicm(0,2));
+
+
+  Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> dynamicm44(4, 4);
+  ROS_INFO_STREAM("动态矩阵4x4，初始化:" << std::endl << dynamicm44);
+  dynamicm44 = dynamicm;
+  ROS_INFO_STREAM("动态矩阵4x4，自适应大小:" << std::endl << dynamicm44);
+}
+
+
+void TestResize()
+{
+  setlocale(LC_ALL, "zh_CN.UTF-8"); // 支持 ros 打印中文
+
+  Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> m3x3(3, 3); // 行列初始化
+  m3x3.Random(3, 3);
+  ROS_INFO_STREAM("矩阵3x3, 随机赋值:" << std::endl << m3x3);
+
+  m3x3.resize(5, 5);
+  ROS_INFO_STREAM("调整矩阵大小5x5:" << std::endl << m3x3);
+
+  m3x3.conservativeResize(2, 2);
+  ROS_INFO_STREAM("调整矩阵大小2x2:" << std::endl << m3x3);
+}
+
+
+void TestDefaultTemplate()
+{
+  setlocale(LC_ALL, "zh_CN.UTF-8"); // 支持 ros 打印中文
+
+  // Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic>
+  Eigen::MatrixXi imx(3, 3);
+  ROS_INFO_STREAM("int 动态矩阵 3x3:" << std::endl << imx);
+
+  // Eigen::Matrix<float, 2, 2>
+  Eigen::Matrix2f fm2x2;
+  ROS_INFO_STREAM("float 固定矩阵 2x2:" << std::endl << fm2x2);
+
+  // Eigen::Matrix<double, Eigen::Dynamic, 2>
+  Eigen::MatrixX2d dmx2(3, 2);
+  ROS_INFO_STREAM("double 动态行，2列矩阵 3x2:" << std::endl << dmx2);
+
+  // Eigen::Matrix<double, 1, Eigen::Dynamic>
+  Eigen::Matrix2Xd dm2x(2, 3);
+  ROS_INFO_STREAM("double 2行，动态列矩阵 2x3:" << std::endl << dm2x);
+}
+
+
+void TestBaseOperation()
+{
+  setlocale(LC_ALL, "zh_CN.UTF-8"); // 支持 ros 打印中文
+
+  Eigen::Matrix3i m0;
+  m0 << 2, 1, 3,
+        6, 8, 0,
+        0, 9, 12;
+  ROS_INFO_STREAM("3x3 m0:" << std::endl << m0);
+
+  Eigen::Matrix3i m1;
+  m1 << 6, 1, 13,
+        2, 0, 4,
+        9, 11, 7;
+  ROS_INFO_STREAM("3x3 m1:" << std::endl << m1);
+
+  ROS_INFO_STREAM("m0+m1=" << std::endl << m0+m1);
+  ROS_INFO_STREAM("3*m0=" << std::endl << 3*m0);
+  ROS_INFO_STREAM("m1/2=" << std::endl << m1/2);
+}
+
+
+void TestTranspose()
+{
+  setlocale(LC_ALL, "zh_CN.UTF-8"); // 支持 ros 打印中文
+
+  Eigen::Matrix3i m;
+  m << 2, 1, 3,
+       6, 8, 0,
+       0, 9, 3;
+  ROS_INFO_STREAM("3x3 m:" << std::endl << m);
+
+  Eigen::Matrix3i tm = m.transpose();
+  ROS_INFO_STREAM("after transpose, tm:" << std::endl << tm);
+
+  m.transposeInPlace();
+  ROS_INFO_STREAM("m.transposeInPlace(), m:" << std::endl << m);
+}
+
+
+void TestAdjoint()
+{
+  setlocale(LC_ALL, "zh_CN.UTF-8"); // 支持 ros 打印中文
+
+  Eigen::Matrix<std::complex<float>, 2, 2> m;
+  m << std::complex<float>(3, 2), std::complex<float>(5, 1),
+       std::complex<float>(7, 3), std::complex<float>(4, 2);
+  ROS_INFO_STREAM("2x2 complex m:" << std::endl << m);
+
+  Eigen::Matrix<std::complex<float>, 2, 2> cm = m.conjugate();
+  ROS_INFO_STREAM("after conjugate, cm:" << std::endl << cm);
+
+  Eigen::Matrix<std::complex<float>, 2, 2> am = m.adjoint();
+  ROS_INFO_STREAM("after adjoint, am:" << std::endl << am);
+
+  m.adjointInPlace();
+  ROS_INFO_STREAM("m.adjointInPlace(), m:" << std::endl << m);
+}
+
+
+void TestTransform()
+{
+  setlocale(LC_ALL, "zh_CN.UTF-8"); // 支持 ros 打印中文
+
+  Eigen::MatrixXf m(3, 3);
+  m << 2.3, 4.0, -0.7,
+       3.3, 0.0, 1.8,
+       0.2, 1.0, -0.5;
+  ROS_INFO_STREAM("matrix:" << std::endl << m);
+
+  Eigen::MatrixX3f t(2, 3);
+  t << 1.2, 2.3, 3.4,
+       4.5, 5.6, 6.7;
+  ROS_INFO_STREAM("transform matrix:" << std::endl << t);
+
+  Eigen::MatrixXf tm;
+  tm = t*m;
+  ROS_INFO_STREAM("t*m=" << std::endl << tm);
+}
+
+
+
+
+
+
+
+
+
+
+
+} // namespace Eigen3_Test_ns
+
+
+#endif // __EIGEN3_TEST_H__
+
