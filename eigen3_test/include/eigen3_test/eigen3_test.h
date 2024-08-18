@@ -196,13 +196,141 @@ void TestTransform()
 }
 
 
+void TestVector()
+{
+  setlocale(LC_ALL, "zh_CN.UTF-8"); // 支持 ros 打印中文
+
+  Eigen::Vector3i v(3, 6, 9);
+  ROS_INFO_STREAM("列向量3i v 构造初始化指定了系数和行数:" << std::endl << v);
+
+  Eigen::RowVectorXf u(5);
+  ROS_INFO_STREAM("动态行向量 u 默认初始化:" << std::endl << u);
+
+  //! 不支持 << 赋值，会导致段错误
+  // Eigen::VectorXd w;
+  // w << 1.2, 2.3, 3.4, 4.5, 5.6;
+
+  Eigen::VectorXd w(5);
+  w.Random(5);
+  ROS_INFO_STREAM("列向量 w 随机赋值:" << std::endl << w);
+  ROS_INFO_STREAM("列向量[]访问 w[2]:" << std::endl << w[2]);
+  w[2] = 12.34;
+  ROS_INFO_STREAM("列向量[]修改 w[2]:" << std::endl << w[2]);
+
+}
 
 
+void TestVectorOperate()
+{
+  Eigen::Vector3i u(3, 6, 9);
+  Eigen::Vector3i v(2, 3, 3);
+  ROS_INFO_STREAM("列向量3i u:" << std::endl << u);
+  ROS_INFO_STREAM("列向量3i v:" << std::endl << v);
+  ROS_INFO_STREAM("u+v=" << std::endl << u+v);
+
+  Eigen::Vector3f fu(2.5, 0, -1.5);
+  Eigen::Vector3f fv(5.1, 3.3, 1.3);
+  ROS_INFO_STREAM("列向量3f fu:" << std::endl << u);
+  ROS_INFO_STREAM("列向量3f fv:" << std::endl << v);
+  ROS_INFO_STREAM("fu-fv=" << std::endl << fu-fv);
+
+  Eigen::Vector3d du(0.7, -1.2, -3.5);
+  ROS_INFO_STREAM("列向量3d du:" << std::endl << du);
+  ROS_INFO_STREAM("列向量3d -3.3 * du=" << std::endl << -3.3*du);
+}
+
+void TestVectorDot()
+{
+  Eigen::Vector3f u0(0.0, 0.3, 0.5);
+  Eigen::Vector3f v0(0.5, 0.0, 0.3);
+  ROS_INFO_STREAM("u0:" << std::endl << u0);
+  ROS_INFO_STREAM("v0:" << std::endl << v0);
+  ROS_INFO_STREAM("u0 · v0 = " << u0.dot(v0));
+  ROS_INFO_STREAM("v0 · u0 = " << v0.dot(u0));
+
+  Eigen::Vector3f u1(1.2, 2.3, 3.4);
+  Eigen::Vector3f v1(5.4, 6.5, 7.6);
+  ROS_INFO_STREAM("u1:" << std::endl << u1);
+  ROS_INFO_STREAM("v1:" << std::endl << v1);
+  ROS_INFO_STREAM("u1 · v1 = " << u1.dot(v1));
+}
+
+void TestVectorCross()
+{
+  Eigen::Vector3f u0(0.0, 0.3, 0.5);
+  Eigen::Vector3f v0(0.5, 0.0, 0.3);
+  ROS_INFO_STREAM("u0:" << std::endl << u0);
+  ROS_INFO_STREAM("v0:" << std::endl << v0);
+  ROS_INFO_STREAM("u0 x v0 = " << u0.cross(v0));
+  ROS_INFO_STREAM("v0 x u1 = " << v0.cross(u0));
+
+  Eigen::Vector3f u1(1.2, 2.3, 3.4);
+  Eigen::Vector3f v1(5.4, 6.5, 7.6);
+  ROS_INFO_STREAM("u1:" << std::endl << u1);
+  ROS_INFO_STREAM("v1:" << std::endl << v1);
+  ROS_INFO_STREAM("u1 x v1 = " << u1.cross(v1));
+}
 
 
+void TestArray()
+{
+  Eigen::ArrayXf a0(3);
+  a0.Random(3);
+  ROS_INFO_STREAM("a0:" << a0);
+
+  Eigen::Array33d a1;
+  a1(2, 2) = 23.33;
+  ROS_INFO_STREAM("a1(2, 2):" << std::endl << a1(2, 2));
+
+  a1 << 1.2, 2.3, 3.4,
+        4.5, 5.6, 6.7,
+        7.8, 8.9, 9.1;
+  ROS_INFO_STREAM("a1:" << std::endl << a1);
+
+  Eigen::Array4i a2;
+  a2[2] = 123;
+  ROS_INFO_STREAM("a2[2]=" << a2[2]);
+}
 
 
+void TestArrayOperate()
+{
+  Eigen::Array22f a0;
+  a0 << 1.2, -2.3,
+        -3.4, 4.5;
+  Eigen::Array22f a1;
+  a1 << -6.5, 7.6,
+        8.7, -9.8;
+  ROS_INFO_STREAM("a0= " << std::endl << a0);
+  ROS_INFO_STREAM("a1= " << std::endl << a1);
+  ROS_INFO_STREAM("a0 + a1 = " << std::endl << a0+a1);
+  ROS_INFO_STREAM("a1 + 5.5 = " << std::endl << a1+5.5);
+  ROS_INFO_STREAM("a0 * a1 = " << std::endl << a0*a1);
+  ROS_INFO_STREAM("a0 * 2.33 = " << std::endl << a0*2.33);
+  ROS_INFO_STREAM("a0 / a1 = " << std::endl << a0/a1);
+  ROS_INFO_STREAM("a0.abs() = " << std::endl << a0.abs());
+  ROS_INFO_STREAM("a1.sqrt() = " << std::endl << a1.sqrt());
+  ROS_INFO_STREAM("a0.min(a1) = " << std::endl << a0.min(a1));
+}
 
+
+void TestArrayTransform()
+{
+  Eigen::Array22f a;
+  a << 1.2, -2.3,
+       -3.4, 4.5;
+  
+  Eigen::Matrix2f t;
+  t << 0, -1,
+       1, 0;
+
+  Eigen::Matrix2f m;
+  m = t*a.matrix();
+  ROS_INFO_STREAM("数组 a = " << std::endl << a);
+  ROS_INFO_STREAM("旋转矩阵 t = " << std::endl << t);
+  ROS_INFO_STREAM("旋转后的矩阵 m = t * a.matrix() = " << std::endl << m);
+  ROS_INFO_STREAM("m.array() 和 a 中最小系数组成的数组 = " << std::endl << m.array().min(a));
+}
 
 
 } // namespace Eigen3_Test_ns
