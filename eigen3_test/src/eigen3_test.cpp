@@ -27,7 +27,14 @@ int main(int argc, char** argv)
   // Eigen3_Test_ns::TestVectorCross();
   // Eigen3_Test_ns::TestArray();
   // Eigen3_Test_ns::TestArrayOperate();
-  Eigen3_Test_ns::TestArrayTransform();
+  // Eigen3_Test_ns::TestArrayTransform();
+  // Eigen3_Test_ns::TestBlock();
+  // Eigen3_Test_ns::TestVectorBlock();
+  // Eigen3_Test_ns::TestVectorSlicingIndexing();
+  // Eigen3_Test_ns::TestReductions();
+  // Eigen3_Test_ns::TestBroadcasting();
+  Eigen3_Test_ns::TestMap();
+
 
   double hz = 10.f;
   ros::Rate r(hz);

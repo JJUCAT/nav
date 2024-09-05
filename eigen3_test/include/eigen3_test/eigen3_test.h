@@ -203,12 +203,10 @@ void TestVector()
   Eigen::Vector3i v(3, 6, 9);
   ROS_INFO_STREAM("列向量3i v 构造初始化指定了系数和行数:" << std::endl << v);
 
+  //! 固定向量类不支持 << 赋值，会导致段错误，但是动态向量类支持。
   Eigen::RowVectorXf u(5);
+  u << 1.2, 2.3, 3.4, 4.5, 5.6;
   ROS_INFO_STREAM("动态行向量 u 默认初始化:" << std::endl << u);
-
-  //! 不支持 << 赋值，会导致段错误
-  // Eigen::VectorXd w;
-  // w << 1.2, 2.3, 3.4, 4.5, 5.6;
 
   Eigen::VectorXd w(5);
   w.Random(5);
@@ -330,6 +328,118 @@ void TestArrayTransform()
   ROS_INFO_STREAM("旋转矩阵 t = " << std::endl << t);
   ROS_INFO_STREAM("旋转后的矩阵 m = t * a.matrix() = " << std::endl << m);
   ROS_INFO_STREAM("m.array() 和 a 中最小系数组成的数组 = " << std::endl << m.array().min(a));
+}
+
+
+void TestBlock()
+{
+  Eigen::Matrix4f m;
+  m << 1.2, -2.3, 3.4, -4.5,
+       5.6, -6.7, 7.8, -8.9,
+       9.0, -0.1, 1.2, -2.3,
+       3.4, -4.5, 5.6, -6.7;
+  Eigen::Matrix2f md1122 = m.block(1,1,2,2);
+  Eigen::Matrix2f mf1122 = m.block<2,2>(1,1);
+  ROS_INFO_STREAM("动态取块，矩阵 m 的 (1,1) 取 2*2 块:" << std::endl << md1122);
+  ROS_INFO_STREAM("固定取块，矩阵 m 的 (1,1) 取 2*2 块:" << std::endl << mf1122);
+
+  Eigen::Matrix3f n;
+  n << 1.2, -2.3, 3.4,
+       -4.5, 5.6, -6.7,
+       7.8, -8.9, 9.0;
+  Eigen::Matrix2f nd0022 = m.block(0,0,2,2);
+  Eigen::Matrix2f mn22 = md1122 + nd0022;
+  ROS_INFO_STREAM("动态取块，矩阵 n 的 (0,0) 取 2*2 块:" << std::endl << nd0022);
+  ROS_INFO_STREAM("矩阵 m(1,1){2*2} + n(0,0){2*2}" << std::endl << mn22);
+
+  Eigen::Matrix2f md2022 = m.block(2,0,2,2);
+  Eigen::Matrix2f nf1122 = n.block<2,2>(1,1);
+  ROS_INFO_STREAM("矩阵 m(2,0){2*2} * n(1,1){2*2}" << std::endl << md2022*nf1122);
+}
+
+
+void TestVectorBlock()
+{
+  Eigen::Vector3f v3f(1.2, -2.3, 3.4);
+  Eigen::Vector2f v3fh2 = v3f.head(2);
+  Eigen::Vector2f v3ft2 = v3f.tail(2);
+  ROS_INFO_STREAM("向量 v3f:" << std::endl << v3f);
+  ROS_INFO_STREAM("向量 v3f 取头部 2 个元素:" << std::endl << v3fh2);
+  ROS_INFO_STREAM("向量 v3f 取尾部 2 个元素:" << std::endl << v3ft2);
+
+  Eigen::VectorXf v6f(6);
+  v6f << 0.1, -1.2, 2.3, -3.4, 4.5, -5.6;
+  Eigen::Vector3f v6f33 = v6f.segment(3,3);
+  Eigen::Vector3f v6f23 = v6f.segment<3>(2);
+  ROS_INFO_STREAM("向量 v6f:" << std::endl << v6f);
+  ROS_INFO_STREAM("向量 v6f 动态取块在 3 位置取 3 个元素:" << std::endl << v6f33);
+  ROS_INFO_STREAM("向量 v6f 在 2 位置固定取块 3 个元素:" << std::endl << v6f23);
+}
+
+
+void TestVectorSlicingIndexing()
+{
+  // Eigen::Vector4f v4f(1.2, -2.3, 3.4, -4.5);
+  // auto v_elements = v4f(Eigen::seq(1,3));
+}
+
+
+void TestReductions()
+{
+  Eigen::Matrix4f m;
+  m << 1.2, -2.3, 3.4, -4.5,
+       5.6, -6.7, 7.8, -8.9,
+       9.0, -0.1, 1.2, -2.3,
+       3.4, -4.5, 5.6, -6.7;
+  ROS_INFO_STREAM("矩阵 m:" << std::endl << m);
+
+  ROS_INFO_STREAM("m.sum():" << m.sum() << std::endl <<
+                  "m.prod():" << m.prod() << std::endl <<
+                  "m.mean():" << m.mean() << std::endl <<
+                  "m.minCoeff():" << m.minCoeff() << std::endl <<
+                  "m.maxCoeff():" << m.maxCoeff() << std::endl <<
+                  "m.trace():" << m.trace() << std::endl <<
+                  "m.squaredNorm():" << m.squaredNorm() << std::endl <<
+                  "m.norm():" << m.norm() << std::endl);
+
+  ROS_INFO_STREAM("m.colwise().maxCoeff():" << m.colwise().maxCoeff() << std::endl <<
+                  "m.rowwise().sum().minCoeff():" << m.rowwise().sum().minCoeff() << std::endl);
+}
+
+
+void TestBroadcasting()
+{
+  Eigen::MatrixXf m(2,4);
+  m << 1.0, -11.23, 6.9, -0.83,
+       -5.6, 2.56, -2.97, 6.56;
+  ROS_INFO_STREAM("矩阵 m:" << std::endl << m);
+
+  Eigen::VectorXf n(2);
+  n << 2,
+       3;
+  ROS_INFO_STREAM("向量 n:" << std::endl << n);
+
+  Eigen::Index index;
+  (m.colwise() - n).colwise().squaredNorm().minCoeff(&index);
+  std::cout << "Nearest neighbour is column " << index << ":" << std::endl;
+  std::cout << m.col(index) << std::endl;
+}
+
+
+void TestMap()
+{
+  int array[8];
+  for(int i = 0; i < 8; ++i)
+    array[i] = i;
+  auto m = Eigen::Map<Eigen::Matrix<int,2,4>>(array);
+  ROS_INFO_STREAM("矩阵 array -> m:" << std::endl << m);
+  ROS_INFO_STREAM("矩阵 array -> m.colwise().sum()" << std::endl << m.colwise().sum());
+
+
+  int data[] = {1,2,3,4,5,6,7,8,9};
+  new (&m) Eigen::Map<Eigen::Matrix<int,2,4>>(data);
+  ROS_INFO_STREAM("矩阵 data -> m:" << std::endl << m);
+  ROS_INFO_STREAM("矩阵 data -> m.rowwise().squaredNorm():" << std::endl << m.rowwise().squaredNorm());
 }
 
 
