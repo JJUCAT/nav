@@ -443,6 +443,85 @@ void TestMap()
 }
 
 
+void TestAliasing()
+{
+  ROS_INFO_STREAM("---------- 混叠异常 ----------");
+  Eigen::MatrixXi m(3,3); 
+  m << 1, 2, 3,
+       4, 5, 6,
+       7, 8, 9;
+  auto x = m;
+  ROS_INFO_STREAM("矩阵 m:" << std::endl << m);
+  
+  m.bottomRightCorner(2,2) = m.topLeftCorner(2,2);
+  ROS_INFO_STREAM("after the assignment, m:" << std::endl << m);
+
+  ROS_INFO_STREAM("---------- 避免混叠 ----------");
+  x.bottomRightCorner(2,2) = x.topLeftCorner(2,2).eval();
+  ROS_INFO_STREAM("after the assignment, x:" << std::endl << x);
+}
+
+
+void TestAliasingMultiplication()
+{
+  Eigen::MatrixXi m(3,3); 
+  m << 1, 2, 3,
+       4, 5, 6,
+       7, 8, 9;
+  auto x = m;
+  ROS_INFO_STREAM("矩阵 m:" << std::endl << m);
+
+  auto mx = m * x;
+  ROS_INFO_STREAM("矩阵 m * 矩阵 x:" << std::endl << mx);
+
+  m *= m;
+  ROS_INFO_STREAM("矩阵 m 乘法混叠无异常, m:" << std::endl << m);
+
+  x.noalias() = x * x;
+  ROS_INFO_STREAM("矩阵 x 混叠，不使用临时变量, x:" << std::endl << x);
+}
+
+
+class xclass
+{
+ public:
+  Eigen::Matrix2d v;
+};
+
+void PrintInputMatrix(const Eigen::Matrix2d m)
+{
+  ROS_INFO_STREAM("input m:" << std::endl << m);
+}
+
+void TestUnalignedArray()
+{
+  // auto x = new xclass();
+  // x->v << 1.0, 2.0, 3.0, 4.0;
+  // ROS_INFO_STREAM("x.v:" << std::endl << x->v);
+
+  // ------------------------------
+
+  // std::vector<Eigen::Vector2d> ve2d;
+  // Eigen::Vector2d m2d0;
+  // m2d0 << 1.0, 2.0;
+  // Eigen::Vector2d m2d1;
+  // m2d1 << 5.0, 6.0;
+
+  // ve2d.push_back(m2d0);
+  // ve2d.push_back(m2d1);
+  // ROS_INFO_STREAM("ve2d.front()" << std::endl << ve2d.front());
+  // ROS_INFO_STREAM("ve2d.at(1)" << std::endl << ve2d.at(1));
+
+  // ------------------------------
+
+  Eigen::Matrix2d m;
+  m << 1.2, 2.3, 3.4, 4.5;
+  PrintInputMatrix(m);
+
+
+}
+
+
 } // namespace Eigen3_Test_ns
 
 
