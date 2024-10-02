@@ -7,7 +7,7 @@
 #include <complex>
 #include <eigen3/Eigen/src/Core/util/Constants.h>
 #include <iostream>
-
+#include <opencv2/opencv.hpp>
 
 namespace Eigen3_Test_ns {
 
@@ -519,6 +519,61 @@ void TestUnalignedArray()
   PrintInputMatrix(m);
 
 
+}
+
+
+void TestScaleMatrix()
+{
+  Eigen::Vector2d x; x << 1.0, 0.0;
+  Eigen::Vector2d y; y << 0.0, 1.0;
+  Eigen::Vector2d z; z << 1.2, 2.3;
+
+  Eigen::Matrix2d s; s << 3.4, 0.0, 0.0, 4.5;
+
+  Eigen::Vector2d xx; xx = s*x;
+  Eigen::Vector2d yy; yy = s*y;
+  Eigen::Vector2d zz; zz = s*z;
+
+  ROS_INFO_STREAM("s*x:" << std::endl << xx);
+  ROS_INFO_STREAM("s*y:" << std::endl << yy);
+  ROS_INFO_STREAM("s*z:" << std::endl << zz);
+}
+
+
+void TestShearMatrix()
+{
+  Eigen::Vector2d x; x << 1.0, 0.0;
+  Eigen::Vector2d y; y << 0.0, 1.0;
+  Eigen::Vector2d z; z << 1.2, 2.3;
+
+  Eigen::Matrix2d s; s << 3.4, 4.5, 0.0, 5.6;
+
+  Eigen::Vector2d xx; xx = s*x;
+  Eigen::Vector2d yy; yy = s*y;
+  Eigen::Vector2d zz; zz = s*z;
+
+  ROS_INFO_STREAM("s*x:" << std::endl << xx);
+  ROS_INFO_STREAM("s*y:" << std::endl << yy);
+  ROS_INFO_STREAM("s*z:" << std::endl << zz);
+}
+
+
+void TestRotaMatrix()
+{
+  Eigen::Vector2d x; x << 1.0, 0.0;
+  Eigen::Vector2d y; y << 0.0, 1.0;
+  Eigen::Vector2d z; z << 1.2, 2.3;
+
+  double theta = M_PI/3;
+  Eigen::Matrix2d s; s << cos(theta), -sin(theta), sin(theta), cos(theta);
+
+  Eigen::Vector2d xx; xx = s*x;
+  Eigen::Vector2d yy; yy = s*y;
+  Eigen::Vector2d zz; zz = s*z;
+
+  ROS_INFO_STREAM("s*x:" << std::endl << xx);
+  ROS_INFO_STREAM("s*y:" << std::endl << yy);
+  ROS_INFO_STREAM("s*z:" << std::endl << zz);
 }
 
 

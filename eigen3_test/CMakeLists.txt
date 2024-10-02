@@ -8,6 +8,7 @@ add_compile_options(-std=c++11)
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(Eigen3 REQUIRED)
+find_package(OpenCV REQUIRED)
 find_package(catkin REQUIRED COMPONENTS
   roscpp
   rospy
@@ -107,7 +108,9 @@ catkin_package(
  INCLUDE_DIRS include ${EIGEN3_INCLUDE_DIRS}
 #  LIBRARIES eigen3_test
  CATKIN_DEPENDS roscpp rospy std_msgs
-#  DEPENDS system_lib
+ DEPENDS 
+  # system_lib
+  OpenCV
 )
 
 ###########
@@ -120,6 +123,7 @@ include_directories(
   include
   ${catkin_INCLUDE_DIRS}
   ${EIGEN3_INCLUDE_DIRS}
+	${OpenCV_INCLUDE_DIRS}
 )
 
 add_definitions(${EIGEN3_DEFINITIONS})
@@ -152,6 +156,7 @@ add_executable(${PROJECT_NAME}_node src/eigen3_test.cpp)
 ## Specify libraries to link a library or executable target against
 target_link_libraries(${PROJECT_NAME}_node
   ${catkin_LIBRARIES}
+	${OpenCV_LIBS}
 )
 
 #############

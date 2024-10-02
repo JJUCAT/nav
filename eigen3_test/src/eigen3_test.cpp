@@ -36,7 +36,12 @@ int main(int argc, char** argv)
   // Eigen3_Test_ns::TestMap();
   // Eigen3_Test_ns::TestAliasing();
   // Eigen3_Test_ns::TestAliasingMultiplication();
-  Eigen3_Test_ns::TestUnalignedArray();
+  // Eigen3_Test_ns::TestUnalignedArray();
+  // Eigen3_Test_ns::TestScaleMatrix();
+  // Eigen3_Test_ns::TestShearMatrix();
+  Eigen3_Test_ns::TestRotaMatrix();
+
+
 
   double hz = 10.f;
   ros::Rate r(hz);
