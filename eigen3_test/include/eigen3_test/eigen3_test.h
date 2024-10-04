@@ -577,6 +577,22 @@ void TestRotaMatrix()
 }
 
 
+void TestLU0()
+{
+  Eigen::Matrix2d A;
+  A << 1, 1, 2, 4;
+
+  Eigen::Vector2d b;
+  b << 35, 94;
+
+  Eigen::FullPivLU<Eigen::Matrix2d> lu(A);
+
+  Eigen::Vector2d x = lu.solve(b);
+
+  ROS_INFO_STREAM("x:" << std::endl << x);
+}
+
+
 } // namespace Eigen3_Test_ns
 
 

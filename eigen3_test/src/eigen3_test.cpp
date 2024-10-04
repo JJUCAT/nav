@@ -39,7 +39,9 @@ int main(int argc, char** argv)
   // Eigen3_Test_ns::TestUnalignedArray();
   // Eigen3_Test_ns::TestScaleMatrix();
   // Eigen3_Test_ns::TestShearMatrix();
-  Eigen3_Test_ns::TestRotaMatrix();
+  // Eigen3_Test_ns::TestRotaMatrix();
+  Eigen3_Test_ns::TestLU0();
+
 
 
 
