@@ -593,6 +593,61 @@ void TestLU0()
 }
 
 
+void TestSVD0()
+{
+  Eigen::MatrixXd P(8, 2);
+  P << 1.2, 0.63,
+       1.88, 1.85,
+       2.4, 3.51,
+       3.5, 4.49,
+       3.66, 6.17,
+       -0.78, -1.51,
+       -2.26, -2.33,
+       -2.92, -4.13;
+  Eigen::MatrixXd A(P.rows(), 2);
+  Eigen::VectorXd b(P.rows()); 
+
+  for (int i = 0; i < P.rows(); ++i) {
+      A(i, 0) = P(i, 0);
+      A(i, 1) = 1;
+      b(i) = P(i, 1);
+  }
+
+  Eigen::JacobiSVD<Eigen::MatrixXd> svd(A, Eigen::ComputeThinU | Eigen::ComputeThinV);
+  Eigen::VectorXd params = svd.solve(b);
+  ROS_INFO_STREAM("y = " << params(0) << "x +" << params(1));
+}
+
+
+
+void TestSVD1()
+{
+  Eigen::MatrixXd P(8, 2);
+  P << 1.82, 5.1,
+       3.2, 4.49,
+       4.24, 3.72,
+       5.47, 2.38,
+       6.69, 3.09,
+       7.38, 4.39,
+       7.92, 5.64,
+       9.43, 6.22;
+  Eigen::MatrixXd A(P.rows(), 3);
+  Eigen::VectorXd b(P.rows()); 
+
+  for (int i = 0; i < P.rows(); ++i) {
+      A(i, 0) = pow(P(i, 0), 2); // x^2
+      A(i, 1) = P(i, 0); // x
+      A(i, 2) = 1; // 常数项
+      b(i) = P(i, 1); // y
+  }
+
+  Eigen::JacobiSVD<Eigen::MatrixXd> svd(A, Eigen::ComputeThinU | Eigen::ComputeThinV);
+  Eigen::VectorXd params = svd.solve(b);
+  ROS_INFO_STREAM("y = " << params(0) << "x^2 +" << params(1) << "x +" << params(2));
+}
+
+
+
 } // namespace Eigen3_Test_ns
 
 

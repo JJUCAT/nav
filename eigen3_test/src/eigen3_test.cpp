@@ -40,9 +40,9 @@ int main(int argc, char** argv)
   // Eigen3_Test_ns::TestScaleMatrix();
   // Eigen3_Test_ns::TestShearMatrix();
   // Eigen3_Test_ns::TestRotaMatrix();
-  Eigen3_Test_ns::TestLU0();
-
-
+  // Eigen3_Test_ns::TestLU0();
+  // Eigen3_Test_ns::TestSVD0();
+  Eigen3_Test_ns::TestSVD1();
 
 
   double hz = 10.f;
